@@ -1,5 +1,5 @@
-# Hyprluggage by Jmartgraphix
-# Theme: Dynamic
+# Octarine Theme
+# The color of magic from Discworld
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
@@ -9,9 +9,9 @@ format = """$hostname$directory$git_branch$git_status$character"""
 palette = "colors"
 
 [palettes.colors]
-primary = '#80d4d8'       # directory, prompt
-secondary = '#b5c7e9'     # git branch
-error = '#ffb4ab'         # errors, git status
+primary = '#A8FF54'       # directory, prompt (octarine)
+secondary = '#D17FF7'     # git branch (magical purple)
+error = '#FF6B7A'         # errors, git status
 
 [hostname]
 ssh_only = true

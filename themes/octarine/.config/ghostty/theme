@@ -1,0 +1,28 @@
+# Octarine Theme
+# The color of magic from Discworld
+
+# primary
+background = #0A0710
+foreground = #E8F0E0
+cursor-color = #D17FF7
+cursor-text = #E8F0E0
+
+# normal colors
+palette = 0=#1A1320
+palette = 1=#FF6B7A
+palette = 2=#A8FF54
+palette = 3=#FFF454
+palette = 4=#7DA5FF
+palette = 5=#D17FF7
+palette = 6=#54FFD4
+palette = 7=#E8F0E0
+
+# bright colors
+palette = 8=#3A3550
+palette = 9=#FF8A95
+palette = 10=#C4FF7A
+palette = 11=#FFFF7A
+palette = 12=#95B5FF
+palette = 13=#E59FFF
+palette = 14=#7AFFE5
+palette = 15=#FFFFFF

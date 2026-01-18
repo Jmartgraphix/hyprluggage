@@ -1,27 +1,27 @@
 {
-    "wallpaper": "/home/jmartin/Wallpapers/nord/a_road_with_cars_and_buildings_in_the_background.png",
+    "wallpaper": "/home/jmartin/Wallpapers/calm/a_house_on_stilts_on_a_lake.jpg",
     "alpha": "100",
     "special": {
-        "background": "#121318",
-        "foreground": "#e2e2e9",
-        "cursor": "#afc6ff"
+        "background": "#0f1512",
+        "foreground": "#dee4df",
+        "cursor": "#89d6b9"
     },
     "colors": {
-        "color0": "#121318",
+        "color0": "#0f1512",
         "color1": "#ffb4ab",
-        "color2": "#afc6ff",
-        "color3": "#dfbbde",
-        "color4": "#bfc6dc",
-        "color5": "#593e5a",
-        "color6": "#404759",
-        "color7": "#e2e2e9",
-        "color8": "#1e1f25",
+        "color2": "#89d6b9",
+        "color3": "#a7cce1",
+        "color4": "#b2ccc0",
+        "color5": "#274b5d",
+        "color6": "#344c42",
+        "color7": "#dee4df",
+        "color8": "#1b211e",
         "color9": "#ffb4ab",
-        "color10": "#afc6ff",
-        "color11": "#dfbbde",
-        "color12": "#bfc6dc",
-        "color13": "#593e5a",
-        "color14": "#404759",
-        "color15": "#e2e2e9"
+        "color10": "#89d6b9",
+        "color11": "#a7cce1",
+        "color12": "#b2ccc0",
+        "color13": "#274b5d",
+        "color14": "#344c42",
+        "color15": "#dee4df"
     }
 }

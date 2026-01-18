@@ -1,0 +1,60 @@
+## Octarine Theme
+## The color of magic from Discworld
+
+
+# Main UI Colors
+theme[main_bg]="#0A0710"
+theme[main_fg]="#E8F0E0"
+theme[title]="#A8FF54"
+theme[hi_fg]="#7AFFE5"
+
+# Selection & Inactive Text
+theme[selected_bg]="#1A1320"
+theme[selected_fg]="#E8F0E0"
+theme[inactive_fg]="#3A3550"
+
+# Box Outlines & Dividers
+theme[cpu_box]="#6B8A7A"
+theme[mem_box]="#6B8A7A"
+theme[net_box]="#6B8A7A"
+theme[proc_box]="#6B8A7A"
+theme[div_line]="#1A1320"
+
+# Process Misc
+theme[proc_misc]="#A8FF54"
+
+# Temperature Gradient (magical colors)
+theme[temp_start]="#54FFD4"
+theme[temp_mid]="#A8FF54"
+theme[temp_end]="#FFF454"
+
+# CPU Graph Gradient (octarine green)
+theme[cpu_start]="#A8FF54"
+theme[cpu_mid]=""
+theme[cpu_end]="#C4FF7A"
+
+# Memory/Disk Meters Gradient
+theme[free_start]="#0A1A10"
+theme[free_mid]="#4A7A5A"
+theme[free_end]="#6BAA7A"
+
+theme[cached_start]="#0A1A10"
+theme[cached_mid]="#4A7A5A"
+theme[cached_end]="#6BAA7A"
+
+theme[available_start]="#0A1A10"
+theme[available_mid]="#4A7A5A"
+theme[available_end]="#6BAA7A"
+
+theme[used_start]="#1A0A17"
+theme[used_mid]="#7A3A6A"
+theme[used_end]="#AA5A8A"
+
+# Network Graphs Gradient (purple magic)
+theme[download_start]="#2A1A3A"
+theme[download_mid]="#7A5A9A"
+theme[download_end]="#B07FD7"
+
+theme[upload_start]="#2A1A3A"
+theme[upload_mid]="#8A6AAA"
+theme[upload_end]="#D17FF7"

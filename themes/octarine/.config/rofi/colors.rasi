@@ -1,0 +1,46 @@
+/**
+ * ════════════════════════════════════════════════════════
+ *   Octarine Theme
+ *   The color of magic from Discworld
+ * ════════════════════════════════════════════════════════
+ */
+
+* {
+    /* Primary accent color (octarine - magical green) */
+    primary: #A8FF54;
+    primary-container: #7DA5FF;
+    on-primary: #0A0710;
+    on-primary-container: #E8F0E0;
+    
+    /* Secondary accent (purple magic) */
+    secondary: #D17FF7;
+    secondary-container: #3A3550;
+    on-secondary: #0A0710;
+    on-secondary-container: #E8F0E0;
+    
+    /* Surface backgrounds */
+    surface: #0A0710;
+    surface-dim: #0A0710;
+    surface-bright: #3A3550;
+    surface-container-lowest: #0A0710;
+    surface-container-low: #0A0710;
+    surface-container: #3A3550;
+    surface-container-high: #3A3550;
+    surface-container-highest: #3A3550;
+    
+    /* Text colors */
+    on-surface: #0A0710;
+    on-surface-variant: #E8F0E0;
+    
+    /* Outline/border colors */
+    outline: #3A3550;
+    outline-variant: #3A3550;
+    
+    /* Error colors */
+    error: #FF6B7A;
+    on-error: #0A0710;
+    
+    /* Inverse colors */
+    inverse-surface: #E8F0E0;
+    inverse-on-surface: #0A0710;
+}

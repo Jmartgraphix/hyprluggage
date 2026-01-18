@@ -2,7 +2,7 @@
  * @name Hyprluggage Discord
  * @author Jmartgraphix
  * @version 1.0.0
- * @description Dynamic Hyprluggage theme for Discord
+ * @description Octarine theme for Discord - The color of magic from Discworld
  * 
  * Based on midnight by refact0r
  * @website https://github.com/refact0r/midnight-discord
@@ -18,39 +18,39 @@
   --font: 'figtree';
 
   /* top left corner text */
-  --corner-text: 'Hyprluggage';
+  --corner-text: 'Octarine';
 
   /* color of status indicators and window controls */
-  --online-indicator: #89d6b9; /* change to #23a55a for default green */
-  --dnd-indicator: #ffb4ab; /* change to #f13f43 for default red */
-  --idle-indicator: #a7cce1; /* change to #f0b232 for default yellow */
-  --streaming-indicator: #b2ccc0; /* change to #593695 for default purple */
+  --online-indicator: #A8FF54; /* octarine green */
+  --dnd-indicator: #FF6B7A; /* red */
+  --idle-indicator: #FFF454; /* yellow */
+  --streaming-indicator: #D17FF7; /* purple magic */
 
   /* accent colors */
-  --accent-1: #a7cce1; /* links */
-  --accent-2: #89d6b9; /* general unread/mention elements, some icons when active */
-  --accent-3: #89d6b9; /* accent buttons */
-  --accent-4: #00513d; /* accent buttons when hovered */
-  --accent-5: #89d6b9; /* accent buttons when clicked */
-  --mention: #00513d; /* mentions & mention messages */
-  --mention-hover: #89d6b9; /* mentions & mention messages when hovered */
+  --accent-1: #A8FF54; /* links (octarine) */
+  --accent-2: #A8FF54; /* general unread/mention elements, some icons when active */
+  --accent-3: #A8FF54; /* accent buttons */
+  --accent-4: #7ACC3A; /* accent buttons when hovered */
+  --accent-5: #C4FF7A; /* accent buttons when clicked */
+  --mention: #7ACC3A; /* mentions & mention messages */
+  --mention-hover: #C4FF7A; /* mentions & mention messages when hovered */
 
   /* text colors */
-  --text-0: #003829; /* text on colored elements */
-  --text-1: #dee4df; /* other normally white text */
-  --text-2: #dee4df; /* headings and important text */
-  --text-3: #dee4df; /* normal text */
-  --text-4: #bfc9c3; /* icon buttons and channels */
-  --text-5: #89938d; /* muted channels/chats and timestamps */
+  --text-0: #0A0710; /* text on colored elements */
+  --text-1: #E8F0E0; /* other normally white text */
+  --text-2: #E8F0E0; /* headings and important text */
+  --text-3: #E8F0E0; /* normal text */
+  --text-4: #C4C4B0; /* icon buttons and channels */
+  --text-5: #7A7A6A; /* muted channels/chats and timestamps */
 
   /* background and dark colors */
-  --bg-1: #0f1512; /* dark buttons when clicked */
-  --bg-2: #252b28; /* dark buttons */
-  --bg-3: #1b211e; /* spacing, secondary elements */
-  --bg-4: #0f1512; /* main background color */
-  --hover: #252b28; /* channels and buttons when hovered */
-  --active: #303633; /* channels and buttons when clicked or selected */
-  --message-hover: #252b28; /* messages when hovered */
+  --bg-1: #1A1320; /* dark buttons when clicked */
+  --bg-2: #3A3550; /* dark buttons */
+  --bg-3: #2A2230; /* spacing, secondary elements */
+  --bg-4: #0A0710; /* main background color */
+  --hover: #3A3550; /* channels and buttons when hovered */
+  --active: #4A4560; /* channels and buttons when clicked or selected */
+  --message-hover: #3A3550; /* messages when hovered */
 
   /* amount of spacing and padding */
   --spacing: 12px;
@@ -94,7 +94,7 @@
   /* (just set to none, they're too much work to configure) */
   --login-bg-filter: saturate(0.3) hue-rotate(-15deg) brightness(0.4);
   /* login background artwork */
-  --green-to-accent-3-filter: hue-rotate(56deg) saturate(1.43);
+  --green-to-accent-3-filter: hue-rotate(0deg) saturate(1.2);
   /* add friend page explore icon */
   --blurple-to-accent-3-filter: hue-rotate(304deg) saturate(0.84) brightness(1.2);
   /* add friend page school icon */
@@ -103,11 +103,11 @@
 /* Selected chat/friend text */
 .selected_f5eb4b,
 .selected_f6f816 .link_d8bfb3 {
-  color: var(--bg-4) !important;
+  color: var(--text-0) !important;
   background: var(--accent-3) !important;
 }
 
 .selected_f6f816 .link_d8bfb3 * {
-  color: var(--bg-4) !important;
-  fill: var(--bg-4) !important;
+  color: var(--text-0) !important;
+  fill: var(--text-0) !important;
 }

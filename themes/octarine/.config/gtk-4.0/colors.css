@@ -1,0 +1,133 @@
+/**
+ * ════════════════════════════════════════════════════════
+ *   Octarine Theme
+ *   The color of magic from Discworld
+ * ════════════════════════════════════════════════════════
+ */
+
+@define-color background     #0A0710;
+@define-color foreground     #E8F0E0;
+@define-color black          #0A0710;
+@define-color red            #FF6B7A;
+@define-color green          #A8FF54;
+@define-color yellow         #FFF454;
+@define-color blue           #7DA5FF;
+@define-color magenta        #D17FF7;
+@define-color cyan           #54FFD4;
+@define-color white          #E8F0E0;
+@define-color bright_black   #3A3550;
+@define-color bright_white   #FFFFFF;
+
+/* Accent colors */
+@define-color accent_bg_color #A8FF54;
+@define-color accent_fg_color #0A0710;
+@define-color accent_color #A8FF54;
+
+/* Window colors */
+@define-color window_bg_color #0A0710;
+@define-color window_fg_color #E8F0E0;
+
+/* View colors */
+@define-color view_bg_color #0A0710;
+@define-color view_fg_color #E8F0E0;
+
+/* Sidebar colors */
+@define-color sidebar_bg_color #1A1320;
+@define-color sidebar_fg_color #E8F0E0;
+@define-color sidebar_backdrop_color #0A0710;
+@define-color sidebar_shade_color #0A0710;
+
+/* Headerbar colors */
+@define-color headerbar_bg_color #1A1320;
+@define-color headerbar_fg_color #E8F0E0;
+@define-color headerbar_backdrop_color #0A0710;
+@define-color headerbar_shade_color #0A0710;
+
+/* Card colors */
+@define-color card_bg_color #1A1320;
+@define-color card_fg_color #E8F0E0;
+
+/* Popover colors */
+@define-color popover_bg_color #1A1320;
+@define-color popover_fg_color #E8F0E0;
+
+/* Dialog colors */
+@define-color dialog_bg_color #1A1320;
+@define-color dialog_fg_color #E8F0E0;
+
+/* Semantic status colors */
+@define-color destructive_bg_color #FF6B7A;
+@define-color destructive_fg_color #0A0710;
+@define-color destructive_color #FF6B7A;
+
+@define-color success_bg_color #A8FF54;
+@define-color success_fg_color #0A0710;
+@define-color success_color #A8FF54;
+
+@define-color warning_bg_color #FFF454;
+@define-color warning_fg_color #0A0710;
+@define-color warning_color #FFF454;
+
+@define-color error_bg_color #FF6B7A;
+@define-color error_fg_color #0A0710;
+@define-color error_color #FF6B7A;
+
+/* Legacy theme colors */
+@define-color borders alpha(@foreground, 0.1);
+
+@define-color theme_fg_color @foreground;
+@define-color theme_text_color @foreground;
+@define-color theme_bg_color @background;
+@define-color theme_base_color @black;
+@define-color theme_selected_bg_color @accent_bg_color;
+@define-color theme_selected_fg_color @accent_fg_color;
+
+@define-color insensitive_bg_color @background;
+@define-color insensitive_fg_color @bright_black;
+@define-color insensitive_base_color @black;
+
+@define-color theme_unfocused_fg_color @foreground;
+@define-color theme_unfocused_text_color @foreground;
+@define-color theme_unfocused_bg_color @background;
+@define-color theme_unfocused_base_color @black;
+@define-color theme_unfocused_selected_bg_color @accent_bg_color;
+@define-color theme_unfocused_selected_fg_color @accent_fg_color;
+
+@define-color unfocused_insensitive_color @bright_black;
+@define-color unfocused_borders alpha(@foreground, 0.1);
+
+@define-color content_view_bg @view_bg_color;
+@define-color text_view_bg @view_bg_color;
+
+/* Widget styling */
+messagedialog {
+    background-color: @dialog_bg_color;
+}
+
+messagedialog label {
+    color: @dialog_fg_color;
+}
+
+banner revealer widget {
+    background: @bright_black;
+    padding: 5px;
+    color: @foreground;
+}
+
+alertdialog.background {
+    background-color: @dialog_bg_color;
+    color: @dialog_fg_color;
+}
+
+alertdialog box {
+    background-color: @dialog_bg_color;
+}
+
+alertdialog label {
+    color: @dialog_fg_color;
+}
+
+toast {
+    background-color: @card_bg_color;
+    color: @foreground;
+}

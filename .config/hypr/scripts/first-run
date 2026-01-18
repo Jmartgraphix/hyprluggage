@@ -7,7 +7,7 @@ MARKER="$HOME/.local/state/hyprluggage/first-run-done"
 sleep 2
 
 # Apply default theme
-~/hyprluggage/install/themes/hyprluggage switch sakura
+~/hyprluggage/install/themes/hyprluggage switch octarine
 
 # Welcome notifications
 notify-send -u critical "App Launcher" "Press Super + Space to launch apps"

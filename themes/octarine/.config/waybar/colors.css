@@ -1,0 +1,12 @@
+/**
+ * ════════════════════════════════════════════════════════
+ *   Octarine Theme
+ *   The color of magic from Discworld
+ * ════════════════════════════════════════════════════════
+ */
+
+@define-color waybar_accent rgba(168, 255, 84, 0.28);
+@define-color waybar_accent_fg @on_background;
+@define-color on_background #E8F0E0;
+@define-color surface_container #1A1320;
+@define-color error #FF6B7A;

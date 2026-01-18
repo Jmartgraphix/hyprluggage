@@ -1,0 +1,32 @@
+## Octarine Theme
+## The color of magic from Discworld
+
+[colors]
+
+[colors.primary]
+background = '#0A0710'
+foreground = '#E8F0E0'
+
+[colors.normal]
+black = "#1A1320"
+red = "#FF6B7A"
+green = "#A8FF54"
+yellow = "#FFF454"
+blue = "#7DA5FF"
+magenta = "#D17FF7"
+cyan = "#54FFD4"
+white = "#E8F0E0"
+
+[colors.bright]
+black = "#3A3550"
+red = "#FF8A95"
+green = "#C4FF7A"
+yellow = "#FFFF7A"
+blue = "#95B5FF"
+magenta = "#E59FFF"
+cyan = "#7AFFE5"
+white = "#FFFFFF"
+
+[colors.cursor]
+text = "#E8F0E0"
+cursor = "#D17FF7"
