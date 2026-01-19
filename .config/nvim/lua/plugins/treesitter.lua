@@ -1,8 +1,9 @@
 -- Syntax highlighting
 return {
   "nvim-treesitter/nvim-treesitter",
-  build = ":TSUpdate",
-  event = { "BufReadPost", "BufNewFile" },
+  branch = "master", -- Lock to master branch to use stable configs API
+  priority = 1000, -- Load early
+  lazy = false, -- Load immediately, don't lazy load (treesitter doesn't support lazy loading)
   config = function()
     require("nvim-treesitter.configs").setup {
       -- language parsers that MUST be installed
@@ -23,7 +24,7 @@ return {
         "yaml",
       },
       auto_install = true, -- auto-install any other parsers on opening new language files
-      sync_install = false,
+      sync_install = true, -- Install parsers synchronously during initial setup
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,

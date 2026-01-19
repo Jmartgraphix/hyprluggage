@@ -38,6 +38,7 @@ return {
   {
     "mistricky/codesnap.nvim",
     build = "make",
+    cmd = "CodeSnapSave", -- Lazy load on command to avoid build conflicts
     config = function()
       require("codesnap").setup {
         watermark = "",
