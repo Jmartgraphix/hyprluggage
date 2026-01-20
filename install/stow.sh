@@ -27,6 +27,8 @@ mkdir -p "$HOME/.config" "$HOME/.local/share"
 # Create directories needed by scripts
 mkdir -p "$HOME/Pictures/Screenshots"
 mkdir -p "$HOME/Wallpapers"
+mkdir -p "$HOME/Scripts"      # For nvim dashboard "Browse scripts"
+mkdir -p "$HOME/Projects"     # For nvim dashboard "Projects"
 
 # Backup existing configs so stow creates clean directory symlinks
 backup_if_exists() {
