@@ -137,23 +137,37 @@ fi
 
 # ── Greetd (Display Manager) ───────────────────────────────────────────────
 if pkg_installed greetd; then
-    # Resolve repo root (install/services.sh -> repo root)
-    DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    # Resolve repo root (use $DOTFILES from install.sh if available, otherwise resolve from script location)
+    if [[ -n "$DOTFILES" ]]; then
+        DOTFILES_ROOT="$DOTFILES"
+    else
+        DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    fi
     GREETD_TEMPLATE="$DOTFILES_ROOT/install/greetd-config.toml"
     GREETD_CONFIG="/etc/greetd/config.toml"
-
+    
     if [[ -f "$GREETD_TEMPLATE" ]]; then
-        sudo mkdir -p /etc/greetd
-
+        # Create greetd config directory (don't fail if it already exists)
+        sudo mkdir -p /etc/greetd || true
+        
         # Render template for the user running the installer
-        sed "s/{{USER}}/$USER/g" "$GREETD_TEMPLATE" | sudo tee "$GREETD_CONFIG" >/dev/null
-
-        sudo chown root:root "$GREETD_CONFIG"
-        sudo chmod 644 "$GREETD_CONFIG"
-
-        sudo systemctl enable --now greetd &>/dev/null && ok "greetd" || warn "greetd failed"
+        # Use || true to prevent set -e from killing the script if sudo fails
+        if sed "s/{{USER}}/$USER/g" "$GREETD_TEMPLATE" | sudo tee "$GREETD_CONFIG" >/dev/null; then
+            sudo chown root:root "$GREETD_CONFIG" || warn "greetd: failed to set ownership"
+            sudo chmod 644 "$GREETD_CONFIG" || warn "greetd: failed to set permissions"
+            
+            # Enable and start greetd service (don't fail the whole installer if this fails)
+            if sudo systemctl enable greetd &>/dev/null; then
+                sudo systemctl start greetd &>/dev/null && ok "greetd" || warn "greetd: enabled but failed to start"
+            else
+                warn "greetd: failed to enable service"
+            fi
+        else
+            warn "greetd: failed to write config file"
+        fi
     else
         warn "greetd: template not found at $GREETD_TEMPLATE"
+        # Still try to enable greetd if it's installed
         sudo systemctl enable --now greetd &>/dev/null && ok "greetd (no config)" || warn "greetd failed"
     fi
 fi
