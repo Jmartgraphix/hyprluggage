@@ -134,3 +134,26 @@ if pkg_installed spicetify-cli; then
         warn "spicetify: install Spotify first, then re-run this script"
     fi
 fi
+
+# ── Greetd (Display Manager) ───────────────────────────────────────────────
+if pkg_installed greetd; then
+    # Resolve repo root (install/services.sh -> repo root)
+    DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    GREETD_TEMPLATE="$DOTFILES_ROOT/install/greetd-config.toml"
+    GREETD_CONFIG="/etc/greetd/config.toml"
+
+    if [[ -f "$GREETD_TEMPLATE" ]]; then
+        sudo mkdir -p /etc/greetd
+
+        # Render template for the user running the installer
+        sed "s/{{USER}}/$USER/g" "$GREETD_TEMPLATE" | sudo tee "$GREETD_CONFIG" >/dev/null
+
+        sudo chown root:root "$GREETD_CONFIG"
+        sudo chmod 644 "$GREETD_CONFIG"
+
+        sudo systemctl enable --now greetd &>/dev/null && ok "greetd" || warn "greetd failed"
+    else
+        warn "greetd: template not found at $GREETD_TEMPLATE"
+        sudo systemctl enable --now greetd &>/dev/null && ok "greetd (no config)" || warn "greetd failed"
+    fi
+fi

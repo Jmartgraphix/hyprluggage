@@ -1,0 +1,17 @@
+[terminal]
+# The VT to run the greeter on. Can be "next", "current" or a number
+# designating the VT.
+vt = 2
+
+# HyprLuggage default session: greetd runs tuigreet, which starts Hyprland on login.
+# The installer will replace {{USER}} with the username running ./install.sh.
+
+[initial_session]
+# Auto-login session (runs directly on boot)
+command = "uwsm start hyprland.desktop"
+user = "{{USER}}"
+
+[default_session]
+# Fallback greeter (tuigreet with your custom theme)
+command = "tuigreet --time --time-format '%H:%M' --asterisks --greeting 'Welcome to Hyprluggage' --theme 'border=lightgray;prompt=white;title=white;time=lightgray;container=blue;action=cyan;button=orange' exec uwsm start hyprland.desktop"
+user = "greeter"

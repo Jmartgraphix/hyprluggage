@@ -68,7 +68,7 @@ packages=(
 	ttf-jetbrains-mono-nerd ttf-cascadia-mono-nerd noto-fonts-emoji
 
 	# Display Manager
-	sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
+	greetd greetd-tuigreet
 
 	# Utilities
 	python-terminaltexteffects gum wget curl unzip localsend deno npm keyd 
@@ -82,7 +82,7 @@ applications=(
 	 zen-browser-bin firefox chromium
 	obsidian bitwarden code visual-studio-code-bin
 	vesktop-bin discord keychain zed opencode
-	mpv yt-dlp steam lutris gamemode mangohud typora sddm-silent-theme
+	mpv yt-dlp steam lutris gamemode mangohud typora
 )
 
 # ╭───────────────────────────────────────────────────────────────────────╮
