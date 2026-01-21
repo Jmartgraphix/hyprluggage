@@ -40,8 +40,12 @@ fi
 if pkg_installed mpd; then
     mkdir -p ~/.config/systemd/user/mpd.service.d
     echo -e "[Service]\nRuntimeDirectory=mpd" > ~/.config/systemd/user/mpd.service.d/override.conf
-    systemctl --user daemon-reload
-    systemctl --user enable --now mpd && ok "mpd" || warn "mpd failed"
+    # Check if systemd --user is available before trying to use it
+    if systemctl --user daemon-reload &>/dev/null; then
+        systemctl --user enable --now mpd &>/dev/null && ok "mpd" || warn "mpd failed"
+    else
+        warn "mpd: systemd --user not available (will be enabled on next login)"
+    fi
 fi
 
 # ── mpdscribble ───────────────────────────────────────────────────────────────
@@ -50,7 +54,11 @@ if pkg_installed mpdscribble; then
     if grep -q "YOUR_USERNAME" ~/.config/mpdscribble/mpdscribble.conf 2>/dev/null; then
         warn "mpdscribble: Edit ~/.config/mpdscribble/mpdscribble.conf with your Last.fm credentials"
     else
-        systemctl --user enable --now mpdscribble && ok "mpdscribble" || warn "mpdscribble failed"
+        if systemctl --user enable --now mpdscribble &>/dev/null; then
+            ok "mpdscribble"
+        else
+            warn "mpdscribble: systemd --user not available (will be enabled on next login)"
+        fi
     fi
 fi
 
@@ -156,9 +164,9 @@ if pkg_installed greetd; then
             sudo chown root:root "$GREETD_CONFIG" || warn "greetd: failed to set ownership"
             sudo chmod 644 "$GREETD_CONFIG" || warn "greetd: failed to set permissions"
             
-            # Enable and start greetd service (don't fail the whole installer if this fails)
+            # Enable greetd service but DON'T start it (would logout current session)
             if sudo systemctl enable greetd &>/dev/null; then
-                sudo systemctl start greetd &>/dev/null && ok "greetd" || warn "greetd: enabled but failed to start"
+                ok "greetd (enabled - will start on next boot)"
             else
                 warn "greetd: failed to enable service"
             fi
