@@ -2,7 +2,25 @@ vim.opt.fillchars = { eob = " " }
 vim.o.hlsearch = false -- Set highlight on search
 vim.wo.number = true -- Make line numbers default
 vim.o.mouse = 'a' -- Enable mouse mode
-vim.o.clipboard = 'unnamedplus' -- Sync clipboard between OS and Neovim.
+
+-- Clipboard configuration for Wayland (wl-clipboard + cliphist)
+if vim.fn.executable('wl-copy') == 1 then
+  vim.g.clipboard = {
+    name = 'wl-clipboard',
+    copy = {
+      ["+"] = "wl-copy --type text/plain",
+      ["*"] = "wl-copy --type text/plain --primary",
+    },
+    paste = {
+      ["+"] = "wl-paste --no-newline",
+      ["*"] = "wl-paste --no-newline --primary",
+    },
+    cache_enabled = 0,
+  }
+  vim.o.clipboard = 'unnamedplus' -- Sync clipboard between OS and Neovim.
+else
+  vim.o.clipboard = 'unnamedplus' -- Fallback if wl-clipboard not available
+end
 vim.o.breakindent = true -- Enable break indent
 vim.o.undofile = true -- Save undo history
 vim.o.ignorecase = true -- Case-insensitive searching UNLESS \C or capital in search

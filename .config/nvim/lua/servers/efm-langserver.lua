@@ -9,6 +9,10 @@
 --- @param capabilities table LSP client capabilities (from nvim-cmp)
 --- @return nil
 return function(capabilities)
+  -- Add Mason bin directory to PATH for efmls-configs to find executables
+  local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+  vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
+
   local luacheck = require "efmls-configs.linters.luacheck" -- lua linter
   local stylua = require "efmls-configs.formatters.stylua" -- lua formatter
   local flake8 = require "efmls-configs.linters.flake8" -- python linter
@@ -22,7 +26,11 @@ return function(capabilities)
   local shfmt = require "efmls-configs.formatters.shfmt" -- bash formatter
   -- local hadolint = require "efmls-configs.linters.hadolint" -- docker linter
 
+  -- Get efm-langserver path from Mason
+  local efm_path = vim.fn.stdpath("data") .. "/mason/bin/efm-langserver"
+
   vim.lsp.config("efm", {
+    cmd = { efm_path }, -- Explicitly set the efm-langserver path
     capabilities = capabilities,
     filetypes = {
       "css",

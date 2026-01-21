@@ -24,6 +24,8 @@ return {
 
           -- Formatters
           "prettier",
+          "prettierd",
+          "black",
           "stylua",
           "gofumpt",
           "shfmt",
