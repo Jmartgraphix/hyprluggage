@@ -104,7 +104,7 @@
     "on-click": "kitty -e btop"
   },
   "clock": {
-    "format": "{:%H:%M}",
+    "format": "{:%I:%M %p}",
     "format-alt": "{:L%A %d %B}",
     "tooltip": false
   },
