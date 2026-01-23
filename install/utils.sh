@@ -46,12 +46,6 @@ catch_error() {
         echo
     fi
     
-    # Also check for debug log
-    if [[ -f /tmp/stow-debug.log ]]; then
-        echo -e "${YELLOW}Debug log available at: /tmp/stow-debug.log${RESET}"
-        echo
-    fi
-    
     clear
     echo
     echo
