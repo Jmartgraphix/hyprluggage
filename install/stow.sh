@@ -53,20 +53,28 @@ backup_if_exists ".config" "$HOME/.config"
 backup_if_exists ".local/share" "$HOME/.local/share"
 
 # Try stow with better error reporting
-if ! stow . 2>&1 | tee /tmp/stow-error.log; then
+stow_output=$(stow . 2>&1)
+stow_exit=$?
+
+if [[ $stow_exit -ne 0 ]]; then
+    # Save error to log file
+    echo "$stow_output" > /tmp/stow-error.log
+    
     err "Stow failed:"
     echo
-    cat /tmp/stow-error.log | head -20
+    echo "$stow_output" | head -20
     echo
     err "Common causes:"
     info "  - Conflicting files/directories in ~/.config or ~/.local/share"
     info "  - Permission issues"
     info "  - Missing parent directories"
     echo
+    info "Full error saved to: /tmp/stow-error.log"
     info "Try manually removing conflicting items or check the error above"
-    rm -f /tmp/stow-error.log
     exit 1
+else
+    ok "Hyprluggage linked"
+    rm -f /tmp/stow-error.log
 fi
-rm -f /tmp/stow-error.log
 
 [[ -d "$BACKUP_DIR" ]] && info "Your old configs: $BACKUP_DIR"
