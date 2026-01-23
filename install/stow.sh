@@ -53,24 +53,34 @@ backup_if_exists ".config" "$HOME/.config"
 backup_if_exists ".local/share" "$HOME/.local/share"
 
 # Try stow with better error reporting
+# Write error to file immediately so error handler can read it
 stow_output=$(stow . 2>&1)
 stow_exit=$?
 
+# Always write output to log for debugging
+echo "=== Stow execution at $(date) ===" >> /tmp/stow-debug.log
+echo "Exit code: $stow_exit" >> /tmp/stow-debug.log
+echo "Output:" >> /tmp/stow-debug.log
+echo "$stow_output" >> /tmp/stow-debug.log
+echo "---" >> /tmp/stow-debug.log
+
 if [[ $stow_exit -ne 0 ]]; then
-    # Save error to log file
+    # Save error to log file (for error handler to read)
     echo "$stow_output" > /tmp/stow-error.log
     
-    err "Stow failed:"
-    echo
-    echo "$stow_output" | head -20
-    echo
-    err "Common causes:"
-    info "  - Conflicting files/directories in ~/.config or ~/.local/share"
-    info "  - Permission issues"
-    info "  - Missing parent directories"
-    echo
-    info "Full error saved to: /tmp/stow-error.log"
-    info "Try manually removing conflicting items or check the error above"
+    # Also write to stderr so it's visible before error handler clears screen
+    err "Stow failed (exit code: $stow_exit):" >&2
+    echo >&2
+    echo "$stow_output" | head -20 >&2
+    echo >&2
+    err "Common causes:" >&2
+    info "  - Conflicting files/directories in ~/.config or ~/.local/share" >&2
+    info "  - Permission issues" >&2
+    info "  - Missing parent directories" >&2
+    echo >&2
+    info "Full error saved to: /tmp/stow-error.log" >&2
+    info "Debug log: /tmp/stow-debug.log" >&2
+    info "Try manually removing conflicting items or check the error above" >&2
     exit 1
 else
     ok "Hyprluggage linked"

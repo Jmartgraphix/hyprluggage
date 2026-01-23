@@ -32,6 +32,26 @@ show_cursor() { printf "\033[?25h"; }
 
 catch_error() {
     show_cursor
+    
+    # Check if there's a stow error log and display it before clearing
+    if [[ -f /tmp/stow-error.log ]]; then
+        echo
+        echo -e "${RED}════════════════════════════════════════${RESET}"
+        echo -e "${RED}Stow Error Details:${RESET}"
+        echo -e "${RED}════════════════════════════════════════${RESET}"
+        echo
+        cat /tmp/stow-error.log
+        echo
+        echo -e "${RED}════════════════════════════════════════${RESET}"
+        echo
+    fi
+    
+    # Also check for debug log
+    if [[ -f /tmp/stow-debug.log ]]; then
+        echo -e "${YELLOW}Debug log available at: /tmp/stow-debug.log${RESET}"
+        echo
+    fi
+    
     clear
     echo
     echo
@@ -41,6 +61,14 @@ catch_error() {
     echo -e "${DIM}    Failed at: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}${RESET}"
     echo -e "${DIM}    Command: ${BASH_COMMAND}${RESET}"
     echo
+    
+    # Show stow error info if available
+    if [[ -f /tmp/stow-error.log ]]; then
+        echo -e "${DIM}    Stow error details shown above${RESET}"
+        echo -e "${DIM}    Full error log: /tmp/stow-error.log${RESET}"
+        echo
+    fi
+    
     echo -e "${DIM}    Open an issue:${RESET}"
     echo -e "    https://github.com/Jmartgraphix/hyprluggage/issues"
     echo
