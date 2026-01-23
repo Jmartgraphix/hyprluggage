@@ -92,5 +92,9 @@ else
 fi
 
 echo "After if/else block" >> /tmp/stow-debug.log
-[[ -d "$BACKUP_DIR" ]] && info "Your old configs: $BACKUP_DIR" || echo "backup_dir check/info failed" >> /tmp/stow-debug.log
+if [[ -d "$BACKUP_DIR" ]]; then
+    info "Your old configs: $BACKUP_DIR" || echo "info() failed" >> /tmp/stow-debug.log
+else
+    echo "No backup directory created (this is normal if no configs were backed up)" >> /tmp/stow-debug.log
+fi
 echo "End of stow.sh script" >> /tmp/stow-debug.log
