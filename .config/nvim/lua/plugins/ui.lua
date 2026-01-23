@@ -2,20 +2,23 @@
 return {
   -- Color highlighter
   {
-    "norcalli/nvim-colorizer.lua",
-    config = function()
-      require("colorizer").setup({ "*" }, {
-        RGB = true, -- #RGB hex codes
-        RRGGBB = true, -- #RRGGBB hex codes
-        names = true, -- "Name" codes like Blue
-        RRGGBBAA = true, -- #RRGGBBAA hex codes
-        rgb_fn = true, -- CSS rgb() and rgba() functions
-        hsl_fn = true, -- CSS hsl() and hsla() functions
-        css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
-        css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
-      })
-    end,
-  },
+  "NvChad/nvim-colorizer.lua",
+  event = "BufReadPre",
+  config = function()
+    require("colorizer").setup({
+      "*",
+    }, {
+      RGB = true, -- #RGB hex codes
+      RRGGBB = true, -- #RRGGBB hex codes
+      names = true, -- "Name" codes like Blue
+      RRGGBBAA = true, -- #RRGGBBAA hex codes
+      rgb_fn = true, -- CSS rgb() and rgba() functions
+      hsl_fn = true, -- CSS hsl() and hsla() functions
+      css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+      css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+    })
+  end,
+},
 
   -- focus mode (hide everything except the the file)
   {
@@ -48,7 +51,7 @@ return {
   },
 
   -- indent line
-  {
+   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
     opts = {
@@ -68,18 +71,6 @@ return {
           "packer",
           "neogitstatus",
           "NvimTree",
-          {
-            "j-hui/fidget.nvim",
-            opts = {
-              notification = {
-                window = {
-                  winblend = 0,
-                  normal_hl = "FloatBorder",
-                  override_vim_notify = false, -- let mini.notify handle vim.notify
-                },
-              },
-            },
-          },
           "Trouble",
         },
       },
@@ -146,18 +137,22 @@ return {
   },
 
   -- lsp progress notification
-  {
-    "j-hui/fidget.nvim",
-    opts = {
-      notification = {
-        window = {
-          winblend = 0,
-          normal_hl = "FloatBorder",
-          override_vim_notify = false, -- let mini.notify handle vim.notify
-        },
+{
+  "j-hui/fidget.nvim",
+  lazy = false, -- ⬅️ REQUIRED
+  opts = {
+    notification = {
+      window = {
+        winblend = 0,
+        normal_hl = "FloatBorder",
+        avoid = { "NvimTree" },
       },
     },
   },
+},
+
+
+
 
   -- better comments highlights
   {
