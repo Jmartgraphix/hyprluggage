@@ -91,12 +91,45 @@ applications=(
 
 setup_aur() {
 	aur_installed && return 0
+	
+	# Ensure base-devel and git are installed first
+	info "Ensuring build dependencies are installed..."
+	if ! pkg_installed "base-devel"; then
+		info "Installing base-devel..."
+		sudo pacman -S --needed --noconfirm base-devel
+	fi
+	if ! pkg_installed "git"; then
+		info "Installing git..."
+		sudo pacman -S --needed --noconfirm git
+	fi
+	
 	info "Installing yay..."
 	local tmp=$(mktemp -d)
-	git clone https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin" --depth 1 &>/dev/null
-	(cd "$tmp/yay-bin" && makepkg -si --noconfirm) &>/dev/null
+	
+	# Use yay (source) instead of yay-bin for better compatibility
+	if ! git clone https://aur.archlinux.org/yay.git "$tmp/yay" --depth 1; then
+		err "Failed to clone yay repository"
+		rm -rf "$tmp"
+		return 1
+	fi
+	
+	# Build and install yay (show output for debugging)
+	if ! (cd "$tmp/yay" && makepkg -si --noconfirm); then
+		err "Failed to build/install yay"
+		rm -rf "$tmp"
+		return 1
+	fi
+	
 	rm -rf "$tmp"
-	ok "yay"
+	
+	# Verify installation
+	if command -v yay &>/dev/null; then
+		ok "yay installed successfully"
+		yay --version
+	else
+		err "yay installation verification failed"
+		return 1
+	fi
 }
 
 do_install() {
