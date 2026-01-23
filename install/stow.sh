@@ -67,6 +67,7 @@ echo "---" >> /tmp/stow-debug.log
 if [[ $stow_exit -ne 0 ]]; then
     # Save error to log file (for error handler to read)
     echo "$stow_output" > /tmp/stow-error.log
+    echo "Stow failed with exit code: $stow_exit" >> /tmp/stow-debug.log
     
     # Also write to stderr so it's visible before error handler clears screen
     err "Stow failed (exit code: $stow_exit):" >&2
@@ -83,8 +84,13 @@ if [[ $stow_exit -ne 0 ]]; then
     info "Try manually removing conflicting items or check the error above" >&2
     exit 1
 else
-    ok "Hyprluggage linked"
-    rm -f /tmp/stow-error.log
+    echo "Stow succeeded, entering else branch" >> /tmp/stow-debug.log
+    ok "Hyprluggage linked" || { echo "ok() function failed" >> /tmp/stow-debug.log; exit 1; }
+    echo "ok() function succeeded" >> /tmp/stow-debug.log
+    rm -f /tmp/stow-error.log || { echo "rm failed" >> /tmp/stow-debug.log; exit 1; }
+    echo "rm succeeded" >> /tmp/stow-debug.log
 fi
 
-[[ -d "$BACKUP_DIR" ]] && info "Your old configs: $BACKUP_DIR"
+echo "After if/else block" >> /tmp/stow-debug.log
+[[ -d "$BACKUP_DIR" ]] && info "Your old configs: $BACKUP_DIR" || echo "backup_dir check/info failed" >> /tmp/stow-debug.log
+echo "End of stow.sh script" >> /tmp/stow-debug.log
