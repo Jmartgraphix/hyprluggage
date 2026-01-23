@@ -70,7 +70,26 @@ print_logo() {
 }
 
 print_luggage() {
-    [[ -f "$LUGGAGE_FILE" ]] && echo -e "${C_ACCENT}" && cat "$LUGGAGE_FILE" && echo -e "${C_RESET}"
+    [[ -f "$LUGGAGE_FILE" ]] || return 0
+    
+    # Calculate padding to center the ASCII art
+    # Find the width of the longest line in the luggage art
+    local max_width=0
+    while IFS= read -r line; do
+        local line_len=${#line}
+        [[ $line_len -gt $max_width ]] && max_width=$line_len
+    done < "$LUGGAGE_FILE"
+    
+    # Calculate padding to center it
+    local pad=$(( (TERM_WIDTH - max_width) / 2 ))
+    [[ $pad -lt 0 ]] && pad=0
+    
+    # Print each line with padding
+    echo -e "${C_ACCENT}"
+    while IFS= read -r line; do
+        printf "%${pad}s%s\n" "" "$line"
+    done < "$LUGGAGE_FILE"
+    echo -e "${C_RESET}"
 }
 
 center_text() {
