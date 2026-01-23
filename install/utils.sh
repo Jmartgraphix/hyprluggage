@@ -38,6 +38,9 @@ catch_error() {
     echo -e "${MAGENTA}    Oops! Something didn't go as planned ${RESET}😢"
     echo -e "${DIM}    Don't worry - this happens sometimes.${RESET}"
     echo
+    echo -e "${DIM}    Failed at: ${BASH_SOURCE[1]}:${BASH_LINENO[0]}${RESET}"
+    echo -e "${DIM}    Command: ${BASH_COMMAND}${RESET}"
+    echo
     echo -e "${DIM}    Open an issue:${RESET}"
     echo -e "    https://github.com/Jmartgraphix/hyprluggage/issues"
     echo
