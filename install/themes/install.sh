@@ -110,7 +110,7 @@ status_line() {
 check_mark() { status_line "✓" "$1" "$C_OK"; }
 cross_mark() { status_line "✗" "$1" "$C_RED"; }
 skip_mark()  { status_line "○" "$1" "$C_DIMMER"; }
-found_item() { status_line "🧳" "$1" "$C_CORAL"; }
+found_item() { status_line "󰜦" "$1" "$C_CORAL"; }
 
 info_line() {
     printf "%${PADDING_LEFT}s" "" && echo -e "${C_DIM}$1${C_RESET}"

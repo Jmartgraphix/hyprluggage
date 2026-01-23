@@ -130,7 +130,7 @@ import_url() {
 
 omarchy_menu() {
     clear
-    gum style --bold --foreground 212 "🧳 omarchy themes"
+    gum style --bold --foreground 212 "󰜦 omarchy themes"
     echo ""
     
     local choice
@@ -151,7 +151,7 @@ WEBAPP_DIR="$DOTFILES/.config/hypr/scripts"
 
 webapp_menu() {
     clear
-    gum style --bold --foreground 212 "🧳 web apps"
+    gum style --bold --foreground 212 "󰜦 web apps"
     echo ""
     
     local choice

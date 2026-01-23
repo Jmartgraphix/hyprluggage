@@ -1,4 +1,4 @@
-# HyprLuggage 🧳
+# HyprLuggage
 
 <div align="center">
 
