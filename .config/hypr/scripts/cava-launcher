@@ -1,5 +1,5 @@
 #!/bin/bash
-# Auto-launch cava when music starts playing
+# Manual cava launcher - can be used to start, stop, toggle, or monitor cava
 
 CAVA_PID_FILE="/tmp/cava.pid"
 PLAYERCTL_STATUS=""
