@@ -1,0 +1,98 @@
+#!/bin/bash
+# Weather script for waybar using wttr.in (API-free)
+
+LOCATION_FILE="$HOME/.config/waybar/weather-location"
+CACHE_FILE="$HOME/.cache/waybar-weather.json"
+CACHE_DURATION=600  # Cache for 10 minutes
+
+# Read location from config file, or use argument, or auto-detect
+if [[ -n "${1:-}" ]]; then
+    LOCATION="$1"
+elif [[ -f "$LOCATION_FILE" ]]; then
+    LOCATION=$(cat "$LOCATION_FILE" | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    [[ -z "$LOCATION" ]] && LOCATION=""
+else
+    LOCATION=""  # Auto-detect
+fi
+
+# Get cached data if fresh
+if [ -f "$CACHE_FILE" ]; then
+    cache_age=$(($(date +%s) - $(stat -c %Y "$CACHE_FILE")))
+    if [ $cache_age -lt $CACHE_DURATION ]; then
+        cat "$CACHE_FILE"
+        exit 0
+    fi
+fi
+
+# Fetch weather from wttr.in
+if [ -z "$LOCATION" ]; then
+    # Auto-detect location or use IP-based location
+    weather_data=$(curl -s "wttr.in/?format=j1" 2>/dev/null)
+else
+    # URL encode the location (replace spaces with +, keep commas and other chars)
+    encoded_location=$(echo "$LOCATION" | sed 's/ /+/g')
+    weather_data=$(curl -s "wttr.in/${encoded_location}?format=j1" 2>/dev/null)
+fi
+
+# Check if we got valid JSON with weather data
+if [ -z "$weather_data" ] || ! echo "$weather_data" | jq -e '.current_condition[0]' >/dev/null 2>&1; then
+    # If no location is set, show a message to set it
+    if [[ ! -f "$LOCATION_FILE" ]]; then
+        echo '{"text": "󰖐 --", "tooltip": "Click to set weather location", "class": "needs-setup"}'
+    else
+        # Location was set but API returned invalid data
+        saved_location=$(cat "$LOCATION_FILE" 2>/dev/null | tr -d '\n')
+        echo "{\"text\": \"󰖐 --\", \"tooltip\": \"Weather unavailable for: ${saved_location:-$LOCATION}\\nTry: 'City, State' format (e.g., Flourtown, PA)\\nOr use a zip code or city name\"}"
+    fi
+    exit 0
+fi
+
+# Parse JSON (requires jq)
+temp=$(echo "$weather_data" | jq -r '.current_condition[0].temp_F' 2>/dev/null || echo "N/A")
+condition=$(echo "$weather_data" | jq -r '.current_condition[0].weatherDesc[0].value' 2>/dev/null || echo "Unknown")
+feelslike_raw=$(echo "$weather_data" | jq -r '.current_condition[0].FeelsLikeF' 2>/dev/null || echo "N/A")
+# Fix "-0" to show as "0"
+feelslike=$(echo "$feelslike_raw" | sed 's/^-0$/0/')
+humidity=$(echo "$weather_data" | jq -r '.current_condition[0].humidity' 2>/dev/null || echo "N/A")
+
+# Get location info for tooltip (to help verify accuracy)
+location_name=$(echo "$weather_data" | jq -r '.nearest_area[0].areaName[0].value // ""' 2>/dev/null)
+location_region=$(echo "$weather_data" | jq -r '.nearest_area[0].region[0].value // ""' 2>/dev/null)
+
+# Get forecast for tooltip
+forecast=""
+for i in {0..2}; do
+    date=$(echo "$weather_data" | jq -r ".weather[$i].date" 2>/dev/null)
+    max=$(echo "$weather_data" | jq -r ".weather[$i].maxtempF" 2>/dev/null)
+    min=$(echo "$weather_data" | jq -r ".weather[$i].mintempF" 2>/dev/null)
+    desc=$(echo "$weather_data" | jq -r ".weather[$i].hourly[0].weatherDesc[0].value" 2>/dev/null)
+    if [ -n "$date" ] && [ "$date" != "null" ]; then
+        forecast="${forecast}${date}: ${desc}, ${min}°-${max}°F\n"
+    fi
+done
+
+# Weather icon based on condition (you can customize these)
+icon="󰖐"
+case "$condition" in
+    *Clear*|*Sunny*) icon="󰖙" ;;
+    *Cloudy*|*Overcast*) icon="󰖐" ;;
+    *Rain*|*Drizzle*) icon="󰖗" ;;
+    *Snow*) icon="󰖘" ;;
+    *Thunder*) icon="󰖓" ;;
+    *Fog*|*Mist*) icon="󰖑" ;;
+esac
+
+# Build tooltip with location info if available
+tooltip_location=""
+if [[ -n "$location_name" && -n "$location_region" ]]; then
+    tooltip_location="${location_name}, ${location_region}\n"
+fi
+
+# Output JSON for waybar
+output="{\"text\": \"$icon $temp°F\", \"tooltip\": \"${tooltip_location}${condition}\\nFeels like: ${feelslike}°F\\nHumidity: ${humidity}%\\n\\nForecast:\\n$forecast\"}"
+
+# Cache the result
+mkdir -p "$(dirname "$CACHE_FILE")"
+echo "$output" > "$CACHE_FILE"
+
+echo "$output"

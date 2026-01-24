@@ -81,7 +81,8 @@ window#waybar {
 #custom-logo,
 #mpris,
 #clock,
-#custom-idle-indicator {
+#custom-idle-indicator,
+#custom-weather {
   padding: 5px;
   font-weight: 600;
   opacity: 1.0;
@@ -112,6 +113,10 @@ window#waybar {
 #battery.critical {
   color: @error;
   animation: blink 1s infinite;
+}
+
+#custom-weather.needs-setup {
+  opacity: 0.6;
 }
 
 @keyframes blink {

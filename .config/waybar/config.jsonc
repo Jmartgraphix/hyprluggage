@@ -22,6 +22,7 @@
     "backlight",
     "pulseaudio",
     "battery",
+    "custom/weather",
     "clock"
   ],
   "group/tray-drawer": {
@@ -55,6 +56,13 @@
     "exec": "~/.config/waybar/scripts/indicator-idle",
     "signal": 9,
     "return-type": "json"
+  },
+  "custom/weather": {
+    "exec": "~/.config/waybar/scripts/weather",
+    "interval": 600,
+    "return-type": "json",
+    "tooltip": true,
+    "on-click": "~/.config/waybar/scripts/set-weather-location"
   },
   "hyprland/workspaces": {
     "on-click": "activate",

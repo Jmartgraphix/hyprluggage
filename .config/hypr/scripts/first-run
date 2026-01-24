@@ -14,6 +14,10 @@ notify-send -u critical "App Launcher" "Press Super + Space to launch apps"
 notify-send -u critical "Keybindings" "Press Super + K to view all keybindings"
 notify-send -u critical "Welcome to Hyprluggage" "Run 'hyprluggage help' for available commands."
 
+# Weather location setup (optional)
+sleep 1
+notify-send -u normal "Weather Module" "Click the weather icon in waybar to set your location (or use auto-detect)"
+
 # Mark as done (prevents re-running on future boots)
 mkdir -p "$(dirname "$MARKER")"
 touch "$MARKER"

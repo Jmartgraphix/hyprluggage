@@ -1,0 +1,89 @@
+#!/bin/bash
+# Interactive script to set weather location for waybar
+
+LOCATION_FILE="$HOME/.config/waybar/weather-location"
+CACHE_FILE="$HOME/.cache/waybar-weather.json"
+
+# Check if rofi is available for GUI input
+if command -v rofi &>/dev/null; then
+    # Get current location if exists
+    current_location=""
+    has_location=false
+    if [[ -f "$LOCATION_FILE" ]]; then
+        current_location=$(cat "$LOCATION_FILE" | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        [[ -n "$current_location" ]] && has_location=true
+    fi
+    
+    # Build menu - show current location first if it exists, then options
+    menu_options=""
+    if [[ "$has_location" == true ]]; then
+        menu_options="${menu_options}󰖐 Current: ${current_location}\n"
+    fi
+    menu_options="${menu_options}🌐 Auto-detect (IP-based)\n"
+    menu_options="${menu_options}❌ Cancel"
+    
+    # Show menu - use normal mode so menu options are always visible
+    selected_line=""
+    [[ "$has_location" == true ]] && selected_line="-selected-row 0"
+    
+    choice=$(echo -e "$menu_options" | rofi -dmenu -i -p "Weather Location" \
+        -mesg "Type location and press Enter, or select an option\nExamples: @40.103,-75.212 or Flourtown, PA" \
+        -theme-str "entry { placeholder: \"Enter location...\"; }" \
+        $selected_line \
+        -config ~/.config/rofi/config.rasi 2>/dev/null)
+    
+    # Handle user choice
+    if [[ -z "$choice" ]] || [[ "$choice" == *"Cancel"* ]]; then
+        exit 0
+    elif [[ "$choice" == *"Auto-detect"* ]]; then
+        # Remove location file to use auto-detect
+        rm -f "$LOCATION_FILE"
+        notify-send "Weather Location" "Using auto-detection (IP-based)"
+    elif [[ "$choice" == *"Current:"* ]]; then
+        # User selected to keep current location
+        notify-send "Weather Location" "Keeping: $current_location"
+        exit 0
+    else
+        # User typed something in the input field that doesn't match menu options - treat as new location
+        location=$(echo "$choice" | xargs)
+        if [[ -n "$location" ]] && [[ "$location" != *"Auto-detect"* ]] && [[ "$location" != *"Cancel"* ]] && [[ "$location" != *"Current:"* ]]; then
+            # Save location
+            mkdir -p "$(dirname "$LOCATION_FILE")"
+            echo "$location" > "$LOCATION_FILE"
+            notify-send "Weather Location" "Set to: $location"
+        fi
+    fi
+else
+    # Fallback to terminal input
+    echo "Weather Location Setup"
+    echo "====================="
+    echo
+    echo "Enter your location (or press Enter for auto-detect):"
+    echo "  For most accuracy: Use coordinates @latitude,longitude"
+    echo "  Examples:"
+    echo "    - Coordinates: @40.103,-75.212 (most accurate)"
+    echo "    - City, State: Flourtown, PA (uses nearest station)"
+    echo "    - City name: New York"
+    echo "    - Zip code: 10001 (may use nearest station)"
+    echo ""
+    echo "  Note: Tooltip will show the actual location used"
+    echo
+    [[ -f "$LOCATION_FILE" ]] && echo "Current: $(cat "$LOCATION_FILE")"
+    echo
+    read -p "Location: " location
+    
+    if [[ -z "$location" ]]; then
+        rm -f "$LOCATION_FILE"
+        echo "Using auto-detection (IP-based)"
+    else
+        mkdir -p "$(dirname "$LOCATION_FILE")"
+        echo "$location" > "$LOCATION_FILE"
+        echo "Location set to: $location"
+    fi
+fi
+
+# Clear cache to force refresh
+rm -f "$CACHE_FILE"
+
+# Reload waybar if running
+pkill -SIGUSR2 waybar 2>/dev/null || true
