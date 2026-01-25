@@ -60,7 +60,7 @@ alias cd='z'
 abbr -a vim nvim
 abbr -a nd 'npm run dev'
 abbr -a n nvim
-abbr -a open 'nautilus .'
+abbr -a open 'thunar .'
 abbr -a zz yazi
 abbr -a lg lazygit
 abbr -a x exit

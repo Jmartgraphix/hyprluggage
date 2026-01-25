@@ -27,7 +27,7 @@ packages=(
 	eza bat fd ripgrep fzf zoxide jq
 
 	# Files
-	yazi nautilus nautilus-dropbox
+	yazi thunar tumbler thunar-volman thunar-archive-plugin
 
 	# Editor
 	neovim lazygit

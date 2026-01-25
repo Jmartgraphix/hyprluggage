@@ -1,27 +1,27 @@
 {
-    "wallpaper": "/home/jmartin/Wallpapers/calm/a_house_on_stilts_on_a_lake.jpg",
+    "wallpaper": "/home/jmartin/Wallpapers/digital/a_car_on_a_road_with_orange_clouds_in_the_sky.jpg",
     "alpha": "100",
     "special": {
-        "background": "#0f1512",
-        "foreground": "#dee4df",
-        "cursor": "#89d6b9"
+        "background": "#19120d",
+        "foreground": "#f0dfd7",
+        "cursor": "#ffb786"
     },
     "colors": {
-        "color0": "#0f1512",
+        "color0": "#19120d",
         "color1": "#ffb4ab",
-        "color2": "#89d6b9",
-        "color3": "#a7cce1",
-        "color4": "#b2ccc0",
-        "color5": "#274b5d",
-        "color6": "#344c42",
-        "color7": "#dee4df",
-        "color8": "#1b211e",
+        "color2": "#ffb786",
+        "color3": "#c9ca94",
+        "color4": "#e4bfa8",
+        "color5": "#48491f",
+        "color6": "#5b4130",
+        "color7": "#f0dfd7",
+        "color8": "#261e19",
         "color9": "#ffb4ab",
-        "color10": "#89d6b9",
-        "color11": "#a7cce1",
-        "color12": "#b2ccc0",
-        "color13": "#274b5d",
-        "color14": "#344c42",
-        "color15": "#dee4df"
+        "color10": "#ffb786",
+        "color11": "#c9ca94",
+        "color12": "#e4bfa8",
+        "color13": "#48491f",
+        "color14": "#5b4130",
+        "color15": "#f0dfd7"
     }
 }
