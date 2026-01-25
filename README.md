@@ -22,11 +22,29 @@
 
 </div>
 
+## Table of Contents
+
+- [Features](#features)
+- [Themes](#themes)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Keybindings](#keybindings)
+- [Components](#components)
+- [Customization](#customization)
+- [Structure](#structure)
+- [Troubleshooting](#troubleshooting)
+- [Uninstallation](#uninstallation)
+- [Credits](#credits)
+
+---
+
 ## Features
 
 - **One-command theming** — Switch entire desktop look with `hyprluggage switch`
 - **Dynamic colors** — Matugen extracts palette from any wallpaper
-- **11 handcrafted themes** — Dark, cozy, and aesthetic
+- **12 themes** — 11 handcrafted + 1 dynamic (Dark, cozy, and aesthetic)
 - **Everything synced** — Terminal, bar, launcher, notifications, apps
 - **Rofi menus** — App launcher, emoji picker, clipboard, wallpaper selector, power profiles
 - **Dual mode** — Vibe (animations + blur) or Focus (minimal + fast)
@@ -59,6 +77,7 @@ Toggle between them with `Super + Ctrl + Backspace`
 - **Gruvbox Material**
 - **Kanagawa**
 - **Nordic**
+- **Octarine**
 - **Rosé Pine**
 - **Sakura**
 - **Tokyo Night**
@@ -67,31 +86,49 @@ Toggle between them with `Super + Ctrl + Backspace`
 
 ---
 
-## Rofi & Notifications
+## Screenshots
 
-**Rofi Menus** - Rofi provides several menus including app launcher, emoji picker, clipboard, wallpaper selector, and power profiles.
-
----
-
-## Hyprlock
-
-Lock screen with customizable appearance.
+> **Note:** Screenshots coming soon! Each theme includes multiple wallpapers and can be previewed using `hyprluggage tui` or `hyprluggage browse`.
 
 ---
 
-## Neovim
+## What's Included
 
-Neovim configuration with theme integration.
+HyprLuggage comes with a complete desktop environment setup:
+
+**Rofi Menus** - Powerful launcher with multiple menus:
+- App launcher (`Super + Space`)
+- Emoji picker (`Alt + .`)
+- Clipboard manager (`Alt + ,`)
+- Wallpaper selector (`Super + Alt + Space`)
+- Power profiles (`Super + Ctrl + B`)
+- Power menu (`Super + Escape`)
+
+**Hyprlock** - Customizable lock screen with theme integration. Lock with `Super + Shift + L`.
+
+**Neovim** - Pre-configured Neovim with theme integration. All themes include Neovim color schemes that sync automatically.
+
+**Music Integration** - Complete music setup:
+- **MPD** - Music Player Daemon for background playback
+- **RMPC** - Terminal-based music player (`Alt + M`)
+- **Cava** - Audio visualizer (`Super + Shift + C`)
+
+**Notifications** - Mako notification daemon with theme-aware styling.
 
 ---
 
-## Music
+## Requirements
 
-Music integration with MPD, RMPC, and Cava visualizer.
+- **Distribution:** CachyOS or Arch Linux (CachyOS preferred)
+- **RAM:** At least 4GB (8GB recommended)
+- **Storage:** ~5GB free space for packages and configs
+- **Internet:** Required for installation
+- **Access:** Root/sudo privileges
+- **Display:** Wayland-compatible graphics
 
 ---
 
-## Pre-install
+## Prerequisites
 
 This setup works best on **CachyOS** or **Arch Linux**. While CachyOS is preferred, you can use either distribution.
 
@@ -132,6 +169,56 @@ cd ~/hyprluggage && ./install.sh
 
 Want just the themes without the full setup? See [install/themes/README.md](install/themes/README.md)
 
+### What Gets Installed
+
+The installer will:
+
+1. **Install core packages:**
+   - Hyprland compositor and related tools (hypridle, hyprlock, hyprpicker)
+   - Desktop components (Waybar, Rofi, Mako, swww)
+   - Terminal emulators (Kitty, Alacritty)
+   - Shell and tools (Fish, Starship, tmux)
+   - File managers (Thunar, Yazi)
+   - Editor (Neovim)
+   - Music stack (MPD, RMPC, Cava)
+   - And many more utilities
+
+2. **Install optional applications:**
+   - Browsers (Brave, Firefox, Chromium, Zen)
+   - Editors (VS Code, Zed, Obsidian)
+   - Communication (Discord, Vesktop)
+   - And other productivity apps
+
+3. **Set up system services:**
+   - MPD (music daemon)
+   - Greetd (display manager)
+   - User services for autostart
+
+4. **Deploy dotfiles:**
+   - Symlink all configs to `~/.config/`
+   - Set up desktop entries
+   - Configure shell (Fish with Starship)
+
+5. **Install theme system:**
+   - Set up Hyprluggage theme manager
+   - Install all 12 themes
+
+---
+
+## Quick Start
+
+After installation:
+
+1. **Log out and log back in** (or reboot) to start Hyprland
+2. **Choose your first theme:**
+   ```bash
+   hyprluggage switch
+   ```
+   Or press `Super + Ctrl + Shift + Space` for the interactive picker
+3. **Explore keybindings:** Press `Super + K` to see all available shortcuts
+4. **Customize:** Edit configs in `~/.config/` - they won't be overwritten
+5. **Switch themes anytime:** Use `hyprluggage switch` or the TUI (`Super + I`)
+
 ---
 
 ## Usage
@@ -143,6 +230,14 @@ hyprluggage switch          # interactive picker
 hyprluggage switch sakura   # direct switch
 hyprluggage list            # show all themes
 hyprluggage reload          # re-apply current
+hyprluggage current         # show current theme
+hyprluggage fix             # fix broken symlinks
+hyprluggage browse          # browse & import Omarchy themes
+hyprluggage import <url>    # import theme from GitHub
+hyprluggage tui             # interactive theme browser
+hyprluggage remove <theme>  # delete a theme
+hyprluggage uninstall       # remove Hyprluggage
+hyprluggage help            # show help
 ```
 
 Or press `Super + Ctrl + Shift + Space` for the theme picker.
@@ -158,7 +253,7 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 |-----|--------|
 | `Super + Return` | Terminal |
 | `Super + B` | Browser |
-| `Super + E` | File Manager |
+| `Super + E` | File Manager (Thunar) |
 | `Super + M` | Spotify |
 | `Super + D` | Discord |
 | `Super + O` | Obsidian |
@@ -182,6 +277,8 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 | `Super + Ctrl + Space` | Matugen Theme |
 | `Super + Alt + Space` | Wallpaper Picker |
 | `Super + Ctrl + Shift + Space` | Theme Switcher |
+| `Super + I` | Hyprluggage TUI |
+| `Super + Alt + I` | Browse Themes |
 
 </details>
 
@@ -191,14 +288,15 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 | Key | Action |
 |-----|--------|
 | `Super + Q` | Close Window |
-| `Super + K` | Kill Application |
+| `Super + K` | Show All Keybindings |
+| `Super + Shift + K` | Kill Application |
 | `Super + Arrow` | Move Focus |
 | `Super + Shift + Arrow` | Move Window |
 | `Super + Ctrl + Arrow` | Resize Window |
 | `Super + 1-9` | Switch Workspace |
 | `Super + Shift + 1-9` | Move to Workspace |
 | `Super + F` | Fullscreen |
-| `Super + V` | Toggle Floating |
+| `Super + Shift + V` | Toggle Floating |
 | `Super + Shift + O` | Pop Window (Float & Pin) |
 
 </details>
@@ -245,19 +343,41 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf) for full list.
 
 ## Components
 
-| Component | Tool |
-|-----------|------|
-| Compositor | [Hyprland](https://hyprland.org/) |
-| Bar | [Waybar](https://github.com/Alexays/Waybar) |
-| Launcher | [Rofi](https://github.com/lbonn/rofi) |
-| Terminal | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Ghostty](https://ghostty.org/) |
-| Notifications | [Mako](https://github.com/emersion/mako) |
-| Lock screen | [Hyprlock](https://github.com/hyprwm/hyprlock) |
-| Theme engine | [Matugen](https://github.com/InioX/matugen) |
-| Music | [MPD](https://musicpd.org/) + [RMPC](https://github.com/mierak/rmpc) |
-| Visualizer | [Cava](https://github.com/karlstav/cava) |
-| Editor | [Neovim](https://neovim.io/) |
-| Shell | [Fish](https://fishshell.com/) + [Starship](https://starship.rs/) |
+| Component | Tool | Description |
+|-----------|------|-------------|
+| Compositor | [Hyprland](https://hyprland.org/) | Wayland compositor with smooth animations and window management |
+| Bar | [Waybar](https://github.com/Alexays/Waybar) | Highly customizable status bar with modules for system info, workspaces, and more |
+| Launcher | [Rofi](https://github.com/lbonn/rofi) | Application launcher and menu system with multiple modes |
+| Terminal | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Alacritty](https://alacritty.org/) / [Ghostty](https://ghostty.org/) | GPU-accelerated terminal emulators (Kitty & Alacritty installed by default) |
+| File Manager | [Thunar](https://docs.xfce.org/xfce/thunar/start) (GUI) / [Yazi](https://github.com/sxyazi/yazi) (CLI) | Dual file managers for GUI and terminal workflows |
+| Notifications | [Mako](https://github.com/emersion/mako) | Lightweight notification daemon with theme support |
+| Lock screen | [Hyprlock](https://github.com/hyprwm/hyprlock) | Secure lock screen integrated with Hyprland |
+| Theme engine | [Matugen](https://github.com/InioX/matugen) | Material You color palette generator from wallpapers |
+| Music | [MPD](https://musicpd.org/) + [RMPC](https://github.com/mierak/rmpc) | Music Player Daemon with terminal client for music playback |
+| Visualizer | [Cava](https://github.com/karlstav/cava) | Audio spectrum visualizer for terminal |
+| Editor | [Neovim](https://neovim.io/) | Modern Vim fork with LSP support and theme integration |
+| Shell | [Fish](https://fishshell.com/) + [Starship](https://starship.rs/) | User-friendly shell with fast, customizable prompt |
+
+---
+
+## Customization
+
+All configuration files are located in `~/.config/`. You can edit them directly—they won't be overwritten by theme switches.
+
+**Key customization locations:**
+- **Keybindings:** `~/.config/hypr/bindings.conf` - Modify or add shortcuts
+- **Hyprland settings:** `~/.config/hypr/` - Window rules, animations, monitors
+- **Waybar:** `~/.config/waybar/` - Status bar modules and styling
+- **Rofi:** `~/.config/rofi/` - Launcher appearance and scripts
+- **Terminal:** `~/.config/kitty/` or `~/.config/alacritty/` - Terminal settings
+- **Shell:** `~/.config/fish/` - Fish shell configuration
+
+**Theme customization:**
+- Each theme's configs are in `~/hyprluggage/themes/<theme-name>/.config/`
+- Copy a theme to create your own: `cp -r themes/zen themes/my-theme`
+- Edit colors, wallpapers, and configs in your custom theme
+
+**Note:** Theme switches only update colors and wallpapers. Your custom config edits are preserved.
 
 ---
 
@@ -276,7 +396,9 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf) for full list.
 │   ├── nvim/           # Neovim
 │   ├── fish/           # Shell
 │   ├── tmux/           # Terminal multiplexer
-│   ├── yazi/           # File manager
+│   ├── yazi/           # File manager (CLI)
+│   ├── gtk-3.0/        # GTK theme (Thunar, etc.)
+│   ├── gtk-4.0/        # GTK theme (Thunar, etc.)
 │   ├── btop/           # System monitor
 │   ├── rmpc/           # Music player
 │   ├── matugen/        # Theme generator templates
@@ -292,7 +414,68 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf) for full list.
 
 ---
 
+## Troubleshooting
+
+**Colors not updating?**
+```bash
+hyprluggage reload
+```
+
+**Symlinks broken?**
+```bash
+hyprluggage fix
+```
+
+**Theme not applying?**
+- Check that `~/.config/hyprluggage/current` exists and is a symlink
+- Verify the theme exists: `hyprluggage list`
+- Try reloading: `hyprluggage reload`
+
+**Installation issues?**
+- Ensure you have internet connection
+- Check you have sudo/root access
+- Verify you're on Arch Linux or CachyOS
+- See [install/themes/README.md](install/themes/README.md) for theme-specific issues
+
+**Hyprland not starting?**
+- Check logs: `journalctl -u greetd` or `~/.local/share/hyprland/hyprland.log`
+- Verify graphics drivers are installed
+- Ensure you're using a Wayland-compatible setup
+
+**Keybindings not working?**
+- Check `~/.config/hypr/bindings.conf` for conflicts
+- Reload Hyprland config: `hyprctl reload`
+- Verify the keybinding syntax is correct
+
+**Need more help?**
+- Check the [full keybindings list](.config/hypr/bindings.conf)
+- Run `hyprluggage help` for command reference
+- [Report a bug](https://github.com/Jmartgraphix/hyprluggage/issues/new?template=bug_report.yml)
+
+---
+
+## Uninstallation
+
+To remove HyprLuggage:
+
+```bash
+cd ~/hyprluggage && ./uninstall.sh
+```
+
+The uninstaller will:
+- Remove all symlinks from your home directory
+- Restore any backed-up configs (from `~/dotfiles-backup*`)
+- Optionally remove installed packages (you choose which ones)
+- Clean up shell configuration
+- Remove desktop entries
+
+**Note:** Your custom edits in `~/.config/` will be preserved if they weren't symlinks. Backups are created during installation in `~/dotfiles-backup*`.
+
+---
+
 ## Credits
+
+**Inspiration:** HyprLuggage is inspired by Terry Pratchett's Discworld series, specifically The Luggage—a magical, multi-legged chest made of Sapient Pearwood that is fiercely loyal to its owner.
 
 Learned a lot from these projects:
 - [vyrx-dev/dotfiles](https://github.com/vyrx-dev/dotfiles)
