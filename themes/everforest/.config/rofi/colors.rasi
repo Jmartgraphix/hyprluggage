@@ -1,0 +1,46 @@
+/**
+ * ════════════════════════════════════════════════════════
+ *   Everforest Theme
+ *   https://github.com/sainnhe/everforest
+ * ════════════════════════════════════════════════════════
+ */
+
+* {
+    /* Primary accent color (using green as primary) */
+    primary: #83c092;
+    primary-container: #7fbbb3;
+    on-primary: #2b3339;
+    on-primary-container: #d3c6aa;
+    
+    /* Secondary accent */
+    secondary: #a7c080;
+    secondary-container: #4a5560;
+    on-secondary: #2b3339;
+    on-secondary-container: #d3c6aa;
+    
+    /* Surface backgrounds (progressively lighter) */
+    surface: #2b3339;
+    surface-dim: #2b3339;
+    surface-bright: #3d484d;
+    surface-container-lowest: #2b3339;
+    surface-container-low: #2b3339;
+    surface-container: #3d484d;
+    surface-container-high: #4a5560;
+    surface-container-highest: #5c6a72;
+    
+    /* Text colors */
+    on-surface: #d3c6aa;
+    on-surface-variant: #a7c080;
+    
+    /* Outline/border colors */
+    outline: #4a5560;
+    outline-variant: #3d484d;
+    
+    /* Error colors */
+    error: #e67e80;
+    on-error: #2b3339;
+    
+    /* Inverse colors */
+    inverse-surface: #d3c6aa;
+    inverse-on-surface: #2b3339;
+}

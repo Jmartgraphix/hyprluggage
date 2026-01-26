@@ -1,0 +1,45 @@
+/**
+ * ════════════════════════════════════════════════════════
+ *   Catppuccin Mocha Theme
+ * ════════════════════════════════════════════════════════
+ */
+
+* {
+    /* Primary accent color (using Mauve as primary) */
+    primary: #cba6f7;
+    primary-container: #b4befe;
+    on-primary: #1e1e2e;
+    on-primary-container: #cdd6f4;
+    
+    /* Secondary accent */
+    secondary: #f5c2e7;
+    secondary-container: #45475a;
+    on-secondary: #1e1e2e;
+    on-secondary-container: #cdd6f4;
+    
+    /* Surface backgrounds (progressively lighter) */
+    surface: #1e1e2e;
+    surface-dim: #1e1e2e;
+    surface-bright: #313244;
+    surface-container-lowest: #1e1e2e;
+    surface-container-low: #1e1e2e;
+    surface-container: #313244;
+    surface-container-high: #45475a;
+    surface-container-highest: #585b70;
+    
+    /* Text colors */
+    on-surface: #cdd6f4;
+    on-surface-variant: #bac2de;
+    
+    /* Outline/border colors */
+    outline: #45475a;
+    outline-variant: #313244;
+    
+    /* Error colors */
+    error: #f38ba8;
+    on-error: #1e1e2e;
+    
+    /* Inverse colors */
+    inverse-surface: #cdd6f4;
+    inverse-on-surface: #1e1e2e;
+}

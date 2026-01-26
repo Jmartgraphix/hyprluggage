@@ -1,0 +1,39 @@
+/* Everforest Theme */
+/* https://github.com/sainnhe/everforest */
+.theme-dark, .theme-light {
+  --background-primary: #2b3339;
+  --background-primary-alt: #232a2e;
+  --background-secondary: #3d484d;
+  --background-secondary-alt: #232a2e;
+  --background-modifier-hover: #4a5560;
+  --background-modifier-border: #4a5560;
+
+  --text-normal: #d3c6aa;
+  --text-muted: #a7c080;
+  --text-faint: #4a5560;
+  --text-on-accent: #2b3339;
+
+  --interactive-accent: #83c092;
+  --interactive-accent-hover: #7fbbb3;
+  --text-accent: #83c092;
+  --text-accent-hover: #7fbbb3;
+
+  --link-color: #83c092;
+  --link-color-hover: #7fbbb3;
+  --link-external-color: #a7c080;
+
+  --code-background: #232a2e;
+  --code-normal: #d3c6aa;
+
+  --text-error: #e67e80;
+  --text-success: #83c092;
+  --text-warning: #dbbc7f;
+
+  --divider-color: #4a5560;
+  --icon-color: #a7c080;
+  --icon-color-hover: #d3c6aa;
+  --tag-color: #83c092;
+  --tag-background: #3d484d;
+}
+
+::selection { background: #83c09240; }

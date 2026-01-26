@@ -71,18 +71,18 @@ Toggle between them with `Super + Ctrl + Backspace`
 
 ## Themes
 
+- **Catppuccin** - Soothing pastel theme (Mocha variant)
 - **Dynamic** - Colors generated from wallpaper using Matugen
-- **Espresso**
-- **Forest**
-- **Gruvbox Material**
+- **Everforest** - Green-based, warm-toned color scheme
+- **Coffee**
+- **Jade**
+- **Gruvbox**
 - **Kanagawa**
 - **Nordic**
 - **Octarine**
 - **Ros√© Pine**
-- **Sakura**
 - **Tokyo Night**
-- **Void**
-- **Zen**
+- **Monochrome**
 
 ---
 
@@ -227,7 +227,7 @@ After installation:
 
 ```bash
 hyprluggage switch          # interactive picker
-hyprluggage switch sakura   # direct switch
+hyprluggage switch rose-pine # direct switch
 hyprluggage list            # show all themes
 hyprluggage reload          # re-apply current
 hyprluggage current         # show current theme
@@ -374,7 +374,7 @@ All configuration files are located in `~/.config/`. You can edit them directly‚
 
 **Theme customization:**
 - Each theme's configs are in `~/hyprluggage/themes/<theme-name>/.config/`
-- Copy a theme to create your own: `cp -r themes/zen themes/my-theme`
+- Copy a theme to create your own: `cp -r themes/monochrome themes/my-theme`
 - Edit colors, wallpapers, and configs in your custom theme
 
 **Note:** Theme switches only update colors and wallpapers. Your custom config edits are preserved.

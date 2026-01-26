@@ -1,6 +1,6 @@
--- Symphony by vyrx
+-- Hyprluggage by Jmartgraphix
 -- Theme: Tokyo Night
--- https://github.com/vyrx-dev
+-- https://github.com/Jmartgraphix/hyprluggage
 
 return {
 	{

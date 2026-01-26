@@ -4,16 +4,16 @@
 DELAY=${1:-4}
 
 themes=(
-	gruvbox-material
+	catppuccin
+	everforest
+	gruvbox
 	tokyo-night
 	rose-pine
 	nordic
 	kanagawa
-	espresso
-	forest
-	sakura
-	zen
-	void
+	coffee
+	jade
+	monochrome
 	dynamic
 )
 

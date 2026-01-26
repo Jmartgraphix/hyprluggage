@@ -1,0 +1,25 @@
+## Everforest Theme
+## https://github.com/sainnhe/everforest
+
+background = #2b3339
+foreground = #d3c6aa
+
+[colors]
+black = #4a5560
+red = #e67e80
+green = #83c092
+yellow = #dbbc7f
+blue = #7fbbb3
+magenta = #d699b6
+cyan = #83c092
+white = #a7c080
+
+[colors.bright]
+black = #5c6a72
+red = #e67e80
+green = #83c092
+yellow = #dbbc7f
+blue = #7fbbb3
+magenta = #d699b6
+cyan = #83c092
+white = #d3c6aa

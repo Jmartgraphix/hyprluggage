@@ -1,0 +1,73 @@
+## Everforest Theme
+## https://github.com/sainnhe/everforest
+
+# Main background, empty for terminal default, need to be empty if you want transparent background
+theme[main_bg]="#2b3339"
+
+# Main text color
+theme[main_fg]="#d3c6aa"
+
+# Title color for boxes
+theme[title]="#83c092"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#83c092"
+
+# Background color of selected item in processes box
+theme[selected_bg]="#3d484d"
+
+# Foreground color of selected item in processes box
+theme[selected_fg]="#d3c6aa"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#4a5560"
+
+# Misc colors for processes box including mini cpu graphs, details memory graph and details status text
+theme[proc_misc]="#83c092"
+
+# Box outline and divider line color
+theme[cpu_box]="#83c092"
+theme[mem_box]="#83c092"
+theme[net_box]="#83c092"
+theme[proc_box]="#83c092"
+theme[div_line]="#3d484d"
+
+# Gradient for all meters and graphs
+theme[temp_start]="#83c092"
+theme[temp_mid]="#7fbbb3"
+theme[temp_end]="#a7c080"
+
+
+theme[cpu_start]="#83c092"
+theme[cpu_mid]="#7fbbb3"
+theme[cpu_end]="#a7c080"
+
+
+theme[free_start]="#a7c080"
+theme[free_mid]="#dbbc7f"
+theme[free_end]="#e69875"
+
+
+theme[cached_start]="#e69875"
+theme[cached_mid]="#e69875"
+theme[cached_end]="#e69875"
+
+
+theme[available_start]="#a7c080"
+theme[available_mid]="#a7c080"
+theme[available_end]="#a7c080"
+
+
+theme[used_start]="#83c092"
+theme[used_mid]="#83c092"
+theme[used_end]="#83c092"
+
+
+theme[download_start]="#e69875"
+theme[download_mid]="#dbbc7f"
+theme[download_end]="#a7c080"
+
+
+theme[upload_start]="#e69875"
+theme[upload_mid]="#dbbc7f"
+theme[upload_end]="#a7c080"

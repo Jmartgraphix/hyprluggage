@@ -1,0 +1,72 @@
+/**
+ * ════════════════════════════════════════════════════════
+ *   Everforest Theme
+ *   https://github.com/sainnhe/everforest
+ * ════════════════════════════════════════════════════════
+ */
+
+@define-color background     #2b3339;
+@define-color foreground     #d3c6aa;
+@define-color black          #4a5560;
+@define-color red            #e67e80;
+@define-color green          #83c092;
+@define-color yellow         #dbbc7f;
+@define-color blue           #7fbbb3;
+@define-color magenta        #d699b6;
+@define-color cyan           #83c092;
+@define-color white          #a7c080;
+@define-color bright_black   #5c6a72;
+@define-color bright_white   #d3c6aa;
+
+/* Accent colors */
+@define-color accent_bg_color #83c092;
+@define-color accent_fg_color #2b3339;
+@define-color accent_color #83c092;
+
+/* Window colors */
+@define-color window_bg_color #2b3339;
+@define-color window_fg_color #d3c6aa;
+
+/* View colors */
+@define-color view_bg_color #2b3339;
+@define-color view_fg_color #d3c6aa;
+
+/* Sidebar colors */
+@define-color sidebar_bg_color #3d484d;
+@define-color sidebar_fg_color #d3c6aa;
+@define-color sidebar_backdrop_color #2b3339;
+@define-color sidebar_shade_color #2b3339;
+
+/* Headerbar colors */
+@define-color headerbar_bg_color #3d484d;
+@define-color headerbar_fg_color #d3c6aa;
+@define-color headerbar_backdrop_color #2b3339;
+@define-color headerbar_shade_color #2b3339;
+
+/* Card colors */
+@define-color card_bg_color #3d484d;
+@define-color card_fg_color #d3c6aa;
+
+/* Popover colors */
+@define-color popover_bg_color #3d484d;
+@define-color popover_fg_color #d3c6aa;
+
+/* Dialog colors */
+@define-color dialog_bg_color #3d484d;
+@define-color dialog_fg_color #d3c6aa;
+
+/* Semantic status colors */
+@define-color destructive_bg_color #e67e80;
+@define-color destructive_fg_color #2b3339;
+@define-color destructive_color #e67e80;
+
+@define-color success_bg_color #83c092;
+@define-color success_fg_color #2b3339;
+@define-color success_color #83c092;
+
+@define-color warning_bg_color #dbbc7f;
+@define-color warning_fg_color #2b3339;
+@define-color warning_color #dbbc7f;
+
+@define-color error_bg_color #e67e80;
+@define-color error_fg_color #2b3339;

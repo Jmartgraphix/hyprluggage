@@ -1,0 +1,38 @@
+/* Catppuccin Mocha Theme */
+.theme-dark, .theme-light {
+  --background-primary: #1e1e2e;
+  --background-primary-alt: #181825;
+  --background-secondary: #313244;
+  --background-secondary-alt: #181825;
+  --background-modifier-hover: #45475a;
+  --background-modifier-border: #45475a;
+
+  --text-normal: #cdd6f4;
+  --text-muted: #bac2de;
+  --text-faint: #45475a;
+  --text-on-accent: #1e1e2e;
+
+  --interactive-accent: #cba6f7;
+  --interactive-accent-hover: #b4befe;
+  --text-accent: #cba6f7;
+  --text-accent-hover: #b4befe;
+
+  --link-color: #cba6f7;
+  --link-color-hover: #b4befe;
+  --link-external-color: #f5c2e7;
+
+  --code-background: #181825;
+  --code-normal: #cdd6f4;
+
+  --text-error: #f38ba8;
+  --text-success: #a6e3a1;
+  --text-warning: #f9e2af;
+
+  --divider-color: #45475a;
+  --icon-color: #bac2de;
+  --icon-color-hover: #cdd6f4;
+  --tag-color: #cba6f7;
+  --tag-background: #313244;
+}
+
+::selection { background: #cba6f740; }

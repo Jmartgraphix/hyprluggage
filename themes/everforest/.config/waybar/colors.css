@@ -1,0 +1,12 @@
+/**
+ * ════════════════════════════════════════════════════════
+ *   Everforest Theme
+ *   https://github.com/sainnhe/everforest
+ * ════════════════════════════════════════════════════════
+ */
+
+@define-color waybar_accent rgba(131, 192, 146, 0.28);
+@define-color waybar_accent_fg @on_background;
+@define-color on_background #d3c6aa;
+@define-color surface_container #3d484d;
+@define-color error #e67e80;

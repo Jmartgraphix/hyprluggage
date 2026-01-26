@@ -1,6 +1,6 @@
--- Symphony by vyrx
+-- Hyprluggage by Jmartgraphix
 -- Theme: Rose Pine
--- https://github.com/vyrx-dev
+-- https://github.com/Jmartgraphix/hyprluggage
 
 return {
 	{

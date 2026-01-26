@@ -1,5 +1,5 @@
 /**
- * Symphony by https://github.com/vyrx-dev
+ * Hyprluggage by https://github.com/Jmartgraphix/hyprluggage
  * Theme: Kanagawa
  * Based on: midnight by refact0r
  * @name midnight
@@ -23,7 +23,7 @@
   --font: 'figtree';
 
   /* top left corner text */
-  --corner-text: 'Symphony';
+  --corner-text: 'Hyprluggage';
 
   /* color of status indicators and window controls */
   --online-indicator: #98BB6C; /* online status (springGreen) */

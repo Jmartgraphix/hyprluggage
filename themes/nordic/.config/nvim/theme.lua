@@ -1,6 +1,6 @@
--- Symphony by vyrx
+-- Hyprluggage by Jmartgraphix
 -- Theme: Nordic
--- https://github.com/vyrx-dev
+-- https://github.com/Jmartgraphix/hyprluggage
 
 return {
 	{

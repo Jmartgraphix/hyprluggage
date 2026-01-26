@@ -13,17 +13,17 @@ Uninstall:
 
 ## Themes
 
+- **Catppuccin** - Soothing pastel theme (Mocha variant)
 - **Dynamic** - Colors generated from wallpaper using Matugen
-- **Espresso**
-- **Forest**
-- **Gruvbox Material**
+- **Everforest** - Green-based, warm-toned color scheme
+- **Coffee**
+- **Jade**
+- **Gruvbox**
 - **Kanagawa**
 - **Nordic**
 - **Rosé Pine**
-- **Sakura**
 - **Tokyo Night**
-- **Void**
-- **Zen**
+- **Monochrome**
 
 Wallpapers: [Jmartgraphix/Wallpapers](https://github.com/Jmartgraphix/Wallpapers)
 
@@ -31,7 +31,7 @@ Wallpapers: [Jmartgraphix/Wallpapers](https://github.com/Jmartgraphix/Wallpapers
 
 ```bash
 hyprluggage switch          # pick a theme
-hyprluggage switch zen      # switch directly
+hyprluggage switch monochrome # switch directly
 hyprluggage list            # see all themes
 hyprluggage reload          # re-apply current
 hyprluggage fix             # fix broken symlinks
@@ -84,7 +84,7 @@ ln -sf ~/.config/hyprluggage/current/.config/nvim/theme.lua ~/.config/nvim/lua/p
 
 Copy an existing theme:
 ```bash
-cp -r themes/zen themes/my-theme
+cp -r themes/monochrome themes/my-theme
 ```
 Edit configs in `themes/my-theme/.config/` and add wallpapers to `themes/my-theme/backgrounds/`.
 

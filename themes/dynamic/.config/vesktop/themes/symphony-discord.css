@@ -1,8 +1,8 @@
 /**
- * @name Symphony Discord
- * @author vyrx
+ * @name Hyprluggage Discord
+ * @author Jmartgraphix
  * @version 1.0.0
- * @description Dynamic Symphony theme for Discord
+ * @description Dynamic Hyprluggage theme for Discord
  * 
  * Based on midnight by refact0r
  * @website https://github.com/refact0r/midnight-discord
@@ -18,7 +18,7 @@
   --font: 'figtree';
 
   /* top left corner text */
-  --corner-text: 'Symphony';
+  --corner-text: 'Hyprluggage';
 
   /* color of status indicators and window controls */
   --online-indicator: #ffb785; /* change to #23a55a for default green */

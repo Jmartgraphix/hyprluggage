@@ -1,0 +1,72 @@
+## Catppuccin Mocha Theme
+
+# Main background, empty for terminal default, need to be empty if you want transparent background
+theme[main_bg]="#1e1e2e"
+
+# Main text color
+theme[main_fg]="#cdd6f4"
+
+# Title color for boxes
+theme[title]="#a6e3a1"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#cba6f7"
+
+# Background color of selected item in processes box
+theme[selected_bg]="#313244"
+
+# Foreground color of selected item in processes box
+theme[selected_fg]="#cdd6f4"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#45475a"
+
+# Misc colors for processes box including mini cpu graphs, details memory graph and details status text
+theme[proc_misc]="#a6e3a1"
+
+# Box outline and divider line color
+theme[cpu_box]="#cba6f7"
+theme[mem_box]="#cba6f7"
+theme[net_box]="#cba6f7"
+theme[proc_box]="#cba6f7"
+theme[div_line]="#313244"
+
+# Gradient for all meters and graphs
+theme[temp_start]="#cba6f7"
+theme[temp_mid]="#b4befe"
+theme[temp_end]="#a6e3a1"
+
+
+theme[cpu_start]="#cba6f7"
+theme[cpu_mid]="#b4befe"
+theme[cpu_end]="#a6e3a1"
+
+
+theme[free_start]="#a6e3a1"
+theme[free_mid]="#f9e2af"
+theme[free_end]="#fab387"
+
+
+theme[cached_start]="#fab387"
+theme[cached_mid]="#fab387"
+theme[cached_end]="#fab387"
+
+
+theme[available_start]="#a6e3a1"
+theme[available_mid]="#a6e3a1"
+theme[available_end]="#a6e3a1"
+
+
+theme[used_start]="#cba6f7"
+theme[used_mid]="#cba6f7"
+theme[used_end]="#cba6f7"
+
+
+theme[download_start]="#fab387"
+theme[download_mid]="#f9e2af"
+theme[download_end]="#a6e3a1"
+
+
+theme[upload_start]="#fab387"
+theme[upload_mid]="#f9e2af"
+theme[upload_end]="#a6e3a1"
