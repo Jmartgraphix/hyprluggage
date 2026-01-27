@@ -155,6 +155,14 @@ This setup works best on **CachyOS** or **Arch Linux**. While CachyOS is preferr
 
    <img src="assets/cachy-no_shell.jpg" alt="Package Selection" width="800"/>
 
+4. **Install Git and Stow** after base system is finished installing
+   
+   Reboot your system and at the prompt install git and stow for package management and stowing dotfiles (*if not installed already*)
+
+   ```bash
+   sudo pacman -S git stow
+   ```
+
 ---
 
 ## Installation
