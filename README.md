@@ -82,7 +82,16 @@ Toggle between them with `Super + Ctrl + Backspace`
 
 **Dynamic** - Colors generated from wallpaper using Matugen  
 **Catppuccin** - Soothing pastel theme (Mocha variant)  
-**Everforest** - Green-based, warm-toned color scheme
+**Coffee** - Warm, earthy brown tones inspired by coffee  
+**Everforest** - Green-based, warm-toned color scheme  
+**Gruvbox** - Retro groove color scheme with warm, muted tones  
+**Jade** - Cool, serene green palette with elegant tones  
+**Kanagawa** - Inspired by Japanese woodblock prints, warm and artistic  
+**Monochrome** - Minimalist black and white aesthetic  
+**Nordic** - Cool, clean blue tones inspired by Nordic design  
+**Octarine** - The eighth color of magic (fluorescent greenish-yellow purple) from Discworld  
+**Rosé Pine** - Soft, muted rose and pine color scheme  
+**Tokyo Night** - Dark theme with vibrant neon accents
 
 Each theme includes multiple wallpapers and can be previewed using `hyprluggage tui` or `hyprluggage browse`.
 
