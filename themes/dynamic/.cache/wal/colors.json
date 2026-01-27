@@ -1,27 +1,27 @@
 {
-    "wallpaper": "/home/jmartin/Wallpapers/digital/a_car_on_a_road_with_orange_clouds_in_the_sky.jpg",
+    "wallpaper": "/home/jmartin/Wallpapers/others/astronaut_jellyfish.jpg",
     "alpha": "100",
     "special": {
-        "background": "#19120d",
-        "foreground": "#f0dfd7",
-        "cursor": "#ffb786"
+        "background": "#101417",
+        "foreground": "#e0e3e8",
+        "cursor": "#97ccf8"
     },
     "colors": {
-        "color0": "#19120d",
+        "color0": "#101417",
         "color1": "#ffb4ab",
-        "color2": "#ffb786",
-        "color3": "#c9ca94",
-        "color4": "#e4bfa8",
-        "color5": "#48491f",
-        "color6": "#5b4130",
-        "color7": "#f0dfd7",
-        "color8": "#261e19",
+        "color2": "#97ccf8",
+        "color3": "#d0c0e8",
+        "color4": "#b8c8d9",
+        "color5": "#4d4162",
+        "color6": "#394956",
+        "color7": "#e0e3e8",
+        "color8": "#1c2024",
         "color9": "#ffb4ab",
-        "color10": "#ffb786",
-        "color11": "#c9ca94",
-        "color12": "#e4bfa8",
-        "color13": "#48491f",
-        "color14": "#5b4130",
-        "color15": "#f0dfd7"
+        "color10": "#97ccf8",
+        "color11": "#d0c0e8",
+        "color12": "#b8c8d9",
+        "color13": "#4d4162",
+        "color14": "#394956",
+        "color15": "#e0e3e8"
     }
 }

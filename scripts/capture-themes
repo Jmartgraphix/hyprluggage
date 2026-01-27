@@ -1,0 +1,385 @@
+#!/bin/bash
+#|---/ /+---------------------+---/ /|#
+#|--/ /-| Hyprluggage         |--/ /-|#
+#|-/ /--| Theme Screenshot     |-/ /--|#
+#|/ /---+---------------------+/ /---|#
+
+# Don't exit on errors - we want to continue even if one theme fails
+set +e
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+RESET='\033[0m'
+
+# Configuration
+DOTFILES="${HYPRLUGGAGE_DIR:-$HOME/hyprluggage}"
+THEMES_DIR="${DOTFILES}/themes"
+ASSETS_DIR="${DOTFILES}/assets"
+OUTPUT_DIR="${ASSETS_DIR}"
+DELAY="${SCREENSHOT_DELAY:-3}"
+DEBUG="${DEBUG:-false}"
+MONITOR_NAME="${MONITOR_NAME:-}"
+THEME_FILTER="${THEME_FILTER:-}"
+
+# Functions
+info() { echo -e "${BLUE}ℹ${RESET} $1"; }
+ok() { echo -e "${GREEN}✓${RESET} $1"; }
+warn() { echo -e "${YELLOW}⚠${RESET} $1"; }
+err() { echo -e "${RED}✗${RESET} $1"; }
+
+# Check dependencies
+command -v grim &>/dev/null || { err "grim not found"; exit 1; }
+command -v hyprluggage &>/dev/null || { err "hyprluggage command not found"; exit 1; }
+command -v hyprctl &>/dev/null || { err "hyprctl not found"; exit 1; }
+command -v jq &>/dev/null || { err "jq not found"; exit 1; }
+
+# Get all themes
+get_themes() {
+    echo "dynamic"
+    for dir in "$THEMES_DIR"/*/; do
+        name=$(basename "$dir")
+        [[ "$name" != "dynamic" && "$name" != "Wallpapers" && -d "$dir" ]] && echo "$name"
+    done | sort
+}
+
+# List available monitors
+list_monitors() {
+    hyprctl monitors -j | jq -r '.[] | "\(.name): \(.width)x\(.height) at (\(.x),\(.y)) - focused: \(.focused) - workspace: \(.activeWorkspace.id)"'
+}
+
+# Get monitor with most windows (likely the main one)
+get_monitor_with_most_windows() {
+    local monitor_name=""
+    local max_windows=0
+    
+    while IFS= read -r name; do
+        local count=$(hyprctl clients -j | jq -r --arg mon "$name" '[.[] | select(.monitor == $mon)] | length' 2>/dev/null || echo "0")
+        if [[ $count -gt $max_windows ]]; then
+            max_windows=$count
+            monitor_name=$name
+        fi
+    done < <(hyprctl monitors -j | jq -r '.[].name' 2>/dev/null)
+    
+    echo "$monitor_name"
+}
+
+# Get monitor geometry
+get_monitor_geometry() {
+    local geometry
+    local target_monitor="$MONITOR_NAME"
+    
+    # If monitor name specified, use it
+    if [[ -n "$target_monitor" ]]; then
+        geometry=$(hyprctl monitors -j | jq -r --arg name "$target_monitor" '.[] | select(.name == $name) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"' 2>/dev/null | head -1)
+        if [[ -n "$geometry" ]]; then
+            [[ "$DEBUG" == "true" ]] && info "Using specified monitor: $target_monitor"
+            echo "$geometry"
+            return 0
+        else
+            err "Monitor '$target_monitor' not found"
+            return 1
+        fi
+    fi
+    
+    # Strategy: Get monitor with most windows (likely main monitor)
+    target_monitor=$(get_monitor_with_most_windows)
+    if [[ -n "$target_monitor" ]]; then
+        geometry=$(hyprctl monitors -j | jq -r --arg name "$target_monitor" '.[] | select(.name == $name) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"' 2>/dev/null | head -1)
+        if [[ -n "$geometry" ]]; then
+            [[ "$DEBUG" == "true" ]] && info "Using monitor with most windows: $target_monitor"
+            echo "$geometry"
+            return 0
+        fi
+    fi
+    
+    # Fallback: Get the non-focused monitor (if 2 monitors, get the other one)
+    local focused_mon=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name' 2>/dev/null | head -1)
+    if [[ -n "$focused_mon" ]]; then
+        geometry=$(hyprctl monitors -j | jq -r --arg focused "$focused_mon" '.[] | select(.name != $focused) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"' 2>/dev/null | head -1)
+        if [[ -n "$geometry" ]]; then
+            [[ "$DEBUG" == "true" ]] && info "Using non-focused monitor (other monitor)"
+            echo "$geometry"
+            return 0
+        fi
+    fi
+    
+    # Final fallback: get the first monitor
+    geometry=$(hyprctl monitors -j | jq -r '.[0] | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"' 2>/dev/null)
+    [[ "$DEBUG" == "true" ]] && info "Using first monitor (fallback)"
+    echo "$geometry"
+}
+
+# Take screenshot
+take_screenshot() {
+    local theme="$1"
+    local output_file="$OUTPUT_DIR/${theme}.png"
+    
+    info "Capturing $theme..."
+    local geometry
+    geometry=$(get_monitor_geometry)
+    
+    if [[ -z "$geometry" ]]; then
+        err "Could not determine monitor geometry"
+        return 1
+    fi
+    
+    info "Using geometry: $geometry"
+    
+    if grim -g "$geometry" "$output_file" 2>/dev/null; then
+        ok "Saved: $output_file"
+        return 0
+    else
+        err "Failed to capture $theme (geometry: $geometry)"
+        return 1
+    fi
+}
+
+# Format theme name for display (capitalize, handle special cases)
+format_theme_name() {
+    local theme="$1"
+    case "$theme" in
+        "rose-pine") echo "Rosé Pine" ;;
+        "tokyo-night") echo "Tokyo Night" ;;
+        "gruvbox-material") echo "Gruvbox Material" ;;
+        "gruvbox") echo "Gruvbox" ;;
+        "catppuccin") echo "Catppuccin" ;;
+        "everforest") echo "Everforest" ;;
+        "monochrome") echo "Monochrome" ;;
+        "coffee") echo "Coffee" ;;
+        "jade") echo "Jade" ;;
+        "kanagawa") echo "Kanagawa" ;;
+        "nordic") echo "Nordic" ;;
+        "octarine") echo "Octarine" ;;
+        "dynamic") echo "Dynamic" ;;
+        *) 
+            # Capitalize first letter and handle hyphens
+            echo "${theme^}" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1'
+            ;;
+    esac
+}
+
+# Generate markdown table (2 columns like vyrx-dev)
+generate_markdown_table() {
+    local themes
+    mapfile -t themes < <(get_themes)
+    local table_file="$OUTPUT_DIR/themes-grid.md"
+    
+    info "Generating markdown table..."
+    
+    {
+        # Table header
+        echo "| Theme | Theme |"
+        echo "|-------|-------|"
+        
+        # Generate rows (2 columns)
+        local i=0
+        while [[ $i -lt ${#themes[@]} ]]; do
+            local theme1="${themes[$i]}"
+            local theme2="${themes[$((i+1))]:-}"
+            
+            local name1=$(format_theme_name "$theme1")
+            local name2=$(format_theme_name "$theme2")
+            
+            local img1="![${name1}](assets/${theme1}.png)"
+            local img2="![${name2}](assets/${theme2}.png)"
+            
+            if [[ -n "$theme2" ]]; then
+                echo "| ${img1}**${name1}** | ${img2}**${name2}** |"
+            else
+                echo "| ${img1}**${name1}** | |"
+            fi
+            
+            i=$((i+2))
+        done
+    } > "$table_file"
+    
+    ok "Markdown table saved: $table_file"
+    echo ""
+    info "Markdown table preview:"
+    cat "$table_file"
+    echo ""
+}
+
+# Main
+main() {
+    echo ""
+    info "Hyprluggage Theme Screenshot Tool"
+    echo ""
+    
+    # Create output directory
+    mkdir -p "$OUTPUT_DIR"
+    ok "Output directory: $OUTPUT_DIR"
+    
+    # Get current theme to restore later
+    local original_theme
+    original_theme=$(hyprluggage current 2>/dev/null | grep -oP '(?<=●\s)\w+' || echo "")
+    
+    # Get themes (all or filtered)
+    local themes
+    if [[ -n "$THEME_FILTER" ]]; then
+        # Check if theme exists by checking if directory exists
+        if [[ -d "$THEMES_DIR/$THEME_FILTER" ]] || [[ "$THEME_FILTER" == "dynamic" ]]; then
+            themes=("$THEME_FILTER")
+            info "Capturing single theme: $THEME_FILTER"
+        else
+            err "Theme '$THEME_FILTER' not found"
+            info "Available themes:"
+            get_themes
+            exit 1
+        fi
+    else
+        mapfile -t themes < <(get_themes)
+        if [[ ${#themes[@]} -eq 0 ]]; then
+            err "No themes found"
+            exit 1
+        fi
+        info "Found ${#themes[@]} themes"
+    fi
+    
+    # Show monitor info
+    if [[ "$DEBUG" == "true" || -n "$MONITOR_NAME" ]]; then
+        echo ""
+        info "Available monitors:"
+        list_monitors
+        echo ""
+        if [[ -n "$MONITOR_NAME" ]]; then
+            info "Will capture monitor: $MONITOR_NAME"
+        else
+            local monitor_with_windows=$(get_monitor_with_most_windows)
+            info "Will capture monitor with most windows: ${monitor_with_windows:-auto-detect}"
+        fi
+    fi
+    echo ""
+    
+    # Capture each theme
+    local success=0
+    local failed=0
+    
+    for theme in "${themes[@]}"; do
+        info "Switching to $theme..."
+        
+        # Try to switch theme and capture any errors
+        local switch_output
+        switch_output=$(hyprluggage switch "$theme" 2>&1)
+        local switch_exit=$?
+        
+        if [[ $switch_exit -ne 0 ]]; then
+            err "Failed to switch to $theme"
+            warn "Error: $switch_output"
+            ((failed++))
+            echo ""
+            continue
+        fi
+        
+        info "Waiting ${DELAY}s for theme to apply..."
+        sleep "$DELAY"
+        
+        # Verify theme actually switched
+        local current
+        current=$(hyprluggage current 2>/dev/null | grep -oP '(?<=●\s)\S+' || echo "")
+        if [[ "$current" != "$theme" ]]; then
+            warn "Theme may not have switched (current: $current, expected: $theme)"
+        fi
+        
+        if take_screenshot "$theme"; then
+            ((success++))
+        else
+            ((failed++))
+        fi
+        
+        echo ""
+    done
+    
+    # Restore original theme
+    if [[ -n "$original_theme" ]]; then
+        info "Restoring original theme: $original_theme"
+        hyprluggage switch "$original_theme" &>/dev/null || true
+    fi
+    
+    # Summary
+    echo ""
+    ok "Completed: $success successful, $failed failed"
+    ok "Screenshots saved to: $OUTPUT_DIR"
+    
+    # Generate markdown table
+    echo ""
+    generate_markdown_table
+    
+    info "Copy the markdown table from: $OUTPUT_DIR/themes-grid.md"
+    info "And paste it into your README.md in the Themes section"
+    echo ""
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -d|--delay)
+            DELAY="$2"
+            shift 2
+            ;;
+        -o|--output)
+            OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        -m|--monitor)
+            MONITOR_NAME="$2"
+            shift 2
+            ;;
+        -t|--theme)
+            THEME_FILTER="$2"
+            shift 2
+            ;;
+        --list-monitors)
+            echo ""
+            info "Available monitors:"
+            list_monitors
+            echo ""
+            exit 0
+            ;;
+        --debug)
+            DEBUG="true"
+            shift
+            ;;
+        -h|--help)
+            cat << EOF
+Usage: $0 [OPTIONS]
+
+Capture screenshots of all themes and generate markdown table.
+
+Options:
+  -d, --delay SECONDS     Wait time after theme switch (default: 3)
+  -o, --output DIR         Output directory (default: ~/hyprluggage/assets)
+  -m, --monitor NAME      Specify monitor name (e.g., DP-1, HDMI-A-1)
+  -t, --theme NAME        Capture only specified theme (e.g., dynamic, tokyo-night)
+  --list-monitors         List available monitors and exit
+  --debug                 Enable debug output
+  -h, --help              Show this help
+
+Monitor selection (if not specified):
+  - Uses monitor with most windows (likely main monitor)
+  - Falls back to non-focused monitor if 2 monitors
+  - Final fallback: first monitor
+
+The script will:
+1. Capture screenshots of all themes (or single theme with -t)
+2. Save them to assets/ directory
+3. Generate a markdown table (themes-grid.md) ready for README
+
+Examples:
+  $0                      # Capture all themes
+  $0 -t dynamic           # Capture only dynamic theme
+  $0 -t tokyo-night -m DP-1  # Capture tokyo-night on DP-1 monitor
+EOF
+            exit 0
+            ;;
+        *)
+            err "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+main

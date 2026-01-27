@@ -71,24 +71,20 @@ Toggle between them with `Super + Ctrl + Backspace`
 
 ## Themes
 
-- **Catppuccin** - Soothing pastel theme (Mocha variant)
-- **Dynamic** - Colors generated from wallpaper using Matugen
-- **Everforest** - Green-based, warm-toned color scheme
-- **Coffee**
-- **Jade**
-- **Gruvbox**
-- **Kanagawa**
-- **Nordic**
-- **Octarine**
-- **Rosé Pine**
-- **Tokyo Night**
-- **Monochrome**
+| | |
+|:---:|:---:|
+| ![Dynamic](assets/dynamic.png)**Dynamic** | ![Catppuccin](assets/catppuccin.png)**Catppuccin** |
+| ![Coffee](assets/coffee.png)**Coffee** | ![Everforest](assets/everforest.png)**Everforest** |
+| ![Gruvbox](assets/gruvbox.png)**Gruvbox** | ![Jade](assets/jade.png)**Jade** |
+| ![Kanagawa](assets/kanagawa.png)**Kanagawa** | ![Monochrome](assets/monochrome.png)**Monochrome** |
+| ![Nordic](assets/nordic.png)**Nordic** | ![Octarine](assets/octarine.png)**Octarine** |
+| ![Rosé Pine](assets/rose-pine.png)**Rosé Pine** | ![Tokyo Night](assets/tokyo-night.png)**Tokyo Night** |
 
----
+**Dynamic** - Colors generated from wallpaper using Matugen  
+**Catppuccin** - Soothing pastel theme (Mocha variant)  
+**Everforest** - Green-based, warm-toned color scheme
 
-## Screenshots
-
-> **Note:** Screenshots coming soon! Each theme includes multiple wallpapers and can be previewed using `hyprluggage tui` or `hyprluggage browse`.
+Each theme includes multiple wallpapers and can be previewed using `hyprluggage tui` or `hyprluggage browse`.
 
 ---
 
