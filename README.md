@@ -160,7 +160,7 @@ This setup works best on **CachyOS** or **Arch Linux**. While CachyOS is preferr
 ## Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jmartgraphix/hyprluggage/main/boot.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Jmartgraphix/hyprluggage/master/boot.sh | bash
 ```
 
 Or manually:
