@@ -18,6 +18,9 @@ themes/dynamic/.config/spicetify/Themes/hyprluggage/color.ini
 # Theme wallpaper symlinks (user preference, changes frequently)
 themes/*/wallpaper
 
+# User-imported omarchy/omakub themes
+themes/* \(*\)/
+
 .config/tmux/plugins
 
 # Fish local config
