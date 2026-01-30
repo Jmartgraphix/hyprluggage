@@ -4,22 +4,19 @@
 background = #2b3339
 foreground = #d3c6aa
 
-[colors]
-black = #4a5560
-red = #e67e80
-green = #83c092
-yellow = #dbbc7f
-blue = #7fbbb3
-magenta = #d699b6
-cyan = #83c092
-white = #a7c080
-
-[colors.bright]
-black = #5c6a72
-red = #e67e80
-green = #83c092
-yellow = #dbbc7f
-blue = #7fbbb3
-magenta = #d699b6
-cyan = #83c092
-white = #d3c6aa
+palette = 0=#4a5560
+palette = 1=#e67e80
+palette = 2=#83c092
+palette = 3=#dbbc7f
+palette = 4=#7fbbb3
+palette = 5=#d699b6
+palette = 6=#83c092
+palette = 7=#a7c080
+palette = 8=#5c6a72
+palette = 9=#e67e80
+palette = 10=#83c092
+palette = 11=#dbbc7f
+palette = 12=#7fbbb3
+palette = 13=#d699b6
+palette = 14=#83c092
+palette = 15=#d3c6aa
