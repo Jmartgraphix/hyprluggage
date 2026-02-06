@@ -2,67 +2,67 @@
 # https://github.com/Jmartgraphix/hyprluggage
 
 [colors.primary]
-background = '#101417'
-foreground = '#e0e3e8'
+background = '#0e1416'
+foreground = '#dee3e5'
 
 [colors.cursor]
-cursor = '#97ccf8'
-text = '#00344f'
+cursor = '#82d3e2'
+text = '#00363e'
 
 [colors.vi_mode_cursor]
-cursor = '#97ccf8'
-text = '#00344f'
+cursor = '#82d3e2'
+text = '#00363e'
 
 [colors.search.matches]
-foreground = '#362b4a'
-background = '#d0c0e8'
+foreground = '#252f4d'
+background = '#bbc5ea'
 
 [colors.search.focused_match]
-foreground = '#00344f'
-background = '#97ccf8'
+foreground = '#00363e'
+background = '#82d3e2'
 
 [colors.footer_bar]
-foreground = '#e0e3e8'
-background = '#1c2024'
+foreground = '#dee3e5'
+background = '#1b2122'
 
 [colors.hints.start]
-foreground = '#22323f'
-background = '#b8c8d9'
+foreground = '#1c3438'
+background = '#b1cbd0'
 
 [colors.hints.end]
-foreground = '#22323f'
-background = '#394956'
+foreground = '#1c3438'
+background = '#334b4f'
 
 [colors.selection]
-text = '#00344f'
-background = '#97ccf8'
+text = '#00363e'
+background = '#82d3e2'
 
 [colors.normal]
-black   = '#101417'
+black   = '#0e1416'
 red     = '#ffb4ab'
-green   = '#d0c0e8'
-yellow  = '#b8c8d9'
-blue    = '#97ccf8'
-magenta = '#d0c0e8'
-cyan    = '#b8c8d9'
-white   = '#c1c7ce'
+green   = '#bbc5ea'
+yellow  = '#b1cbd0'
+blue    = '#82d3e2'
+magenta = '#bbc5ea'
+cyan    = '#b1cbd0'
+white   = '#bfc8ca'
 
 [colors.bright]
-black   = '#363a3e'
+black   = '#343a3c'
 red     = '#93000a'
-green   = '#4d4162'
-yellow  = '#394956'
-blue    = '#004b71'
-magenta = '#ebdcff'
-cyan    = '#d3e5f6'
-white   = '#e0e3e8'
+green   = '#3c4665'
+yellow  = '#334b4f'
+blue    = '#004f59'
+magenta = '#dae1ff'
+cyan    = '#cde7ed'
+white   = '#dee3e5'
 
 [colors.dim]
-black   = '#0b0f12'
+black   = '#090f10'
 red     = '#ffdad6'
-green   = '#ebdcff'
-yellow  = '#d3e5f6'
-blue    = '#cbe6ff'
-magenta = '#211634'
-cyan    = '#0c1d29'
-white   = '#8b9198'
+green   = '#dae1ff'
+yellow  = '#cde7ed'
+blue    = '#9eefff'
+magenta = '#0f1a37'
+cyan    = '#051f23'
+white   = '#899294'
