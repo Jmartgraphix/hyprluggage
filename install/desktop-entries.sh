@@ -30,6 +30,11 @@ if command -v chromium &>/dev/null && [[ -f "$APPS_DIR/chromium.desktop" ]]; the
     ok "Chromium override"
 fi
 
+if command -v freecad &>/dev/null && [[ -f "$APPS_DIR/org.freecad.FreeCAD.desktop" ]]; then
+    cat "$APPS_DIR/org.freecad.FreeCAD.desktop" > "$TARGET_DIR/org.freecad.FreeCAD.desktop"
+    ok "FreeCAD override"
+fi
+
 # Hide system clutter (LSP plugins, electron, etc)
 if [[ -x "$DOTFILES/scripts/hide-apps" ]]; then
     count=$("$DOTFILES/scripts/hide-apps" 2>/dev/null | grep -oP '\d+' || echo 0)
