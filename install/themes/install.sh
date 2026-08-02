@@ -179,7 +179,7 @@ page_one() {
     heading "Checking the Luggage"
     
     local missing=()
-    for dep in stow hyprctl swww; do
+    for dep in stow hyprctl awww; do
         if command -v "$dep" &>/dev/null; then
             check_mark "$dep"
         else

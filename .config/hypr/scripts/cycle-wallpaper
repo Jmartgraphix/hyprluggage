@@ -5,11 +5,12 @@
 #   left/prev  = previous wallpaper
 #   right/next = next wallpaper
 
+source "$HOME/.config/hypr/scripts/wallpaper-lib.sh"
 source "$HOME/.config/rofi/scripts/thumbcache"
 
 THEME=$(cat "$HOME/.config/hyprluggage/.current-theme" 2>/dev/null || echo "dynamic")
 WALLDIR="$HOME/hyprluggage/themes/$THEME/backgrounds"
-SWWW_PARAMS="--transition-fps 120 --transition-duration 1 --transition-bezier 0.25,0.1,0.25,1.0"
+AWWW_PARAMS="--transition-fps 120 --transition-duration 1 --transition-bezier 0.25,0.1,0.25,1.0"
 
 if [[ "$THEME" == "dynamic" || ! -d "$WALLDIR" ]]; then
   notify-send "Wallpaper Cycling" "Not available for '$THEME' theme.\nUse SUPER+CTRL+SPACE for dynamic wallpaper picker."
@@ -21,7 +22,7 @@ TOTAL=${#WALLS[@]}
 
 [[ $TOTAL -eq 0 ]] && notify-send "Wallpaper Cycling" "No wallpapers found" && exit 0
 
-CURRENT=$(swww query | head -1 | grep -oP 'image: \K.*')
+CURRENT=$(awww_current_image)
 
 find_index() {
   for i in "${!WALLS[@]}"; do
@@ -35,8 +36,10 @@ INDEX=$(find_index)
 apply_wallpaper() {
   local idx=$1 trans=$2 pos=$3
   local wall="${WALLS[$idx]}"
-  swww img "$wall" --transition-type "$trans" --transition-pos "$pos" $SWWW_PARAMS
+  ensure_awww_daemon
+  awww img "$wall" --transition-type "$trans" --transition-pos "$pos" $AWWW_PARAMS
   ln -sf "$wall" "$HOME/hyprluggage/themes/$THEME/wallpaper"
+  sync_hyprlock_wallpaper "$wall"
   notify-send -i "$wall" "Wallpaper" "$((idx + 1))/$TOTAL"
 }
 

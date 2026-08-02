@@ -1,9 +1,16 @@
 #!/bin/bash
 
-# Sync hyprlock wallpaper from swww cache (fast inline version)
-CACHE="$HOME/.cache/swww"
-MON=$(ls "$CACHE" 2>/dev/null | grep -v '_' | head -1)
-[[ -f "$CACHE/$MON" ]] && ln -sf "$(tr '\0' '\n' < "$CACHE/$MON" | sed -n '3p')" "$HOME/.cache/hyprlock-wallpaper"
+source "$HOME/.config/hypr/scripts/wallpaper-lib.sh"
+
+# Sync hyprlock wallpaper from awww (fallback: awww cache)
+if ! sync_hyprlock_wallpaper; then
+	CACHE="$HOME/.cache/awww"
+	MON=$(ls "$CACHE" 2>/dev/null | grep -v '_' | head -1)
+	if [[ -f "$CACHE/$MON" ]]; then
+		wp="$(tr '\0' '\n' < "$CACHE/$MON" | sed -n '3p')"
+		sync_hyprlock_wallpaper "$wp"
+	fi
+fi
 
 # Kill screensaver, launch hyprlock
 pkill -f "alacritty --class Screensaver"

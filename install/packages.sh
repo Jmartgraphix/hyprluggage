@@ -18,7 +18,7 @@ packages=(
 	qt5-wayland qt6-wayland uwsm
 
 	# Desktop
-	waybar rofi mako swayosd swww wlogout brave-bin
+	waybar rofi mako swayosd awww wlogout brave-bin
 
 	# Terminal & Shell
 	kitty alacritty fish starship tmux

@@ -188,7 +188,7 @@ The installer will:
 
 1. **Install core packages:**
    - Hyprland compositor and related tools (hypridle, hyprlock, hyprpicker)
-   - Desktop components (Waybar, Rofi, Mako, swww)
+   - Desktop components (Waybar, Rofi, Mako, awww)
    - Terminal emulators (Kitty, Alacritty)
    - Shell and tools (Fish, Starship, tmux)
    - File managers (Thunar, Yazi)
