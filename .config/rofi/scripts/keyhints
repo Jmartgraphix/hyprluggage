@@ -1,9 +1,22 @@
 #!/bin/bash
 # keyhints - show hyprland keybindings
+# During Gatwy/VNC sessions (hypr-vnc-mod active), show only Ctrl+Alt binds.
 
 if pidof rofi >/dev/null; then
   pkill rofi
   exit
+fi
+
+XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+VNC_STATE="${XDG_RUNTIME_DIR}/wayvnc-vncmod/active"
+
+if [[ -f "$VNC_STATE" ]]; then
+  PROMPT="VNC keybinds (Ctrl+Alt)"
+  # Only remote-usable chords from hypr-vnc-mod
+  filter_list() { grep -E 'CTRL ALT'; }
+else
+  PROMPT=""
+  filter_list() { cat; }
 fi
 
 # Hyprland 0.56 broke `hyprctl binds -j`; parse the stable text output instead.
@@ -118,4 +131,4 @@ END {
         print_bind();
     }
 }
-' | sort -u | rofi -dmenu -i -p "" -config ~/.config/rofi/custom-rofi/config-keybinds.rasi
+' | sort -u | filter_list | rofi -dmenu -i -p "$PROMPT" -config ~/.config/rofi/custom-rofi/config-keybinds.rasi

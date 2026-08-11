@@ -503,3 +503,11 @@ Wallpapers: [Jmartgraphix/Wallpapers](https://github.com/Jmartgraphix/Wallpapers
 **[Report Bug](https://github.com/Jmartgraphix/hyprluggage/issues/new?template=bug_report.yml)** · **[Request Feature](https://github.com/Jmartgraphix/hyprluggage/issues/new?template=feature_request.yml)** ·
 
 </div>
+
+## Remote desktop (VNC)
+
+Hyprluggage includes **wayvnc** and **Ctrl+Alt** Super-key twins for browser-based remote access (e.g. Gatwy/noVNC), because Super often does not reach the remote session.
+
+- At the desk: Super works as usual.
+- Over VNC: use **Ctrl+Alt** instead of Super; **Ctrl+Alt+K** shows remote keybinds.
+- See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for details.

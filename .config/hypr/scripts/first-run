@@ -12,6 +12,7 @@ sleep 2
 # Welcome notifications
 notify-send -u critical "App Launcher" "Press Super + Space to launch apps"
 notify-send -u critical "Keybindings" "Press Super + K to view all keybindings"
+notify-send -u normal "Remote (VNC)" "Over browser VNC use Ctrl+Alt instead of Super (Ctrl+Alt+K for keybinds)"
 notify-send -u critical "Welcome to Hyprluggage" "Run 'hyprluggage help' for available commands."
 
 # Weather location setup (optional)

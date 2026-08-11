@@ -1,0 +1,6 @@
+# Default wayvnc config for hyprluggage (LAN / reverse-proxied remote).
+# Browser gateways (e.g. Gatwy) already provide TLS + auth; RFB auth left off
+# for noVNC compatibility. Bind only as needed and firewall port 5900.
+use_relative_paths=true
+address=0.0.0.0
+port=5900

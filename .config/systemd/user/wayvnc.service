@@ -1,0 +1,14 @@
+[Unit]
+Description=wayvnc VNC server for Hyprland (browser remote / Gatwy)
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+# XDG_RUNTIME_DIR is set by systemd --user
+ExecStart=%h/.local/bin/wayvnc-gatwy.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

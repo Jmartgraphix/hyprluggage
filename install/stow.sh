@@ -22,7 +22,7 @@ for f in "$HOME"/*; do
 done
 
 # Prevent stow from symlinking ~/.config itself
-mkdir -p "$HOME/.config" "$HOME/.local/share"
+mkdir -p "$HOME/.config" "$HOME/.local/share" "$HOME/.local/bin"
 
 # Create directories needed by scripts
 mkdir -p "$HOME/Pictures/Screenshots"
@@ -51,6 +51,7 @@ backup_if_exists() {
 
 backup_if_exists ".config" "$HOME/.config"
 backup_if_exists ".local/share" "$HOME/.local/share"
+backup_if_exists ".local/bin" "$HOME/.local/bin"
 
 # Try stow with better error reporting
 stow_output=$(stow . 2>&1)

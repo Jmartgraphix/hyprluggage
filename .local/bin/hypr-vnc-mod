@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+# Apply/clear CTRL+ALT twins of SUPER binds while VNC sessions are active.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}"
+export PATH="$HOME/.local/bin:/usr/bin:/bin:$PATH"
+
+# Prefer real Wayland socket if unset
+if [[ -z "${WAYLAND_DISPLAY}" ]]; then
+  for d in wayland-1 wayland-0; do
+    if [[ -S "${XDG_RUNTIME_DIR}/${d}" ]]; then
+      export WAYLAND_DISPLAY="$d"
+      break
+    fi
+  done
+  export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}"
+fi
+
+HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+GENERATED="$HYPR_DIR/vnc-mod-generated.conf"
+ACTIVE="$HYPR_DIR/vnc-mod-active.conf"
+STATE_DIR="${XDG_RUNTIME_DIR}/wayvnc-vncmod"
+STATE_FILE="$STATE_DIR/active"
+GEN="${SCRIPT_DIR}/hypr-vnc-mod-gen.sh"
+
+ensure_hypr_env() {
+  if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    local inst
+    inst="$(ls -1 "$XDG_RUNTIME_DIR/hypr" 2>/dev/null | head -n1 || true)"
+    if [[ -n "$inst" ]]; then
+      export HYPRLAND_INSTANCE_SIGNATURE="$inst"
+    fi
+  fi
+}
+
+hypr_reload() {
+  ensure_hypr_env
+  if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    logger -t wayvnc-vncmod "hyprctl unavailable (no Hyprland instance); skipped reload"
+    return 1
+  fi
+  hyprctl reload >/dev/null
+}
+
+cmd_generate() {
+  if [[ ! -x "$GEN" ]]; then
+    echo "missing generator: $GEN" >&2
+    return 1
+  fi
+  "$GEN" "$GENERATED"
+}
+
+cmd_apply() {
+  mkdir -p "$STATE_DIR" "$HYPR_DIR"
+  # Ensure active stub exists (fresh install)
+  if [[ ! -f "$ACTIVE" ]]; then
+    printf '%s\n' "# Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)" > "$ACTIVE"
+  fi
+  cmd_generate
+  cat > "$ACTIVE" << INNER
+# Managed by hypr-vnc-mod — loaded only while VNC clients are connected
+source = $GENERATED
+INNER
+  if hypr_reload; then
+    touch "$STATE_FILE"
+    logger -t wayvnc-vncmod "applied CTRL+ALT VNC mod binds"
+    echo "vnc-mod: applied ($(grep -cE '^\s*bind' "$GENERATED" 2>/dev/null || echo 0) binds)"
+  else
+    echo "vnc-mod: generated but hyprctl reload failed" >&2
+    return 1
+  fi
+}
+
+cmd_clear() {
+  mkdir -p "$HYPR_DIR"
+  cat > "$ACTIVE" << 'INNER'
+# Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)
+INNER
+  rm -f "$STATE_FILE"
+  if hypr_reload 2>/dev/null; then
+    logger -t wayvnc-vncmod "cleared VNC mod binds (hyprctl reload)"
+    echo "vnc-mod: cleared"
+  else
+    echo "vnc-mod: active file cleared (hyprctl reload skipped/failed)"
+  fi
+}
+
+cmd_status() {
+  if [[ -f "$STATE_FILE" ]]; then
+    echo "state: active (VNC mod binds loaded)"
+  else
+    echo "state: inactive (desktop Super-only)"
+  fi
+  if [[ -f "$GENERATED" ]]; then
+    echo "generated: $(grep -cE '^\s*bind' "$GENERATED" 2>/dev/null || echo 0) binds in $GENERATED"
+  else
+    echo "generated: missing (run: hypr-vnc-mod generate)"
+  fi
+  if [[ -f "$ACTIVE" ]] && grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null; then
+    echo "active-file: sourcing generated conf"
+  else
+    echo "active-file: empty/not sourcing"
+  fi
+  ensure_hypr_env
+  echo "hyprland: ${HYPRLAND_INSTANCE_SIGNATURE:-not detected}"
+  echo "scripts: $SCRIPT_DIR"
+}
+
+cmd_ensure() {
+  # Fresh install / login: ensure stubs exist without enabling VNC binds
+  mkdir -p "$HYPR_DIR" "$STATE_DIR"
+  if [[ ! -f "$ACTIVE" ]]; then
+    printf '%s\n' "# Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)" > "$ACTIVE"
+  fi
+  if [[ ! -f "$GENERATED" ]]; then
+    cmd_generate || true
+  fi
+  # Never leave "VNC mode on" after ensure
+  if grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null && [[ ! -f "$STATE_FILE" ]]; then
+    cmd_clear || true
+  fi
+  echo "vnc-mod: ensure ok"
+}
+
+case "${1:-}" in
+  generate|gen) cmd_generate ;;
+  apply) cmd_apply ;;
+  clear) cmd_clear ;;
+  status) cmd_status ;;
+  ensure) cmd_ensure ;;
+  *)
+    echo "Usage: $0 {generate|apply|clear|status|ensure}" >&2
+    echo "  Super stays Super locally; during VNC, CTRL+ALT mirrors Super binds." >&2
+    exit 1
+    ;;
+esac

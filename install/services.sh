@@ -179,3 +179,27 @@ if pkg_installed greetd; then
         sudo systemctl enable --now greetd &>/dev/null && ok "greetd (no config)" || warn "greetd failed"
     fi
 fi
+
+# ── wayvnc + VNC Hyprland mod (browser remote / Gatwy) ─────────────────
+# Super is often blocked in browsers; hypr-vnc-mod loads Ctrl+Alt twins while clients are connected.
+if command -v wayvnc &>/dev/null || pkg_installed wayvnc 2>/dev/null; then
+    # Ensure PATH scripts exist (stow) and seed conf
+    if [[ -x "$HOME/.local/bin/hypr-vnc-mod" ]]; then
+        "$HOME/.local/bin/hypr-vnc-mod" ensure &>/dev/null || true
+    fi
+    if systemctl --user daemon-reload &>/dev/null; then
+        systemctl --user enable wayvnc.service wayvnc-clipboard-bridge.service &>/dev/null \
+            && ok "wayvnc + vnc-mod bridge (enabled)" \
+            || warn "wayvnc: enable failed (start after login: systemctl --user enable --now wayvnc wayvnc-clipboard-bridge)"
+        # Try start if session already graphical
+        systemctl --user start wayvnc.service wayvnc-clipboard-bridge.service &>/dev/null || true
+    else
+        warn "wayvnc: systemd --user not available yet (enable after first graphical login)"
+    fi
+    # Linger so user services can start at boot when configured (optional)
+    if command -v loginctl &>/dev/null; then
+        loginctl enable-linger "$USER" &>/dev/null || true
+    fi
+else
+    info "wayvnc not installed — skip remote desktop services"
+fi
