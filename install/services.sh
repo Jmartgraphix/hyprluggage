@@ -6,13 +6,93 @@
 
 step "Setting up services"
 
+# Ensure hardware stubs exist (safe if already written by install.sh / stow)
+if [[ -x "$HOME/.local/bin/hyprluggage-hw-ensure" ]]; then
+    "$HOME/.local/bin/hyprluggage-hw-ensure" ensure &>/dev/null || true
+fi
+
+# Resolve profile/gpu from env or saved state (desktop defaults)
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
+HYPRLUGGAGE_PROFILE="${HYPRLUGGAGE_PROFILE:-}"
+HYPRLUGGAGE_GPU="${HYPRLUGGAGE_GPU:-}"
+[[ -z "$HYPRLUGGAGE_PROFILE" && -f "$STATE_DIR/profile" ]] && HYPRLUGGAGE_PROFILE=$(tr -d '[:space:]' <"$STATE_DIR/profile")
+[[ -z "$HYPRLUGGAGE_GPU" && -f "$STATE_DIR/gpu" ]] && HYPRLUGGAGE_GPU=$(tr -d '[:space:]' <"$STATE_DIR/gpu")
+HYPRLUGGAGE_PROFILE="${HYPRLUGGAGE_PROFILE:-desktop}"
+HYPRLUGGAGE_GPU="${HYPRLUGGAGE_GPU:-other}"
+info "Using profile=$HYPRLUGGAGE_PROFILE gpu=$HYPRLUGGAGE_GPU"
+
 # ── Power Profile ─────────────────────────────────────────────────────────────
 if command -v powerprofilesctl &>/dev/null; then
-    if ls /sys/class/power_supply/BAT* &>/dev/null; then
-        powerprofilesctl set balanced &>/dev/null && ok "power profile: balanced (laptop)"
+    if [[ "$HYPRLUGGAGE_PROFILE" == "laptop" ]]; then
+        if compgen -G '/sys/class/power_supply/BAT*' >/dev/null 2>&1; then
+            # Prefer balanced while on battery; performance on AC
+            on_ac=false
+            for adapter in /sys/class/power_supply/A{C,DP}*; do
+                [[ -r "$adapter/online" ]] || continue
+                [[ "$(cat "$adapter/online")" == "1" ]] && on_ac=true && break
+            done
+            if [[ "$on_ac" == true ]]; then
+                powerprofilesctl set performance &>/dev/null && ok "power profile: performance (laptop AC)"
+            else
+                powerprofilesctl set balanced &>/dev/null && ok "power profile: balanced (laptop battery)"
+            fi
+        else
+            powerprofilesctl set balanced &>/dev/null && ok "power profile: balanced (laptop)"
+        fi
+        # Ensure daemon is enabled on laptops
+        sudo systemctl enable --now power-profiles-daemon &>/dev/null \
+            && ok "power-profiles-daemon" \
+            || warn "power-profiles-daemon: enable failed"
     else
         powerprofilesctl set performance &>/dev/null && ok "power profile: performance (desktop)"
     fi
+fi
+
+# ── Laptop: video group (brightnessctl) + logind lid ignore ───────────────────
+if [[ "$HYPRLUGGAGE_PROFILE" == "laptop" ]]; then
+    if ! id -nG "$USER" 2>/dev/null | grep -qw video; then
+        sudo usermod -aG video "$USER" &>/dev/null \
+            && ok "added $USER to video group (re-login for brightnessctl)" \
+            || warn "video group: failed to add $USER"
+    else
+        ok "video group already set"
+    fi
+
+    # Resolve repo root for logind drop-in
+    if [[ -n "${DOTFILES:-}" ]]; then
+        DOTFILES_ROOT="$DOTFILES"
+    else
+        DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    fi
+    LOGIND_SRC="$DOTFILES_ROOT/install/logind-laptop.conf"
+    LOGIND_DST="/etc/systemd/logind.conf.d/hyprluggage-lid.conf"
+    if [[ -f "$LOGIND_SRC" ]]; then
+        sudo mkdir -p /etc/systemd/logind.conf.d
+        if sudo cp "$LOGIND_SRC" "$LOGIND_DST"; then
+            sudo chmod 644 "$LOGIND_DST" || true
+            if sudo systemctl restart systemd-logind &>/dev/null; then
+                ok "logind: lid handled by Hyprland (drop-in installed)"
+            else
+                warn "logind: drop-in installed; reboot recommended for lid handling"
+            fi
+            info "Lid close: suspend (undocked) or clamshell (external monitor)"
+        else
+            warn "logind: failed to install lid drop-in"
+        fi
+    else
+        warn "logind: template missing at $LOGIND_SRC"
+    fi
+fi
+
+# ── NVIDIA laptop: suspend/resume helpers ─────────────────────────────────────
+if [[ "$HYPRLUGGAGE_PROFILE" == "laptop" && "$HYPRLUGGAGE_GPU" == "nvidia" ]]; then
+    for unit in nvidia-suspend.service nvidia-resume.service nvidia-hibernate.service; do
+        if systemctl list-unit-files "$unit" &>/dev/null; then
+            sudo systemctl enable "$unit" &>/dev/null \
+                && ok "$unit" \
+                || warn "$unit: enable failed"
+        fi
+    done
 fi
 
 # ── Bluetooth ──────────────────────────────────────────────────────────────────
@@ -209,7 +289,7 @@ if pkg_installed openssh; then
     sudo systemctl enable --now sshd &>/dev/null && ok "sshd" || warn "sshd failed"
 fi
 
-# ── Firewall (ufw): allow app ports; enable only if already active ──────────
+# ── Firewall (ufw): allow app ports; enable on laptop, keep desktop inactive ──
 if pkg_installed ufw && command -v ufw &>/dev/null; then
     ufw_was_active=false
     if sudo ufw status 2>/dev/null | grep -qi "Status: active"; then
@@ -221,7 +301,11 @@ if pkg_installed ufw && command -v ufw &>/dev/null; then
     sudo ufw allow 53317/udp &>/dev/null || true
     sudo ufw allow 1714:1764/tcp &>/dev/null || true
     sudo ufw allow 1714:1764/udp &>/dev/null || true
-    if [[ "$ufw_was_active" == true ]]; then
+    if [[ "$HYPRLUGGAGE_PROFILE" == "laptop" ]]; then
+        sudo ufw --force enable &>/dev/null \
+            && ok "ufw: enabled (ssh, vnc, localsend, kdeconnect allowed)" \
+            || warn "ufw: enable failed"
+    elif [[ "$ufw_was_active" == true ]]; then
         sudo ufw --force enable &>/dev/null \
             && ok "ufw: allowed ssh, vnc, localsend, kdeconnect (kept enabled)" \
             || warn "ufw: rules may not have applied"

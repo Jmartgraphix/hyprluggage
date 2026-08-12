@@ -44,6 +44,7 @@
 ## Features
 
 - **One-command theming** — Switch entire desktop look with `hyprluggage switch`
+- **Desktop & laptop profiles** — Installer chooses form factor; NVIDIA GPU overlay is auto-detected
 - **Dynamic colors** — Matugen extracts palette from any wallpaper
 - **12 themes** — 11 handcrafted + 1 dynamic (Dark, cozy, and aesthetic)
 - **Everything synced** — Terminal, bar, launcher, notifications, apps
@@ -190,6 +191,11 @@ Want just the themes without the full setup? See [install/themes/README.md](inst
 
 The installer will:
 
+0. **Choose a hardware profile:**
+   - **Desktop** or **Laptop** (battery presence is auto-detected as the default)
+   - **GPU overlay** via `lspci` (NVIDIA env applied only when an NVIDIA display GPU is found)
+   - Saved under `~/.local/state/hyprluggage/profile` and `gpu` (re-run can keep or change)
+
 1. **Install core packages:**
    - Hyprland compositor and related tools (hypridle, hyprlock, hyprpicker)
    - Desktop components (Waybar, Rofi, Mako, awww, swayosd)
@@ -211,20 +217,41 @@ The installer will:
 
 3. **Set up system services:**
    - MPD (music daemon)
-   - Greetd (display manager)
+   - Greetd (display manager; runs `hyprluggage-hw-ensure` before Hyprland)
    - wayvnc + clipboard bridge (user units)
    - sshd (enabled)
-   - ufw allow rules for SSH, VNC, LocalSend, and KDE Connect (UFW enabled only if it was already active)
+   - ufw allow rules for SSH, VNC, LocalSend, and KDE Connect
+     - **Laptop:** UFW is enabled
+     - **Desktop:** UFW stays inactive unless it was already active
+   - **Laptop only:** logind lid ignore drop-in, `video` group, `power-profiles-daemon`, hypridle + battery notifications, hybrid lid close (suspend undocked / clamshell when docked)
+   - **NVIDIA + laptop:** enable nvidia suspend/resume/hibernate units when present
    - User services for autostart
 
 4. **Deploy dotfiles:**
    - Symlink all configs to `~/.config/`
+   - Write form-factor + GPU Hyprland stubs under `~/.local/state/hyprluggage/`
    - Set up desktop entries
    - Configure shell (Fish with Starship)
 
 5. **Install theme system:**
    - Set up Hyprluggage theme manager
    - Install all 12 themes
+
+### Hardware profiles
+
+| Profile | Idle | Battery | Lid close | Firewall | Power |
+|---------|------|---------|-----------|----------|-------|
+| Desktop | hypridle killed on login | not started | no change | rules only (left inactive) | performance |
+| Laptop | hypridle started | battery-notify | suspend or clamshell | UFW enabled | balanced on battery |
+
+NVIDIA vs AMD/Intel is **independent** of desktop/laptop. When an NVIDIA display GPU is detected, `~/.config/hypr/profiles/nvidia.conf` is sourced; AMD/Intel get an empty GPU stub.
+
+Re-check or recreate stubs anytime:
+
+```bash
+hyprluggage-hw-ensure ensure
+hyprluggage-hw-ensure set laptop nvidia   # example
+```
 
 ---
 
@@ -447,13 +474,20 @@ All configuration files are located in `~/.config/`. You can edit them directly�
 │   └── lazygit/        # Git UI
 ├── .local/bin/         # Helper scripts (VNC, clipboard bridge, etc.)
 ├── themes/             # Theme configs (colors, wallpapers)
+├── .config/hypr/
+│   ├── profiles/       # desktop.conf, laptop.conf, nvidia.conf
+│   └── ...
+├── .local/bin/         # hyprluggage-hw-ensure, hypr-vnc-mod, ...
 ├── scripts/            # Utility scripts
 └── install/            # Installer
     ├── packages.sh     # Package lists
     ├── stow.sh         # Dotfile deployment
-    ├── services.sh     # Systemd services
+    ├── services.sh     # Systemd services (profile-aware)
+    ├── logind-laptop.conf  # Lid ignore drop-in (laptop)
     └── themes/         # Hyprluggage theme system
 ```
+
+Runtime stubs (outside the git tree): `~/.local/state/hyprluggage/profile.conf` and `gpu.conf`.
 
 ---
 
@@ -465,7 +499,7 @@ Hyprluggage includes **wayvnc** and **Ctrl+Alt** Super-key twins for browser-bas
 - Over VNC: use **Ctrl+Alt** instead of Super; **Ctrl+Alt+K** shows remote keybinds.
 - Some Space-family theme chords are remapped under Ctrl+Alt (documented in VNC.md).
 - Fresh install enables `wayvnc` and `wayvnc-clipboard-bridge` user units via `install/services.sh`.
-- Fresh install also enables `sshd` and adds ufw allow rules for SSH (`22/tcp`), VNC (`5900/tcp`), LocalSend (`53317` TCP/UDP), and KDE Connect (`1714–1764` TCP/UDP). UFW itself is enabled only if it was already active.
+- Fresh install also enables `sshd` and adds ufw allow rules for SSH (`22/tcp`), VNC (`5900/tcp`), LocalSend (`53317` TCP/UDP), and KDE Connect (`1714–1764` TCP/UDP). On **laptop** profile, UFW is enabled; on **desktop**, UFW stays inactive unless it was already active.
 
 See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for setup, remaps, and files.
 

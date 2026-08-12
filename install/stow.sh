@@ -76,6 +76,12 @@ if [[ $stow_exit -ne 0 ]]; then
 else
     ok "Hyprluggage linked"
     rm -f /tmp/stow-error.log
+    # Hardware profile + GPU stubs (must exist before Hyprland sources them)
+    if [[ -x "$HOME/.local/bin/hyprluggage-hw-ensure" ]]; then
+        "$HOME/.local/bin/hyprluggage-hw-ensure" ensure &>/dev/null || true
+    elif [[ -x "$DOTFILES/.local/bin/hyprluggage-hw-ensure" ]]; then
+        "$DOTFILES/.local/bin/hyprluggage-hw-ensure" ensure &>/dev/null || true
+    fi
     # VNC active stub lives outside stow; create before Hyprland sources it
     if [[ -x "$HOME/.local/bin/hypr-vnc-mod" ]]; then
         "$HOME/.local/bin/hypr-vnc-mod" ensure &>/dev/null || true

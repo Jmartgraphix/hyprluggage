@@ -53,4 +53,4 @@ hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
 
 `install/services.sh` runs `hypr-vnc-mod ensure` so the active stub exists before Hyprland sources it.
 
-Install adds `ufw allow 5900/tcp`. Enable UFW yourself if you want that rule enforced (`sudo ufw enable`); the installer only turns UFW on if it was already active.
+Install adds `ufw allow 5900/tcp`. On the **laptop** install profile, UFW is enabled; on **desktop**, the installer only turns UFW on if it was already active (`sudo ufw enable` otherwise).

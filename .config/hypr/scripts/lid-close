@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Hybrid lid-close: clamshell if an external monitor is connected, else suspend.
+set -euo pipefail
+
+monitors_json=$(hyprctl monitors -j 2>/dev/null || echo "[]")
+
+externals=$(echo "$monitors_json" | jq '[.[] | select(.name | test("^(eDP|LVDS|DSI)"; "i") | not)] | length' 2>/dev/null || echo 0)
+internal=$(echo "$monitors_json" | jq -r '.[] | select(.name | test("^(eDP|LVDS|DSI)"; "i")) | .name' 2>/dev/null | head -1)
+
+if [[ "${externals:-0}" -gt 0 ]]; then
+	if [[ -n "${internal:-}" ]]; then
+		hyprctl keyword monitor "${internal},disable" >/dev/null
+	fi
+else
+	systemctl suspend
+fi

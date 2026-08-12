@@ -132,6 +132,34 @@ confirm() {
     fi
 }
 
+# choose "Prompt" "opt1" "opt2" ...  → prints selected option
+# Works without gum (numbered menu). Used before packages install gum.
+choose() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+    [[ ${#options[@]} -eq 0 ]] && return 1
+
+    if [[ $HAS_GUM -eq 1 ]]; then
+        gum choose --header "$prompt" "${options[@]}"
+        return
+    fi
+
+    echo "  $prompt" >&2
+    local i=1
+    for o in "${options[@]}"; do
+        echo "  $i) $o" >&2
+        ((i++)) || true
+    done
+    local ans
+    read -rp "  Choice [1]: " ans
+    ans=${ans:-1}
+    if ! [[ "$ans" =~ ^[0-9]+$ ]] || ((ans < 1 || ans > ${#options[@]})); then
+        ans=1
+    fi
+    echo "${options[$((ans - 1))]}"
+}
+
 pkg_installed() {
     pacman -Qi "$1" &>/dev/null
 }

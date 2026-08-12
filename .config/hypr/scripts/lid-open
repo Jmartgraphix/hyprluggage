@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Re-enable the internal laptop panel after lid open (clamshell / wake).
+set -euo pipefail
+
+# Disabled monitors may only appear in "monitors all"
+monitors_json=$(hyprctl monitors all -j 2>/dev/null || hyprctl monitors -j 2>/dev/null || echo "[]")
+internal=$(echo "$monitors_json" | jq -r '.[] | select(.name | test("^(eDP|LVDS|DSI)"; "i")) | .name' 2>/dev/null | head -1)
+internal="${internal:-eDP-1}"
+
+# Brief delay so DRM can settle after resume
+sleep 0.5
+hyprctl keyword monitor "${internal},preferred,auto,1" >/dev/null
