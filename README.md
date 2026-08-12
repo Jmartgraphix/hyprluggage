@@ -194,7 +194,8 @@ The installer will:
    - Hyprland compositor and related tools (hypridle, hyprlock, hyprpicker)
    - Desktop components (Waybar, Rofi, Mako, awww, swayosd)
    - Browser (Brave)
-   - Remote desktop (wayvnc)
+   - Remote desktop (wayvnc) and SSH (openssh)
+   - Firewall (ufw) with allow rules for SSH, VNC, LocalSend, and KDE Connect
    - Terminal emulators (Kitty, Alacritty; Ghostty configs included if you install it yourself)
    - Shell and tools (Fish, Starship, tmux)
    - File managers (Thunar, Yazi)
@@ -212,6 +213,8 @@ The installer will:
    - MPD (music daemon)
    - Greetd (display manager)
    - wayvnc + clipboard bridge (user units)
+   - sshd (enabled)
+   - ufw allow rules for SSH, VNC, LocalSend, and KDE Connect (UFW enabled only if it was already active)
    - User services for autostart
 
 4. **Deploy dotfiles:**
@@ -462,6 +465,7 @@ Hyprluggage includes **wayvnc** and **Ctrl+Alt** Super-key twins for browser-bas
 - Over VNC: use **Ctrl+Alt** instead of Super; **Ctrl+Alt+K** shows remote keybinds.
 - Some Space-family theme chords are remapped under Ctrl+Alt (documented in VNC.md).
 - Fresh install enables `wayvnc` and `wayvnc-clipboard-bridge` user units via `install/services.sh`.
+- Fresh install also enables `sshd` and adds ufw allow rules for SSH (`22/tcp`), VNC (`5900/tcp`), LocalSend (`53317` TCP/UDP), and KDE Connect (`1714–1764` TCP/UDP). UFW itself is enabled only if it was already active.
 
 See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for setup, remaps, and files.
 

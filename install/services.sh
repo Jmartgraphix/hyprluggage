@@ -203,3 +203,29 @@ if command -v wayvnc &>/dev/null || pkg_installed wayvnc 2>/dev/null; then
 else
     info "wayvnc not installed — skip remote desktop services"
 fi
+
+# ── SSH ──────────────────────────────────────────────────────────────────────
+if pkg_installed openssh; then
+    sudo systemctl enable --now sshd &>/dev/null && ok "sshd" || warn "sshd failed"
+fi
+
+# ── Firewall (ufw): allow app ports; enable only if already active ──────────
+if pkg_installed ufw && command -v ufw &>/dev/null; then
+    ufw_was_active=false
+    if sudo ufw status 2>/dev/null | grep -qi "Status: active"; then
+        ufw_was_active=true
+    fi
+    sudo ufw allow 22/tcp &>/dev/null || true
+    sudo ufw allow 5900/tcp &>/dev/null || true
+    sudo ufw allow 53317/tcp &>/dev/null || true
+    sudo ufw allow 53317/udp &>/dev/null || true
+    sudo ufw allow 1714:1764/tcp &>/dev/null || true
+    sudo ufw allow 1714:1764/udp &>/dev/null || true
+    if [[ "$ufw_was_active" == true ]]; then
+        sudo ufw --force enable &>/dev/null \
+            && ok "ufw: allowed ssh, vnc, localsend, kdeconnect (kept enabled)" \
+            || warn "ufw: rules may not have applied"
+    else
+        ok "ufw: allowed ssh, vnc, localsend, kdeconnect (left inactive)"
+    fi
+fi

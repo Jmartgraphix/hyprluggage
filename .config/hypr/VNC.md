@@ -28,7 +28,7 @@ Space-family Super chords collide under Ctrl+Alt, so several theme binds are **r
 At the physical keyboard, Super is unchanged.
 
 ## Fresh install
-Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units).
+Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units). Install also adds `ufw allow 5900/tcp` (UFW is enabled only if it was already active).
 
 Manual:
 ```bash
@@ -53,4 +53,4 @@ hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
 
 `install/services.sh` runs `hypr-vnc-mod ensure` so the active stub exists before Hyprland sources it.
 
-Firewall port **5900** if the host is not only on a trusted LAN or reverse proxy.
+Install adds `ufw allow 5900/tcp`. Enable UFW yourself if you want that rule enforced (`sudo ufw enable`); the installer only turns UFW on if it was already active.

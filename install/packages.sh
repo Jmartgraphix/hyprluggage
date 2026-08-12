@@ -49,6 +49,7 @@ packages=(
 	# Network & Bluetooth
 	networkmanager nmgui-bin kdeconnect
 	bluez bluez-utils blueman
+	openssh ufw
 
 	# System
 	polkit-gnome brightnessctl ddcutil power-profiles-daemon upower
