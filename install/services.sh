@@ -44,7 +44,7 @@ if command -v powerprofilesctl &>/dev/null; then
             && ok "power-profiles-daemon" \
             || warn "power-profiles-daemon: enable failed"
     else
-        powerprofilesctl set performance &>/dev/null && ok "power profile: performance (desktop)"
+        powerprofilesctl set performance &>/dev/null && ok "power profile: performance (desktop/vm)"
     fi
 fi
 
@@ -289,7 +289,7 @@ if pkg_installed openssh; then
     sudo systemctl enable --now sshd &>/dev/null && ok "sshd" || warn "sshd failed"
 fi
 
-# ── Firewall (ufw): allow app ports; enable on laptop, keep desktop inactive ──
+# ── Firewall (ufw): allow app ports; enable on laptop, keep desktop/vm inactive ──
 if pkg_installed ufw && command -v ufw &>/dev/null; then
     ufw_was_active=false
     if sudo ufw status 2>/dev/null | grep -qi "Status: active"; then
