@@ -12,8 +12,8 @@ VNC_STATE="${XDG_RUNTIME_DIR}/wayvnc-vncmod/active"
 
 if [[ -f "$VNC_STATE" ]]; then
   PROMPT="VNC keybinds (Ctrl+Alt)"
-  # Only remote-usable chords from hypr-vnc-mod
-  filter_list() { grep -E 'CTRL ALT'; }
+  # Only remote Ctrl+Alt twins — not Super+Ctrl+Alt (or other Super chords)
+  filter_list() { grep -E '^CTRL ALT( SHIFT)? \+'; }
 else
   PROMPT=""
   filter_list() { cat; }
@@ -26,22 +26,23 @@ BEGIN {
     keymap[14] = "5"; keymap[15] = "6"; keymap[16] = "7"; keymap[17] = "8";
     keymap[18] = "9"; keymap[19] = "0"; keymap[20] = "-"; keymap[21] = "=";
 
+    # Prefer CTRL ALT SHIFT order (matches VNC docs / how chords are pressed)
     modmap[0] = "";
     modmap[1] = "SHIFT";
     modmap[4] = "CTRL";
-    modmap[5] = "SHIFT CTRL";
+    modmap[5] = "CTRL SHIFT";
     modmap[8] = "ALT";
-    modmap[9] = "SHIFT ALT";
+    modmap[9] = "ALT SHIFT";
     modmap[12] = "CTRL ALT";
-    modmap[13] = "SHIFT CTRL ALT";
+    modmap[13] = "CTRL ALT SHIFT";
     modmap[64] = "SUPER";
     modmap[65] = "SUPER SHIFT";
     modmap[68] = "SUPER CTRL";
-    modmap[69] = "SUPER SHIFT CTRL";
+    modmap[69] = "SUPER CTRL SHIFT";
     modmap[72] = "SUPER ALT";
-    modmap[73] = "SUPER SHIFT ALT";
+    modmap[73] = "SUPER ALT SHIFT";
     modmap[76] = "SUPER CTRL ALT";
-    modmap[77] = "SUPER SHIFT CTRL ALT";
+    modmap[77] = "SUPER CTRL ALT SHIFT";
 
     mousemap[272] = "LEFT CLICK";
     mousemap[273] = "RIGHT CLICK";
@@ -52,7 +53,52 @@ function trim(s) {
     sub(/[ \t]+$/, "", s);
     return s;
 }
-function print_bind(    mod, label, description) {
+function basename(path,    n, parts) {
+    n = split(path, parts, "/")
+    return parts[n]
+}
+function describe_exec(arg,    cleaned, n, i, word, base, flags, out) {
+    cleaned = arg
+    sub(/^exec,[[:space:]]*/, "", cleaned)
+    cleaned = trim(cleaned)
+
+    base = ""
+    flags = ""
+    n = split(cleaned, word, /[[:space:]]+/)
+    for (i = 1; i <= n; i++) {
+        if (word[i] == "" || word[i] ~ /^--dir=|^--class=|^--title=|^--/) {
+            if (word[i] ~ /^--with-/ || word[i] ~ /^--/) {
+                flags = (flags == "") ? word[i] : flags " " word[i]
+            }
+            continue
+        }
+        if (word[i] ~ /\// || word[i] ~ /^\$/) {
+            base = basename(word[i])
+            continue
+        }
+        if (base == "" && word[i] !~ /^(uwsm|uwsm-app|setsid|pkill|kitty|bash|sh)$/) {
+            # first real command token
+            if (word[i] == "app" && i > 1 && word[i-1] ~ /uwsm/) continue
+            base = word[i]
+        } else if (base != "" && word[i] ~ /^--/) {
+            flags = (flags == "") ? word[i] : flags " " word[i]
+        }
+    }
+
+    if (base == "") {
+        out = cleaned
+    } else if (flags != "") {
+        out = base " " flags
+    } else {
+        out = base
+    }
+
+    if (length(out) > 56) {
+        out = substr(out, 1, 53) "..."
+    }
+    return out
+}
+function print_bind(    mod, label, description, extra) {
     if (key == "" && keycode != "" && keycode != "0" && keycode in keymap) {
         key = keymap[keycode];
     }
@@ -66,13 +112,24 @@ function print_bind(    mod, label, description) {
 
     description = desc;
     if (description == "") {
-        description = dispatcher;
-        if (arg != "") {
-            gsub(/^exec, /, "", arg);
-            gsub(/uwsm app -- /, "", arg);
-            gsub(/uwsm-app -- /, "", arg);
-            if (length(arg) <= 40) {
+        if (dispatcher == "exec") {
+            description = describe_exec(arg)
+        } else {
+            description = dispatcher;
+            if (arg != "") {
                 description = dispatcher " " arg;
+            }
+        }
+    }
+
+    # Append exec script basename as searchable hint when description differs
+    if (dispatcher == "exec" && arg != "") {
+        extra = describe_exec(arg)
+        if (extra != "") {
+            split(extra, _ew, " ")
+            # Only keep real command/script names (skip flags like -e)
+            if (_ew[1] ~ /^[A-Za-z0-9_][A-Za-z0-9_-]*$/ && index(tolower(description), tolower(_ew[1])) == 0) {
+                description = description "  [" _ew[1] "]"
             }
         }
     }

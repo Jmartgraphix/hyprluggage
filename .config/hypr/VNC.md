@@ -15,8 +15,15 @@ Super/Win is often swallowed by the local OS or browser. Hyprluggage ships a **C
 | Super (generic) | **Ctrl+Alt** + same key |
 | Keybind list | **Ctrl+Alt+K** |
 | Launcher | **Ctrl+Alt+Space** |
-| Theme switcher | **Ctrl+Alt+Shift+Y** |
-| Wallpaper picker | **Ctrl+Alt+Shift+Space** |
+| Theme switcher | **Ctrl+Alt+Shift+Y** (Super+Ctrl+Shift+Space) |
+| Theme Matugen apply | **Ctrl+Alt+Shift+T** (Super+Ctrl+Space) |
+| Theme wallpaper picker | **Ctrl+Alt+Shift+Space** (Super+Alt+Space) |
+| Theme random wallpaper | **Ctrl+Alt+Shift+G** (Super+Ctrl+Alt+Space) |
+| Theme browse | **Ctrl+Alt+Shift+U** (Super+Alt+I) |
+| Theme Hyprluggage TUI | **Ctrl+Alt+I** (Super+I) |
+| Theme wallpapers cycle | **Ctrl+Alt+Shift+Up/Left/Right** (Super+Alt+arrows) |
+
+Space-family Super chords collide under Ctrl+Alt, so several theme binds are **remapped** to letter keys. Search **theme** in Ctrl+Alt+K to list them all.
 
 At the physical keyboard, Super is unchanged.
 

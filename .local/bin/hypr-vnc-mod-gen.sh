@@ -70,12 +70,13 @@ def preferred_vnc(tokens):
 # (orig_mod_key, KEY.upper()) -> (mods, new_key|None, description|None)
 # new_key None = keep original key token
 EXPLICIT = {
-    # Space family
+    # Space family — remapped; descriptions keep Super origin for keyhints search
     ("SUPER", "SPACE"): (["CTRL", "ALT"], None, None),  # launcher
-    ("SUPER SHIFT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "W", "Toggle waybar (VNC)"),
-    ("SUPER CTRL", "SPACE"): (["CTRL", "ALT", "SHIFT"], "T", "Matugen Themes (VNC)"),
-    ("SUPER ALT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "SPACE", "Wallpaper Picker (VNC)"),
-    ("SUPER CTRL SHIFT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "Y", "Theme Switcher (VNC)"),
+    ("SUPER SHIFT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "W", "Toggle waybar (Super+Shift+Space)"),
+    ("SUPER CTRL", "SPACE"): (["CTRL", "ALT", "SHIFT"], "T", "Theme Matugen apply (Super+Ctrl+Space)"),
+    ("SUPER ALT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "SPACE", "Theme wallpaper picker (Super+Alt+Space)"),
+    ("SUPER CTRL SHIFT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "Y", "Theme switcher (Super+Ctrl+Shift+Space)"),
+    ("SUPER CTRL ALT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "G", "Theme random wallpaper (Super+Ctrl+Alt+Space)"),
 
     # Apps / collide with Super-only or Super+Shift
     ("SUPER CTRL", "A"): (["CTRL", "ALT", "SHIFT"], "F6", "Gemini (VNC)"),
@@ -83,9 +84,9 @@ EXPLICIT = {
     ("SUPER ALT", "M"): (["CTRL", "ALT", "SHIFT"], "E", "EasyEffects (VNC)"),
     ("SUPER CTRL", "F12"): (["CTRL", "ALT", "SHIFT"], "F12", "Restart Sunshine (VNC)"),
     ("SUPER CTRL", "BACKSPACE"): (["CTRL", "ALT", "SHIFT"], "BACKSPACE", "Toggle focus/vibe (VNC)"),
-    ("SUPER", "I"): (["CTRL", "ALT"], None, None),
+    ("SUPER", "I"): (["CTRL", "ALT"], None, "Theme Hyprluggage TUI"),
     ("SUPER SHIFT", "I"): (["CTRL", "ALT", "SHIFT"], "I", "Web App Install (VNC)"),
-    ("SUPER ALT", "I"): (["CTRL", "ALT", "SHIFT"], "U", "Browse Themes (VNC)"),
+    ("SUPER ALT", "I"): (["CTRL", "ALT", "SHIFT"], "U", "Theme browse (Super+Alt+I)"),
     ("SUPER CTRL", "I"): (["CTRL", "ALT", "SHIFT"], "O", "Toggle Idle/Lock (VNC)"),
     ("SUPER CTRL", "N"): (["CTRL", "ALT", "SHIFT"], "F5", "Nightlight (VNC)"),
 
@@ -95,9 +96,9 @@ EXPLICIT = {
     ("SUPER CTRL", "S"): (["CTRL", "ALT", "SHIFT"], "D", "Share folder (VNC)"),
 
     # Wallpaper arrows
-    ("SUPER ALT", "LEFT"): (["CTRL", "ALT", "SHIFT"], "left", "Previous Wallpaper (VNC)"),
-    ("SUPER ALT", "RIGHT"): (["CTRL", "ALT", "SHIFT"], "right", "Next Wallpaper (VNC)"),
-    ("SUPER ALT", "UP"): (["CTRL", "ALT", "SHIFT"], "up", "Theme Wallpapers (VNC)"),
+    ("SUPER ALT", "LEFT"): (["CTRL", "ALT", "SHIFT"], "left", "Theme previous wallpaper (Super+Alt+Left)"),
+    ("SUPER ALT", "RIGHT"): (["CTRL", "ALT", "SHIFT"], "right", "Theme next wallpaper (Super+Alt+Right)"),
+    ("SUPER ALT", "UP"): (["CTRL", "ALT", "SHIFT"], "up", "Theme wallpapers cycle (Super+Alt+Up)"),
 
     # Swap Super+Shift+arrows → vim keys on Shift tier
     ("SUPER SHIFT", "LEFT"): (["CTRL", "ALT", "SHIFT"], "H", "Swap window left (VNC)"),
@@ -118,9 +119,10 @@ EXPLICIT = {
     ("SUPER ALT", "L"): (["CTRL", "ALT", "SHIFT"], "F2", "Laptop screen on (VNC)"),
     ("SUPER SHIFT", "L"): (["CTRL", "ALT", "SHIFT"], "F3", "Lock screen (VNC)"),
 
-    # Record
-    ("SUPER SHIFT", "R"): (["CTRL", "ALT", "SHIFT"], "R", "Record + Mic (VNC)"),
-    ("SUPER ALT", "R"): (["CTRL", "ALT", "SHIFT"], "V", "Record mic+webcam (VNC)"),
+    # Record / screen recording
+    ("SUPER", "R"): (["CTRL", "ALT"], None, "Screen recording"),
+    ("SUPER SHIFT", "R"): (["CTRL", "ALT", "SHIFT"], "R", "Screen recording + mic (VNC)"),
+    ("SUPER ALT", "R"): (["CTRL", "ALT", "SHIFT"], "V", "Screen recording + mic + webcam (VNC)"),
 
     # Tmux
     ("SUPER SHIFT", "RETURN"): (["CTRL", "ALT", "SHIFT"], "RETURN", "Attach tmux (VNC)"),
@@ -280,13 +282,15 @@ print("\nKey map:")
 for label, pat in [
     ("Launcher", r"CTRL ALT, SPACE,"),
     ("Browser", r"CTRL ALT, B,"),
-    ("Theme switcher", r"Theme Switcher \(VNC\)"),
-    ("Matugen", r"Matugen Themes \(VNC\)"),
-    ("Wall picker", r"Wallpaper Picker \(VNC\)"),
-    ("Waybar", r"Toggle waybar \(VNC\)|toggle-waybar"),
+    ("Theme switcher", r"Theme switcher"),
+    ("Matugen", r"Theme Matugen"),
+    ("Wall picker", r"Theme wallpaper picker"),
+    ("Random wallpaper", r"Theme random wallpaper"),
+    ("Theme browse", r"Theme browse"),
+    ("Waybar", r"Toggle waybar|toggle-waybar"),
     ("Gemini", r"Gemini \(VNC\)"),
     ("EasyEffects", r"EasyEffects \(VNC\)"),
-    ("Wall prev", r"Previous Wallpaper \(VNC\)"),
+    ("Wall prev", r"Theme previous wallpaper"),
     ("Swap left", r"Swap window left \(VNC\)"),
     ("Lock", r"Lock screen \(VNC\)"),
     ("Reboot", r"Reboot \(VNC\)"),
