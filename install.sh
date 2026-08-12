@@ -21,7 +21,7 @@ warn "This will install packages and modify your configs."
 echo
 confirm "Continue?" || exit 0
 
-# ── Hardware profile (desktop vs laptop) + GPU overlay ───────────────────────
+# ── Hardware profile (desktop / laptop / vm) + GPU overlay ───────────────────
 step "Hardware profile"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
 mkdir -p "$STATE_DIR"
@@ -34,10 +34,40 @@ elif [[ -x "$DOTFILES/.local/bin/hyprluggage-hw-ensure" ]]; then
     HW_ENSURE="$DOTFILES/.local/bin/hyprluggage-hw-ensure"
 fi
 
+# Detect form factor. Desktop and laptop stay the existing defaults;
+# VMs are an extra option so virt guests are not treated as gaming NVIDIA boxes.
 detect_form=desktop
-compgen -G '/sys/class/power_supply/BAT*' >/dev/null 2>&1 && detect_form=laptop
+if command -v systemd-detect-virt >/dev/null 2>&1 && systemd-detect-virt -q; then
+    detect_form=vm
+elif grep -q hypervisor /proc/cpuinfo 2>/dev/null; then
+    detect_form=vm
+elif compgen -G '/sys/class/power_supply/BAT*' >/dev/null 2>&1; then
+    detect_form=laptop
+fi
 detect_gpu=other
-lspci 2>/dev/null | grep -iE 'VGA|3D|Display' | grep -qi nvidia && detect_gpu=nvidia
+if [[ "$detect_form" != "vm" ]] && lspci 2>/dev/null | grep -iE 'VGA|3D|Display' | grep -qi nvidia; then
+    detect_gpu=nvidia
+fi
+
+profile_from_label() {
+    case "$1" in
+        Laptop) printf 'laptop\n' ;;
+        "Virtual machine") printf 'vm\n' ;;
+        *) printf 'desktop\n' ;;
+    esac
+}
+
+choose_profile() {
+    local prompt="$1"
+    local choice
+    # Put the detected option first so the numbered/gum default matches detection.
+    case "$detect_form" in
+        laptop) choice=$(choose "$prompt" "Laptop" "Desktop" "Virtual machine") ;;
+        vm)     choice=$(choose "$prompt" "Virtual machine" "Desktop" "Laptop") ;;
+        *)      choice=$(choose "$prompt" "Desktop" "Laptop" "Virtual machine") ;;
+    esac
+    profile_from_label "$choice"
+}
 
 saved_profile=""
 [[ -f "$STATE_DIR/profile" ]] && saved_profile=$(tr -d '[:space:]' <"$STATE_DIR/profile")
@@ -47,21 +77,14 @@ if [[ -n "$saved_profile" ]]; then
     if confirm "Keep hardware profile '$saved_profile'?"; then
         HYPRLUGGAGE_PROFILE="$saved_profile"
     else
-        choice=$(choose "Install profile:" "Desktop" "Laptop")
-        case "$choice" in
-            Laptop) HYPRLUGGAGE_PROFILE=laptop ;;
-            *) HYPRLUGGAGE_PROFILE=desktop ;;
-        esac
+        HYPRLUGGAGE_PROFILE=$(choose_profile "Install profile:")
     fi
 else
     info "Detected: $detect_form form factor, GPU=$detect_gpu"
     default_label="Desktop"
     [[ "$detect_form" == "laptop" ]] && default_label="Laptop"
-    choice=$(choose "Install profile (detected: $default_label):" "Desktop" "Laptop")
-    case "$choice" in
-        Laptop) HYPRLUGGAGE_PROFILE=laptop ;;
-        *) HYPRLUGGAGE_PROFILE=desktop ;;
-    esac
+    [[ "$detect_form" == "vm" ]] && default_label="Virtual machine"
+    HYPRLUGGAGE_PROFILE=$(choose_profile "Install profile (detected: $default_label):")
 fi
 
 HYPRLUGGAGE_GPU="$detect_gpu"
