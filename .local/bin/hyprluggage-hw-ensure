@@ -19,6 +19,15 @@ detect_laptop() {
 	compgen -G '/sys/class/power_supply/BAT*' >/dev/null 2>&1
 }
 
+detect_vm() {
+	# qemu/kvm, vmware, hyperv, etc. Prefer systemd; fall back to CPUID hypervisor bit.
+	if command -v systemd-detect-virt >/dev/null 2>&1; then
+		systemd-detect-virt -q
+		return
+	fi
+	grep -q hypervisor /proc/cpuinfo 2>/dev/null
+}
+
 write_profile_stub() {
 	local profile="$1"
 	mkdir -p "$STATE_DIR"
@@ -48,7 +57,7 @@ EOF
 normalize_profile() {
 	local p="${1:-}"
 	case "$p" in
-	laptop | desktop) printf '%s\n' "$p" ;;
+	laptop | desktop | vm) printf '%s\n' "$p" ;;
 	*) printf 'desktop\n' ;;
 	esac
 }
@@ -58,7 +67,10 @@ normalize_gpu() {
 	case "$g" in
 	nvidia | other) printf '%s\n' "$g" ;;
 	*)
-		if detect_nvidia; then
+		# Bare-metal NVIDIA display: apply the gaming overlay.
+		# In a VM, lspci often still sees a passthrough/compute card that is
+		# not a Hyprland display GPU — default off; `set … nvidia` still works.
+		if detect_nvidia && ! detect_vm; then
 			printf 'nvidia\n'
 		else
 			printf 'other\n'
@@ -73,20 +85,20 @@ cmd_ensure() {
 
 	if [[ -f "$PROFILE_FILE" ]]; then
 		profile=$(normalize_profile "$(tr -d '[:space:]' <"$PROFILE_FILE")")
+	elif detect_vm; then
+		profile=vm
 	else
-		# Missing-stub default: desktop (this machine / streaming-safe)
+		# Missing-stub default: desktop (streaming-safe)
 		profile=desktop
 	fi
 
 	if [[ -f "$GPU_FILE" ]]; then
 		gpu=$(normalize_gpu "$(tr -d '[:space:]' <"$GPU_FILE")")
+	elif detect_nvidia && ! detect_vm; then
+		# Prefer NVIDIA on bare metal so a git pull never drops the gaming overlay
+		gpu=nvidia
 	else
-		# Prefer NVIDIA when present so a git pull on this desktop never drops NVIDIA env
-		if detect_nvidia; then
-			gpu=nvidia
-		else
-			gpu=other
-		fi
+		gpu=other
 	fi
 
 	write_profile_stub "$profile"
@@ -104,8 +116,15 @@ cmd_set() {
 
 cmd_detect() {
 	local form=desktop gpu=other
-	detect_laptop && form=laptop
-	detect_nvidia && gpu=nvidia
+	if detect_vm; then
+		form=vm
+	elif detect_laptop; then
+		form=laptop
+	fi
+	# VMs default to no NVIDIA overlay; desktop/laptop keep current auto-detect.
+	if detect_nvidia && [[ "$form" != "vm" ]]; then
+		gpu=nvidia
+	fi
 	echo "form=$form gpu=$gpu"
 }
 
@@ -114,7 +133,7 @@ usage() {
 Usage: hyprluggage-hw-ensure <command>
 
   ensure              Write profile.conf / gpu.conf if missing (or refresh from saved choice)
-  set <profile> <gpu> Force profile (desktop|laptop) and gpu (nvidia|other)
+  set <profile> <gpu> Force profile (desktop|laptop|vm) and gpu (nvidia|other)
   detect              Print detected form= and gpu= (no write)
 EOF
 }

@@ -53,4 +53,16 @@ hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
 
 `install/services.sh` runs `hypr-vnc-mod ensure` so the active stub exists before Hyprland sources it.
 
-Install adds `ufw allow 5900/tcp`. On the **laptop** install profile, UFW is enabled; on **desktop**, the installer only turns UFW on if it was already active (`sudo ufw enable` otherwise).
+Install adds `ufw allow 5900/tcp`. On the **laptop** install profile, UFW is enabled; on **desktop** and **vm**, the installer only turns UFW on if it was already active (`sudo ufw enable` otherwise).
+
+## Virtual machines
+
+The **vm** install profile is optional and sits next to desktop/laptop. It keeps the same idle policy as desktop (hypridle stays off) and skips the NVIDIA gaming overlay unless you opt in.
+
+That matters for remote sessions:
+
+- `wayvnc --gpu` is still the default on desktop/laptop. On **vm**, wayvnc uses software capture so a missing render node does not take down the server.
+- Hyprland's NVIDIA env (`LIBVA` / `GBM_BACKEND=nvidia-drm` / `__GLX_VENDOR_LIBRARY_NAME=nvidia`) is meant for a GeForce with a real display. In a VM, `lspci` may still show an NVIDIA 3D/compute device; applying that overlay can make wayvnc show a solid gray frame (compositor renders on NVIDIA, scanout is on a virt connector).
+- If you *do* have a display NVIDIA in the guest and want the overlay: `hyprluggage-hw-ensure set vm nvidia`.
+
+This is not a full headless/KVM cookbook — guest display topology (virtio, vkms, looking-glass, …) stays machine-specific.
