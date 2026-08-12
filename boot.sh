@@ -30,7 +30,7 @@ EOF
 echo -e "${RESET}"
 
 REPO="${HYPRLUGGAGE_REPO:-Jmartgraphix/hyprluggage}"
-BRANCH="${HYPRLUGGAGE_BRANCH:-main}"
+BRANCH="${HYPRLUGGAGE_BRANCH:-master}"
 DEST="${HYPRLUGGAGE_DEST:-$HOME/hyprluggage}"
 
 # Bootstrap dependencies
@@ -48,8 +48,8 @@ else
     git clone "https://github.com/${REPO}.git" "$DEST"
 fi
 
-# Switch branch if needed
-if [[ "$BRANCH" != "main" ]]; then
+# Switch branch if needed (default remote branch is master)
+if [[ "$BRANCH" != "master" ]]; then
     git -C "$DEST" fetch origin "$BRANCH"
     git -C "$DEST" checkout "$BRANCH"
 fi

@@ -13,17 +13,18 @@ Uninstall:
 
 ## Themes
 
-- **Catppuccin** - Soothing pastel theme (Mocha variant)
 - **Dynamic** - Colors generated from wallpaper using Matugen
+- **Catppuccin** - Soothing pastel theme (Mocha variant)
+- **Coffee** - Warm, earthy brown tones inspired by coffee
 - **Everforest** - Green-based, warm-toned color scheme
-- **Coffee**
-- **Jade**
-- **Gruvbox**
-- **Kanagawa**
-- **Nordic**
-- **Rosé Pine**
-- **Tokyo Night**
-- **Monochrome**
+- **Gruvbox** - Retro groove color scheme with warm, muted tones
+- **Jade** - Cool, serene green palette with elegant tones
+- **Kanagawa** - Inspired by Japanese woodblock prints, warm and artistic
+- **Monochrome** - Minimalist black and white aesthetic
+- **Nordic** - Cool, clean blue tones inspired by Nordic design
+- **Octarine** - The eighth color of magic (fluorescent greenish-yellow purple) from Discworld
+- **Rosé Pine** - Soft, muted rose and pine color scheme
+- **Tokyo Night** - Dark theme with vibrant neon accents
 
 Wallpapers: [Jmartgraphix/Wallpapers](https://github.com/Jmartgraphix/Wallpapers)
 
@@ -44,9 +45,12 @@ hyprluggage fix             # fix broken symlinks
 | `Super + Ctrl + Shift + Space` | Theme switcher |
 | `Super + Ctrl + Space` | Matugen (colors from wallpaper) |
 | `Super + Alt + Space` | Wallpaper picker |
+| `Super + Ctrl + Alt + Space` | Random wallpaper + colors |
 | `Super + Alt + Left/Right` | Cycle wallpapers |
 | `Super + Backspace` | Toggle terminal transparency |
 | `Super + Ctrl + Backspace` | Toggle focus/vibe mode |
+
+Over VNC, use **Ctrl+Alt** instead of Super (some Space-family theme chords are remapped). See [`.config/hypr/VNC.md`](../../.config/hypr/VNC.md).
 
 ## How it works
 

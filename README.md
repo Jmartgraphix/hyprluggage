@@ -34,6 +34,7 @@
 - [Components](#components)
 - [Customization](#customization)
 - [Structure](#structure)
+- [Remote desktop (VNC)](#remote-desktop-vnc)
 - [Troubleshooting](#troubleshooting)
 - [Uninstallation](#uninstallation)
 - [Credits](#credits)
@@ -49,6 +50,7 @@
 - **Rofi menus** — App launcher, emoji picker, clipboard, wallpaper selector, power profiles
 - **Dual mode** — Vibe (animations + blur) or Focus (minimal + fast)
 - **Music integration** — MPD + RMPC + Cava visualizer
+- **Remote desktop** — wayvnc with Ctrl+Alt Super-key twins for browser VNC (Gatwy/noVNC)
 
 <details>
 <summary><b>Dual Mode System</b></summary>
@@ -118,7 +120,9 @@ HyprLuggage comes with a complete desktop environment setup:
 - **RMPC** - Terminal-based music player (`Alt + M`)
 - **Cava** - Audio visualizer (`Super + Shift + C`)
 
-**Notifications** - Mako notification daemon with theme-aware styling.
+**Notifications** - Mako notification daemon with theme-aware styling. Dismiss all with `Super + N`.
+
+**Remote desktop** - wayvnc shares the session; over VNC use **Ctrl+Alt** instead of Super. See [Remote desktop (VNC)](#remote-desktop-vnc).
 
 ---
 
@@ -188,8 +192,10 @@ The installer will:
 
 1. **Install core packages:**
    - Hyprland compositor and related tools (hypridle, hyprlock, hyprpicker)
-   - Desktop components (Waybar, Rofi, Mako, awww)
-   - Terminal emulators (Kitty, Alacritty)
+   - Desktop components (Waybar, Rofi, Mako, awww, swayosd)
+   - Browser (Brave)
+   - Remote desktop (wayvnc)
+   - Terminal emulators (Kitty, Alacritty; Ghostty configs included if you install it yourself)
    - Shell and tools (Fish, Starship, tmux)
    - File managers (Thunar, Yazi)
    - Editor (Neovim)
@@ -197,7 +203,7 @@ The installer will:
    - And many more utilities
 
 2. **Install optional applications:**
-   - Browsers (Brave, Firefox, Chromium, Zen)
+   - Extra browsers (Firefox, Chromium, Zen)
    - Editors (VS Code, Zed, Obsidian)
    - Communication (Discord, Vesktop)
    - And other productivity apps
@@ -205,6 +211,7 @@ The installer will:
 3. **Set up system services:**
    - MPD (music daemon)
    - Greetd (display manager)
+   - wayvnc + clipboard bridge (user units)
    - User services for autostart
 
 4. **Deploy dotfiles:**
@@ -270,7 +277,9 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 | `Super + M` | Spotify |
 | `Super + D` | Discord |
 | `Super + O` | Obsidian |
-| `Super + C` | VS Code |
+| `Super + C` | Cursor |
+| `Super + /` | Bitwarden |
+| `Super + Shift + C` | Cava |
 | `Alt + M` | RMPC |
 | `Alt + N` | Neovim |
 | `Alt + Q` | Yazi |
@@ -304,10 +313,11 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 | `Super + K` | Show All Keybindings |
 | `Super + Shift + K` | Kill Application |
 | `Super + Arrow` | Move Focus |
-| `Super + Shift + Arrow` | Move Window |
-| `Super + Ctrl + Arrow` | Resize Window |
-| `Super + 1-9` | Switch Workspace |
-| `Super + Shift + 1-9` | Move to Workspace |
+| `Super + Shift + Arrow` | Swap Window |
+| `Super + Ctrl + Left/Right` | Previous/Next Workspace |
+| `Super + -` / `Super + =` | Resize Window |
+| `Super + 1-9, 0` | Switch Workspace (1–10) |
+| `Super + Shift + 1-9, 0` | Move to Workspace (1–10) |
 | `Super + F` | Fullscreen |
 | `Super + Shift + V` | Toggle Floating |
 | `Super + Shift + O` | Pop Window (Float & Pin) |
@@ -322,7 +332,7 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 | `Super + L` | Screensaver |
 | `Super + Shift + L` | Lock Screen |
 | `Super + Escape` | Power Menu |
-| `Super + N` | Notifications |
+| `Super + N` | Dismiss Notifications |
 | `Super + Backspace` | Toggle Transparency |
 | `Super + Ctrl + Backspace` | Toggle Focus/Vibe Mode |
 
@@ -345,12 +355,25 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 
 | Key | Action |
 |-----|--------|
-| `Ctrl + Alt + Space` | Random Wallpaper + Colors |
+| `Super + Ctrl + Alt + Space` | Random Wallpaper + Colors |
 | `Super + Alt + Left/Right` | Cycle Wallpapers |
 
 </details>
 
-See [.config/hypr/bindings.conf](.config/hypr/bindings.conf) for full list.
+<details>
+<summary><b>Remote (VNC)</b></summary>
+
+| Key | Action |
+|-----|--------|
+| `Ctrl + Alt` + same key | Twin of most Super binds |
+| `Ctrl + Alt + K` | Show remote keybinds |
+| `Ctrl + Alt + Space` | App launcher (VNC twin of Super+Space) |
+
+Some Space-family theme chords are remapped under Ctrl+Alt — see [`.config/hypr/VNC.md`](.config/hypr/VNC.md).
+
+</details>
+
+See [.config/hypr/bindings.conf](.config/hypr/bindings.conf), [tiling.conf](.config/hypr/tiling.conf), and [media.conf](.config/hypr/media.conf) for the full list.
 
 ---
 
@@ -361,7 +384,9 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf) for full list.
 | Compositor | [Hyprland](https://hyprland.org/) | Wayland compositor with smooth animations and window management |
 | Bar | [Waybar](https://github.com/Alexays/Waybar) | Highly customizable status bar with modules for system info, workspaces, and more |
 | Launcher | [Rofi](https://github.com/lbonn/rofi) | Application launcher and menu system with multiple modes |
-| Terminal | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Alacritty](https://alacritty.org/) / [Ghostty](https://ghostty.org/) | GPU-accelerated terminal emulators (Kitty & Alacritty installed by default) |
+| Wallpaper | [awww](https://codeberg.org/LGFae/awww) | Wayland wallpaper daemon (theme wallpapers + Matugen) |
+| OSD | [SwayOSD](https://github.com/ErikReider/SwayOSD) | On-screen display for volume, brightness, and caps lock |
+| Terminal | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Alacritty](https://alacritty.org/) | GPU-accelerated terminals installed by default; [Ghostty](https://ghostty.org/) configs included if you install it |
 | File Manager | [Thunar](https://docs.xfce.org/xfce/thunar/start) (GUI) / [Yazi](https://github.com/sxyazi/yazi) (CLI) | Dual file managers for GUI and terminal workflows |
 | Notifications | [Mako](https://github.com/emersion/mako) | Lightweight notification daemon with theme support |
 | Lock screen | [Hyprlock](https://github.com/hyprwm/hyprlock) | Secure lock screen integrated with Hyprland |
@@ -370,6 +395,7 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf) for full list.
 | Visualizer | [Cava](https://github.com/karlstav/cava) | Audio spectrum visualizer for terminal |
 | Editor | [Neovim](https://neovim.io/) | Modern Vim fork with LSP support and theme integration |
 | Shell | [Fish](https://fishshell.com/) + [Starship](https://starship.rs/) | User-friendly shell with fast, customizable prompt |
+| Remote desktop | [wayvnc](https://github.com/any1/wayvnc) | VNC server for the Hyprland session (Ctrl+Alt Super twins) |
 
 ---
 
@@ -399,23 +425,24 @@ All configuration files are located in `~/.config/`. You can edit them directly�
 ```
 ~/hyprluggage/
 ├── .config/
-│   ├── hypr/           # Hyprland (compositor, bindings, animations)
+│   ├── hypr/           # Hyprland (compositor, bindings, VNC mods)
 │   ├── waybar/         # Status bar
 │   ├── rofi/           # Launcher & menus
 │   ├── mako/           # Notifications
+│   ├── swayosd/        # OSD (volume/brightness)
+│   ├── wayvnc/         # Remote desktop server
 │   ├── kitty/          # Terminal
-│   ├── ghostty/        # Terminal (alt)
+│   ├── ghostty/        # Terminal (alt; not auto-installed)
 │   ├── alacritty/      # Terminal (alt)
 │   ├── nvim/           # Neovim
 │   ├── fish/           # Shell
 │   ├── tmux/           # Terminal multiplexer
 │   ├── yazi/           # File manager (CLI)
-│   ├── gtk-3.0/        # GTK theme (Thunar, etc.)
-│   ├── gtk-4.0/        # GTK theme (Thunar, etc.)
-│   ├── btop/           # System monitor
+│   ├── mpd/            # Music daemon
 │   ├── rmpc/           # Music player
 │   ├── matugen/        # Theme generator templates
 │   └── lazygit/        # Git UI
+├── .local/bin/         # Helper scripts (VNC, clipboard bridge, etc.)
 ├── themes/             # Theme configs (colors, wallpapers)
 ├── scripts/            # Utility scripts
 └── install/            # Installer
@@ -424,6 +451,19 @@ All configuration files are located in `~/.config/`. You can edit them directly�
     ├── services.sh     # Systemd services
     └── themes/         # Hyprluggage theme system
 ```
+
+---
+
+## Remote desktop (VNC)
+
+Hyprluggage includes **wayvnc** and **Ctrl+Alt** Super-key twins for browser-based remote access (e.g. Gatwy/noVNC), because Super often does not reach the remote session.
+
+- At the desk: Super works as usual.
+- Over VNC: use **Ctrl+Alt** instead of Super; **Ctrl+Alt+K** shows remote keybinds.
+- Some Space-family theme chords are remapped under Ctrl+Alt (documented in VNC.md).
+- Fresh install enables `wayvnc` and `wayvnc-clipboard-bridge` user units via `install/services.sh`.
+
+See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for setup, remaps, and files.
 
 ---
 
@@ -456,9 +496,10 @@ hyprluggage fix
 - Ensure you're using a Wayland-compatible setup
 
 **Keybindings not working?**
-- Check `~/.config/hypr/bindings.conf` for conflicts
+- Check `~/.config/hypr/bindings.conf` (and `tiling.conf` / `media.conf`) for conflicts
 - Reload Hyprland config: `hyprctl reload`
 - Verify the keybinding syntax is correct
+- Over VNC, use Ctrl+Alt instead of Super — see [VNC.md](.config/hypr/VNC.md)
 
 **Need more help?**
 - Check the [full keybindings list](.config/hypr/bindings.conf)
@@ -503,11 +544,3 @@ Wallpapers: [Jmartgraphix/Wallpapers](https://github.com/Jmartgraphix/Wallpapers
 **[Report Bug](https://github.com/Jmartgraphix/hyprluggage/issues/new?template=bug_report.yml)** · **[Request Feature](https://github.com/Jmartgraphix/hyprluggage/issues/new?template=feature_request.yml)** ·
 
 </div>
-
-## Remote desktop (VNC)
-
-Hyprluggage includes **wayvnc** and **Ctrl+Alt** Super-key twins for browser-based remote access (e.g. Gatwy/noVNC), because Super often does not reach the remote session.
-
-- At the desk: Super works as usual.
-- Over VNC: use **Ctrl+Alt** instead of Super; **Ctrl+Alt+K** shows remote keybinds.
-- See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for details.

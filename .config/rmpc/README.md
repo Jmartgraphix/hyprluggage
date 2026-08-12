@@ -1,20 +1,8 @@
-# RMPC - TUI Music Player Client
+# RMPC
 
-- For detailed configuration and usage: [RMPC Documentation](https://mierak.github.io/rmpc/next/overview/)
+Terminal music player client for [MPD](https://musicpd.org/), configured as part of Hyprluggage.
 
-## Prerequisites
-
-- **MPD**: Must be pre-installed and configured
-- Check configuration at [`~/dotfiles/.config/mpd`](../mpd/)
-
-## Installation
-
-```bash
-sudo pacman -S rmpc
-```
-
-```bash
-cp -r ~/dotfiles/.config/rmpc ~/.config/
-```
-
-![RMPC](../../images/rmpc.png)
+- Launch: `Alt + M` (or run `rmpc`)
+- Official docs: [RMPC documentation](https://mierak.github.io/rmpc/next/overview/)
+- Config in this repo is stowed to `~/.config/rmpc/`
+- MPD config lives alongside at `~/.config/mpd/`

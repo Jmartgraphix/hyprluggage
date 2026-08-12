@@ -1,8 +1,8 @@
 | Theme | Theme |
 |-------|-------|
-| ![Dynamic](assets/dynamic.png)**Dynamic** | ![Catppuccin](assets/catppuccin.png)**Catppuccin** |
-| ![Coffee](assets/coffee.png)**Coffee** | ![Everforest](assets/everforest.png)**Everforest** |
-| ![Gruvbox](assets/gruvbox.png)**Gruvbox** | ![Jade](assets/jade.png)**Jade** |
-| ![Kanagawa](assets/kanagawa.png)**Kanagawa** | ![Monochrome](assets/monochrome.png)**Monochrome** |
-| ![Nordic](assets/nordic.png)**Nordic** | ![Octarine](assets/octarine.png)**Octarine** |
-| ![Rosé Pine](assets/rose-pine.png)**Rosé Pine** | ![Tokyo Night](assets/tokyo-night.png)**Tokyo Night** |
+| ![Dynamic](dynamic.png)**Dynamic** | ![Catppuccin](catppuccin.png)**Catppuccin** |
+| ![Coffee](coffee.png)**Coffee** | ![Everforest](everforest.png)**Everforest** |
+| ![Gruvbox](gruvbox.png)**Gruvbox** | ![Jade](jade.png)**Jade** |
+| ![Kanagawa](kanagawa.png)**Kanagawa** | ![Monochrome](monochrome.png)**Monochrome** |
+| ![Nordic](nordic.png)**Nordic** | ![Octarine](octarine.png)**Octarine** |
+| ![Rosé Pine](rose-pine.png)**Rosé Pine** | ![Tokyo Night](tokyo-night.png)**Tokyo Night** |

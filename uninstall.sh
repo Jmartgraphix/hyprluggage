@@ -11,7 +11,7 @@ source "$DOTFILES/install/utils.sh"
 
 # Core stuff - don't offer to uninstall
 skip=(
-    base-devel git stow fish tmux neovim nautilus
+    base-devel git stow fish tmux neovim thunar
     pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber
     networkmanager bluez bluez-utils polkit-gnome power-profiles-daemon
     xdg-utils xdg-user-dirs libnotify wl-clipboard ffmpeg jq wget curl unzip
