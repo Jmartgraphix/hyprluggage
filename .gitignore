@@ -1,5 +1,8 @@
 *.bak
 
+# Runtime VNC toggle (lives in ~/.local/state; ignore legacy stowed path if present)
+.config/hypr/vnc-mod-active.conf
+
 # Runtime symlinks created by hyprluggage hooks
 .config/waybar/colors.css
 .config/rofi/colors.rasi

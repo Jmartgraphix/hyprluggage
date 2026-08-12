@@ -20,10 +20,27 @@ fi
 
 HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
 GENERATED="$HYPR_DIR/vnc-mod-generated.conf"
-ACTIVE="$HYPR_DIR/vnc-mod-active.conf"
+# Outside the stowed ~/.config/hypr tree so apply/clear never dirties the git repo
+ACTIVE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
+ACTIVE="$ACTIVE_DIR/vnc-mod-active.conf"
 STATE_DIR="${XDG_RUNTIME_DIR}/wayvnc-vncmod"
 STATE_FILE="$STATE_DIR/active"
 GEN="${SCRIPT_DIR}/hypr-vnc-mod-gen.sh"
+
+write_active_empty() {
+  mkdir -p "$ACTIVE_DIR"
+  cat > "$ACTIVE" << 'INNER'
+# Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)
+INNER
+}
+
+write_active_source() {
+  mkdir -p "$ACTIVE_DIR"
+  cat > "$ACTIVE" << INNER
+# Managed by hypr-vnc-mod — loaded only while VNC clients are connected
+source = $GENERATED
+INNER
+}
 
 ensure_hypr_env() {
   if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
@@ -54,15 +71,8 @@ cmd_generate() {
 
 cmd_apply() {
   mkdir -p "$STATE_DIR" "$HYPR_DIR"
-  # Ensure active stub exists (fresh install)
-  if [[ ! -f "$ACTIVE" ]]; then
-    printf '%s\n' "# Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)" > "$ACTIVE"
-  fi
   cmd_generate
-  cat > "$ACTIVE" << INNER
-# Managed by hypr-vnc-mod — loaded only while VNC clients are connected
-source = $GENERATED
-INNER
+  write_active_source
   if hypr_reload; then
     touch "$STATE_FILE"
     logger -t wayvnc-vncmod "applied CTRL+ALT VNC mod binds"
@@ -74,10 +84,7 @@ INNER
 }
 
 cmd_clear() {
-  mkdir -p "$HYPR_DIR"
-  cat > "$ACTIVE" << 'INNER'
-# Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)
-INNER
+  write_active_empty
   rm -f "$STATE_FILE"
   if hypr_reload 2>/dev/null; then
     logger -t wayvnc-vncmod "cleared VNC mod binds (hyprctl reload)"
@@ -110,9 +117,9 @@ cmd_status() {
 
 cmd_ensure() {
   # Fresh install / login: ensure stubs exist without enabling VNC binds
-  mkdir -p "$HYPR_DIR" "$STATE_DIR"
+  mkdir -p "$HYPR_DIR" "$STATE_DIR" "$ACTIVE_DIR"
   if [[ ! -f "$ACTIVE" ]]; then
-    printf '%s\n' "# Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)" > "$ACTIVE"
+    write_active_empty
   fi
   if [[ ! -f "$GENERATED" ]]; then
     cmd_generate || true
@@ -121,7 +128,7 @@ cmd_ensure() {
   if grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null && [[ ! -f "$STATE_FILE" ]]; then
     cmd_clear || true
   fi
-  echo "vnc-mod: ensure ok"
+  echo "vnc-mod: ensure ok ($ACTIVE)"
 }
 
 case "${1:-}" in

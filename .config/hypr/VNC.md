@@ -48,7 +48,9 @@ hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
 | `~/.local/bin/hypr-vnc-mod` | apply / clear / generate / ensure |
 | `~/.local/bin/hypr-vnc-mod-gen.sh` | generator |
 | `~/.config/hypr/vnc-mod-generated.conf` | committed seed map |
-| `~/.config/hypr/vnc-mod-active.conf` | empty in git; toggled at runtime |
+| `~/.local/state/hyprluggage/vnc-mod-active.conf` | runtime toggle (created by `ensure` / apply / clear; outside stow so git stays clean) |
 | `~/.config/wayvnc/config` | listen `0.0.0.0:5900` |
+
+`install/services.sh` runs `hypr-vnc-mod ensure` so the active stub exists before Hyprland sources it.
 
 Firewall port **5900** if the host is not only on a trusted LAN or reverse proxy.

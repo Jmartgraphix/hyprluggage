@@ -76,6 +76,12 @@ if [[ $stow_exit -ne 0 ]]; then
 else
     ok "Hyprluggage linked"
     rm -f /tmp/stow-error.log
+    # VNC active stub lives outside stow; create before Hyprland sources it
+    if [[ -x "$HOME/.local/bin/hypr-vnc-mod" ]]; then
+        "$HOME/.local/bin/hypr-vnc-mod" ensure &>/dev/null || true
+    elif [[ -x "$DOTFILES/.local/bin/hypr-vnc-mod" ]]; then
+        "$DOTFILES/.local/bin/hypr-vnc-mod" ensure &>/dev/null || true
+    fi
 fi
 
 # Show backup location if backups were created
