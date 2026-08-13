@@ -19,6 +19,25 @@ detect_laptop() {
 	compgen -G '/sys/class/power_supply/BAT*' >/dev/null 2>&1
 }
 
+detect_vm() {
+	# qemu/kvm, vmware, hyperv, etc. Prefer systemd; fall back to CPUID hypervisor bit.
+	if command -v systemd-detect-virt >/dev/null 2>&1; then
+		systemd-detect-virt -q
+		return
+	fi
+	grep -q hypervisor /proc/cpuinfo 2>/dev/null
+}
+
+# Default GPU for auto-detect: bare-metal NVIDIA → nvidia; guests → other
+# (passthrough/compute cards in a VM are often not Hyprland's display GPU).
+default_gpu() {
+	if detect_nvidia && ! detect_vm; then
+		printf 'nvidia\n'
+	else
+		printf 'other\n'
+	fi
+}
+
 write_profile_stub() {
 	local profile="$1"
 	mkdir -p "$STATE_DIR"
@@ -57,13 +76,7 @@ normalize_gpu() {
 	local g="${1:-}"
 	case "$g" in
 	nvidia | other) printf '%s\n' "$g" ;;
-	*)
-		if detect_nvidia; then
-			printf 'nvidia\n'
-		else
-			printf 'other\n'
-		fi
-		;;
+	*) default_gpu ;;
 	esac
 }
 
@@ -81,12 +94,9 @@ cmd_ensure() {
 	if [[ -f "$GPU_FILE" ]]; then
 		gpu=$(normalize_gpu "$(tr -d '[:space:]' <"$GPU_FILE")")
 	else
-		# Prefer NVIDIA when present so a git pull on this desktop never drops NVIDIA env
-		if detect_nvidia; then
-			gpu=nvidia
-		else
-			gpu=other
-		fi
+		# Prefer NVIDIA on bare metal so a git pull never drops the gaming overlay.
+		# Guests default off — force with: hyprluggage-hw-ensure set <profile> nvidia
+		gpu=$(default_gpu)
 	fi
 
 	write_profile_stub "$profile"
@@ -103,10 +113,11 @@ cmd_set() {
 }
 
 cmd_detect() {
-	local form=desktop gpu=other
+	local form=desktop gpu virt=no
 	detect_laptop && form=laptop
-	detect_nvidia && gpu=nvidia
-	echo "form=$form gpu=$gpu"
+	detect_vm && virt=yes
+	gpu=$(default_gpu)
+	echo "form=$form gpu=$gpu virt=$virt"
 }
 
 usage() {
@@ -115,7 +126,9 @@ Usage: hyprluggage-hw-ensure <command>
 
   ensure              Write profile.conf / gpu.conf if missing (or refresh from saved choice)
   set <profile> <gpu> Force profile (desktop|laptop) and gpu (nvidia|other)
-  detect              Print detected form= and gpu= (no write)
+  detect              Print detected form=, gpu=, virt= (no write)
+
+Virtual machines: NVIDIA overlay is not auto-applied (use set … nvidia to opt in).
 EOF
 }
 

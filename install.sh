@@ -36,8 +36,19 @@ fi
 
 detect_form=desktop
 compgen -G '/sys/class/power_supply/BAT*' >/dev/null 2>&1 && detect_form=laptop
+
+# Guests often still list NVIDIA (passthrough/compute) that is not Hyprland's
+# display GPU — skip auto overlay there; opt in with hyprluggage-hw-ensure set … nvidia
+detect_vm=false
+if command -v systemd-detect-virt >/dev/null 2>&1 && systemd-detect-virt -q; then
+    detect_vm=true
+elif grep -q hypervisor /proc/cpuinfo 2>/dev/null; then
+    detect_vm=true
+fi
 detect_gpu=other
-lspci 2>/dev/null | grep -iE 'VGA|3D|Display' | grep -qi nvidia && detect_gpu=nvidia
+if [[ "$detect_vm" != true ]] && lspci 2>/dev/null | grep -iE 'VGA|3D|Display' | grep -qi nvidia; then
+    detect_gpu=nvidia
+fi
 
 saved_profile=""
 [[ -f "$STATE_DIR/profile" ]] && saved_profile=$(tr -d '[:space:]' <"$STATE_DIR/profile")

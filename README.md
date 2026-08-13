@@ -44,7 +44,7 @@
 ## Features
 
 - **One-command theming** — Switch entire desktop look with `hyprluggage switch`
-- **Desktop & laptop profiles** — Installer chooses form factor; NVIDIA GPU overlay is auto-detected
+- **Desktop & laptop profiles** — Installer chooses form factor; NVIDIA GPU overlay auto-detects on bare metal (skipped in VMs by default)
 - **Dynamic colors** — Matugen extracts palette from any wallpaper
 - **12 themes** — 11 handcrafted + 1 dynamic (Dark, cozy, and aesthetic)
 - **Everything synced** — Terminal, bar, launcher, notifications, apps
@@ -193,7 +193,7 @@ The installer will:
 
 0. **Choose a hardware profile:**
    - **Desktop** or **Laptop** (battery presence is auto-detected as the default)
-   - **GPU overlay** via `lspci` (NVIDIA env applied only when an NVIDIA display GPU is found)
+   - **GPU overlay** via `lspci` on bare metal (NVIDIA env applied when an NVIDIA display GPU is found; **skipped by default in VMs**)
    - Saved under `~/.local/state/hyprluggage/profile` and `gpu` (re-run can keep or change)
 
 1. **Install core packages:**
@@ -244,11 +244,12 @@ The installer will:
 | Desktop | hypridle killed on login | not started | no change | rules only (left inactive) | performance |
 | Laptop | hypridle started | battery-notify | suspend or clamshell | UFW enabled | balanced on battery |
 
-NVIDIA vs AMD/Intel is **independent** of desktop/laptop. When an NVIDIA display GPU is detected, `~/.config/hypr/profiles/nvidia.conf` is sourced; AMD/Intel get an empty GPU stub.
+NVIDIA vs AMD/Intel is **independent** of desktop/laptop. On bare metal, an NVIDIA display GPU sources `~/.config/hypr/profiles/nvidia.conf`; AMD/Intel get an empty GPU stub. **Virtual machines** still use Desktop or Laptop — there is no separate VM profile — but NVIDIA is not auto-applied under a hypervisor (passthrough cards often break Hyprland/wayvnc). Opt in with `hyprluggage-hw-ensure set desktop nvidia`. wayvnc also skips `--gpu` when virt is detected. See [VNC.md](.config/hypr/VNC.md).
 
 Re-check or recreate stubs anytime:
 
 ```bash
+hyprluggage-hw-ensure detect
 hyprluggage-hw-ensure ensure
 hyprluggage-hw-ensure set laptop nvidia   # example
 ```

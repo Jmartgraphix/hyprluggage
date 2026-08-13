@@ -54,3 +54,14 @@ hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
 `install/services.sh` runs `hypr-vnc-mod ensure` so the active stub exists before Hyprland sources it.
 
 Install adds `ufw allow 5900/tcp`. On the **laptop** install profile, UFW is enabled; on **desktop**, the installer only turns UFW on if it was already active (`sudo ufw enable` otherwise).
+
+## Virtual machines
+
+Throwaway guests use the normal **Desktop** (or Laptop) profile — there is no separate VM profile.
+
+Virt-specific defaults:
+
+- **NVIDIA overlay** is not auto-applied under a hypervisor (`systemd-detect-virt`). A guest may still show NVIDIA in `lspci` (passthrough/compute) without that being Hyprland's display GPU; applying the overlay can gray out wayvnc. Opt in with `hyprluggage-hw-ensure set desktop nvidia` when you truly have a display NVIDIA in the guest.
+- **wayvnc** skips `--gpu` when virt is detected and uses software capture so a missing render node does not take down the server. Bare metal keeps `--gpu`.
+
+This is not a full headless/KVM cookbook — guest display topology stays machine-specific.
