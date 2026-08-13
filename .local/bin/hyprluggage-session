@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Greetd / tuigreet session entrypoint for Hyprluggage.
+# Runs hw-ensure before Hyprland so profile.conf / gpu.conf always exist.
+set -euo pipefail
+
+export PATH="${HOME}/.local/bin:${PATH:-/usr/bin:/bin}"
+
+if [[ -x "${HOME}/.local/bin/hyprluggage-hw-ensure" ]]; then
+	"${HOME}/.local/bin/hyprluggage-hw-ensure" ensure >/dev/null 2>&1 || true
+elif command -v hyprluggage-hw-ensure >/dev/null 2>&1; then
+	hyprluggage-hw-ensure ensure >/dev/null 2>&1 || true
+fi
+
+exec uwsm start hyprland.desktop

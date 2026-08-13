@@ -4,15 +4,18 @@
 vt = 2
 
 # HyprLuggage default session: greetd runs tuigreet, which starts Hyprland on login.
-# The installer will replace {{USER}} with the username running ./install.sh.
-# hyprluggage-hw-ensure runs before Hyprland so profile.conf / gpu.conf always exist.
+# The installer replaces {{USER}} with the username running ./install.sh.
+#
+# Session command MUST be passed to tuigreet with --cmd. Trailing bare args are
+# treated as tuigreet flags and make the greeter exit immediately (crash loop).
+# hyprluggage-session runs hw-ensure, then uwsm + Hyprland.
 
 [initial_session]
-# Auto-login session (runs directly on boot)
-command = "bash -lc '~/.local/bin/hyprluggage-hw-ensure ensure >/dev/null 2>&1; exec uwsm start hyprland.desktop'"
+# Auto-login session (runs directly on boot as {{USER}})
+command = "/home/{{USER}}/.local/bin/hyprluggage-session"
 user = "{{USER}}"
 
 [default_session]
-# Fallback greeter (tuigreet with your custom theme)
-command = "tuigreet --time --time-format '%H:%M' --asterisks --greeting 'Welcome to Hyprluggage' --theme 'border=lightgray;prompt=white;title=white;time=lightgray;container=blue;action=cyan;button=orange' exec bash -lc '~/.local/bin/hyprluggage-hw-ensure ensure >/dev/null 2>&1; exec uwsm start hyprland.desktop'"
+# Greeter after logout / if initial_session is unset
+command = "tuigreet --time --time-format '%H:%M' --asterisks --greeting 'Welcome to Hyprluggage' --theme 'border=lightgray;prompt=white;title=white;time=lightgray;container=blue;action=cyan;button=orange' --cmd /home/{{USER}}/.local/bin/hyprluggage-session"
 user = "greeter"

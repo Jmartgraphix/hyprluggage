@@ -217,7 +217,7 @@ The installer will:
 
 3. **Set up system services:**
    - MPD (music daemon)
-   - Greetd (display manager; runs `hyprluggage-hw-ensure` before Hyprland)
+   - Greetd (display manager; session via `hyprluggage-session`, which runs hw-ensure then Hyprland)
    - wayvnc + clipboard bridge (user units)
    - sshd (enabled)
    - ufw allow rules for SSH, VNC, LocalSend, and KDE Connect
@@ -529,8 +529,16 @@ hyprluggage fix
 - Verify you're on Arch Linux or CachyOS
 - See [install/themes/README.md](install/themes/README.md) for theme-specific issues
 
-**Hyprland not starting?**
-- Check logs: `journalctl -u greetd` or `~/.local/share/hyprland/hyprland.log`
+**Hyprland not starting / greetd crash loop?**
+- Check logs: `journalctl -u greetd -b` or `~/.local/share/hyprland/hyprland.log`
+- If you see `greeter exited without creating a session` / `start-limit-hit`, tuigreet's session command is wrong — it must use `--cmd`. Re-apply the template from this repo (as the install user):
+
+```bash
+sed "s/{{USER}}/$USER/g" ~/hyprluggage/install/greetd-config.toml | sudo tee /etc/greetd/config.toml
+sudo systemctl reset-failed greetd
+sudo systemctl restart greetd
+```
+
 - Verify graphics drivers are installed
 - Ensure you're using a Wayland-compatible setup
 
