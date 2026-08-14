@@ -1,7 +1,7 @@
 [Unit]
 Description=wayvnc VNC server for Hyprland (browser remote / Gatwy)
 After=graphical-session.target
-Wants=graphical-session.target
+PartOf=graphical-session.target
 
 [Service]
 Type=simple
@@ -11,4 +11,4 @@ Restart=always
 RestartSec=2
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target

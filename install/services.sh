@@ -285,17 +285,18 @@ if command -v wayvnc &>/dev/null || pkg_installed wayvnc 2>/dev/null; then
         "$HOME/.local/bin/hypr-vnc-mod" ensure &>/dev/null || true
     fi
     if systemctl --user daemon-reload &>/dev/null; then
+        # Older installs used WantedBy=default.target + Wants=graphical-session.target,
+        # which left an empty graphical session active and made uwsm/greetd refuse to start.
+        systemctl --user disable wayvnc.service wayvnc-clipboard-bridge.service &>/dev/null || true
+        systemctl --user daemon-reload &>/dev/null || true
         systemctl --user enable wayvnc.service wayvnc-clipboard-bridge.service &>/dev/null \
-            && ok "wayvnc + vnc-mod bridge (enabled)" \
-            || warn "wayvnc: enable failed (start after login: systemctl --user enable --now wayvnc wayvnc-clipboard-bridge)"
-        # Try start if session already graphical
-        systemctl --user start wayvnc.service wayvnc-clipboard-bridge.service &>/dev/null || true
+            && ok "wayvnc + vnc-mod bridge (with graphical session)" \
+            || warn "wayvnc: enable failed (after login: systemctl --user enable wayvnc wayvnc-clipboard-bridge)"
+        if systemctl --user is-active -q graphical-session.target; then
+            systemctl --user start wayvnc.service wayvnc-clipboard-bridge.service &>/dev/null || true
+        fi
     else
         warn "wayvnc: systemd --user not available yet (enable after first graphical login)"
-    fi
-    # Linger so user services can start at boot when configured (optional)
-    if command -v loginctl &>/dev/null; then
-        loginctl enable-linger "$USER" &>/dev/null || true
     fi
 else
     info "wayvnc not installed — skip remote desktop services"

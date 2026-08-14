@@ -28,12 +28,12 @@ Space-family Super chords collide under Ctrl+Alt, so several theme binds are **r
 At the physical keyboard, Super is unchanged.
 
 ## Fresh install
-Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units). Install also adds `ufw allow 5900/tcp` (UFW is enabled only if it was already active).
+Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units). Install also adds `ufw allow 5900/tcp` (UFW is enabled only if it was already active). Units are `WantedBy=graphical-session.target` so they start with Hyprland, not at boot — binding them to `default.target` pulled in an empty graphical session and made UWSM/greetd refuse to start.
 
 Manual:
 ```bash
 hypr-vnc-mod ensure
-systemctl --user enable --now wayvnc wayvnc-clipboard-bridge
+systemctl --user enable wayvnc wayvnc-clipboard-bridge
 ```
 
 After changing Super binds:

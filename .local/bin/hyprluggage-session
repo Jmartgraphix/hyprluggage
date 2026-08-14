@@ -65,12 +65,39 @@ if [[ $in_vm -eq 1 ]]; then
 	fi
 fi
 
-# Drop leftover units from earlier failed logins (uwsm then prints a red compositor error)
+# wayvnc used to be WantedBy=default.target with Wants=graphical-session.target.
+# Linger then kept an empty graphical session active, and uwsm refused to start.
+WANTS_DIR="$HOME/.config/systemd/user/default.target.wants"
+if [[ -L $WANTS_DIR/wayvnc.service || -L $WANTS_DIR/wayvnc-clipboard-bridge.service ]]; then
+	log "migrating wayvnc off default.target"
+	systemctl --user disable wayvnc.service wayvnc-clipboard-bridge.service >/dev/null 2>&1 || true
+	systemctl --user daemon-reload >/dev/null 2>&1 || true
+	systemctl --user enable wayvnc.service wayvnc-clipboard-bridge.service >/dev/null 2>&1 || true
+fi
+
 if command -v systemctl >/dev/null 2>&1; then
 	systemctl --user reset-failed >/dev/null 2>&1 || true
-fi
-if [[ -x /usr/bin/uwsm ]]; then
-	/usr/bin/uwsm stop >/dev/null 2>&1 || true
+	if systemctl --user is-active -q graphical-session.target 2>/dev/null; then
+		log "graphical-session.target already active; stopping leftovers"
+		systemctl --user --no-pager --no-legend list-units --state=active >>"$TMPLOG" 2>/dev/null || true
+		# Stop wayvnc first — Restart=always + Wants=graphical-session would pull the target back
+		systemctl --user stop wayvnc.service wayvnc-clipboard-bridge.service >/dev/null 2>&1 || true
+		[[ -x /usr/bin/uwsm ]] && /usr/bin/uwsm stop >/dev/null 2>&1 || true
+		systemctl --user stop 'wayland-wm@*.service' 'wayland-session@*.target' \
+			graphical-session.target graphical-session-pre.target >/dev/null 2>&1 || true
+		systemctl --user unset-environment WAYLAND_DISPLAY DISPLAY HYPRLAND_INSTANCE_SIGNATURE >/dev/null 2>&1 || true
+		n=0
+		while systemctl --user is-active -q graphical-session.target 2>/dev/null; do
+			n=$((n + 1))
+			[[ $n -ge 20 ]] && break
+			sleep 0.2
+		done
+		if systemctl --user is-active -q graphical-session.target 2>/dev/null; then
+			log "WARN: graphical-session.target still active"
+		else
+			log "cleared graphical-session.target"
+		fi
+	fi
 fi
 
 if [[ ! -x /usr/bin/uwsm ]]; then

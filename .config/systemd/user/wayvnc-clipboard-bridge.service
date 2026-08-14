@@ -1,6 +1,7 @@
 [Unit]
 Description=VNC session hooks: clipboard pause + Hyprland Ctrl+Alt binds
 After=wayvnc.service graphical-session.target
+PartOf=graphical-session.target
 Wants=wayvnc.service
 
 [Service]
@@ -10,4 +11,4 @@ Restart=always
 RestartSec=2
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
