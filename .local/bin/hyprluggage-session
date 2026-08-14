@@ -1,7 +1,6 @@
 #!/usr/bin/bash
 # Greetd session: write Hyprland stubs, then start Hyprland via uwsm.
-# greetd gives a stripped environment — set XDG_* ourselves or uwsm cannot
-# find compositor desktop files ("No compositor was selected").
+# greetd gives a stripped environment — set XDG_* / D-Bus ourselves.
 
 export PATH="/usr/local/bin:/usr/bin:/bin${HOME:+:$HOME/.local/bin}${PATH:+:$PATH}"
 if [[ -z "${HOME:-}" ]]; then
@@ -15,6 +14,9 @@ export XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
 export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
+if [[ -z "${DBUS_SESSION_BUS_ADDRESS:-}" && -S ${XDG_RUNTIME_DIR}/bus ]]; then
+	export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+fi
 
 STATE_DIR="${XDG_STATE_HOME}/hyprluggage"
 LOG="$STATE_DIR/session.log"
@@ -24,7 +26,7 @@ mkdir -p "$STATE_DIR" 2>/dev/null || true
 log() { echo "$*" | tee -a "$TMPLOG" >>"$LOG" 2>/dev/null; }
 
 log "---- $(date -Iseconds) uid=$(id -u) user=$(id -un) home=$HOME ----"
-log "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR XDG_DATA_DIRS=$XDG_DATA_DIRS"
+log "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR DBUS=${DBUS_SESSION_BUS_ADDRESS:-unset}"
 
 if [[ -x $HOME/.local/bin/hyprluggage-hw-ensure ]]; then
 	"$HOME/.local/bin/hyprluggage-hw-ensure" ensure >>"$TMPLOG" 2>&1 || log "hw-ensure failed ($?)"
@@ -36,29 +38,53 @@ fi
 if [[ ! -f $STATE_DIR/profile.conf ]]; then
 	echo "source = $HOME/.config/hypr/profiles/desktop.conf" >"$STATE_DIR/profile.conf"
 	echo desktop >"$STATE_DIR/profile"
-	log "wrote fallback profile.conf"
 fi
 if [[ ! -f $STATE_DIR/gpu.conf ]]; then
 	printf '# no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.conf"
 	echo other >"$STATE_DIR/gpu"
-	log "wrote fallback gpu.conf"
 fi
 if [[ ! -f $STATE_DIR/vnc-mod-active.conf ]]; then
 	printf '# Managed by hypr-vnc-mod — empty when no VNC session\n' >"$STATE_DIR/vnc-mod-active.conf"
-	log "wrote fallback vnc-mod-active.conf"
 fi
+log "profile=$(cat "$STATE_DIR/profile" 2>/dev/null) gpu=$(cat "$STATE_DIR/gpu" 2>/dev/null)"
 
+in_vm=0
 if command -v systemd-detect-virt >/dev/null 2>&1 && systemd-detect-virt -q; then
+	in_vm=1
+elif grep -q hypervisor /proc/cpuinfo 2>/dev/null; then
+	in_vm=1
+fi
+if [[ $in_vm -eq 1 ]]; then
 	export AQ_NO_MODIFIERS=1
 	log "virt detected: AQ_NO_MODIFIERS=1"
+	# NVIDIA overlay in a guest makes Aquamarine fail to start the compositor
+	if grep -q nvidia.conf "$STATE_DIR/gpu.conf" 2>/dev/null; then
+		printf '# no NVIDIA GPU overlay (forced off under virt)\n' >"$STATE_DIR/gpu.conf"
+		echo other >"$STATE_DIR/gpu"
+		log "cleared nvidia overlay for virt"
+	fi
 fi
 
-if [[ ! -x /usr/bin/uwsm || ! -x /usr/bin/Hyprland ]]; then
-	log "missing /usr/bin/uwsm or /usr/bin/Hyprland"
+# Drop leftover units from earlier failed logins (uwsm then prints a red compositor error)
+if command -v systemctl >/dev/null 2>&1; then
+	systemctl --user reset-failed >/dev/null 2>&1 || true
+fi
+if [[ -x /usr/bin/uwsm ]]; then
+	/usr/bin/uwsm stop >/dev/null 2>&1 || true
+fi
+
+if [[ ! -x /usr/bin/uwsm ]]; then
+	log "missing /usr/bin/uwsm"
 	exit 1
 fi
 
-# Start Hyprland by path so uwsm does not need to resolve a .desktop ID
-# (stripped greetd env often has empty XDG_DATA_DIRS → red "compositor" error).
-log "exec /usr/bin/uwsm start -e -D Hyprland -- /usr/bin/Hyprland"
-exec /usr/bin/uwsm start -e -D Hyprland -- /usr/bin/Hyprland
+# Match CachyOS hyprland.desktop (Exec=/usr/bin/start-hyprland) with data dirs set
+# so uwsm can resolve the desktop file. Log uwsm output — do not exec, so a
+# failure is written here instead of only flashing on the TTY.
+log "uwsm start hyprland.desktop"
+set +e
+/usr/bin/uwsm start hyprland.desktop >>"$TMPLOG" 2>&1
+rc=$?
+set -e
+log "uwsm exited $rc"
+exit "$rc"
