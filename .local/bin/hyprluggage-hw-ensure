@@ -21,11 +21,11 @@ detect_laptop() {
 
 detect_vm() {
 	# qemu/kvm, vmware, hyperv, etc. Prefer systemd; fall back to CPUID hypervisor bit.
+	# Keep this in &&/|| form so `set -e` cannot abort the script on "not a VM".
 	if command -v systemd-detect-virt >/dev/null 2>&1; then
-		systemd-detect-virt -q
-		return
+		systemd-detect-virt -q && return 0 || return 1
 	fi
-	grep -q hypervisor /proc/cpuinfo 2>/dev/null
+	grep -q hypervisor /proc/cpuinfo 2>/dev/null && return 0 || return 1
 }
 
 # Default GPU for auto-detect: bare-metal NVIDIA → nvidia; guests → other

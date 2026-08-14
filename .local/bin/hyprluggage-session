@@ -1,14 +1,50 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 # Greetd / tuigreet session entrypoint for Hyprluggage.
-# Runs hw-ensure before Hyprland so profile.conf / gpu.conf always exist.
-set -euo pipefail
+# Must be a login-session command: write Hyprland source stubs, then exec uwsm.
+# Do not use `env bash` or `set -u` — greetd starts this with a stripped environment.
 
-export PATH="${HOME}/.local/bin:${PATH:-/usr/bin:/bin}"
+export PATH="/usr/local/bin:/usr/bin:/bin:${HOME:+$HOME/.local/bin:}${PATH:-}"
+export HOME="${HOME:-$(getent passwd "$(id -un)" | cut -d: -f6)}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
-if [[ -x "${HOME}/.local/bin/hyprluggage-hw-ensure" ]]; then
-	"${HOME}/.local/bin/hyprluggage-hw-ensure" ensure >/dev/null 2>&1 || true
-elif command -v hyprluggage-hw-ensure >/dev/null 2>&1; then
-	hyprluggage-hw-ensure ensure >/dev/null 2>&1 || true
-fi
+STATE_DIR="${XDG_STATE_HOME}/hyprluggage"
+LOG="$STATE_DIR/session.log"
+mkdir -p "$STATE_DIR"
 
-exec uwsm start hyprland.desktop
+{
+	echo "---- $(date -Iseconds) uid=$(id -u) user=$(id -un) home=$HOME ----"
+
+	if [[ -x "$HOME/.local/bin/hyprluggage-hw-ensure" ]]; then
+		"$HOME/.local/bin/hyprluggage-hw-ensure" ensure || echo "hw-ensure failed ($?)"
+	elif [[ -x /usr/local/bin/hyprluggage-hw-ensure ]]; then
+		/usr/local/bin/hyprluggage-hw-ensure ensure || echo "hw-ensure failed ($?)"
+	fi
+	if [[ -x "$HOME/.local/bin/hypr-vnc-mod" ]]; then
+		"$HOME/.local/bin/hypr-vnc-mod" ensure || echo "vnc-mod ensure failed ($?)"
+	fi
+
+	# Hyprland sources these; missing files make it exit and bounce to tuigreet.
+	if [[ ! -f "$STATE_DIR/profile.conf" ]]; then
+		echo "source = $HOME/.config/hypr/profiles/desktop.conf" >"$STATE_DIR/profile.conf"
+		echo "desktop" >"$STATE_DIR/profile"
+		echo "wrote fallback profile.conf"
+	fi
+	if [[ ! -f "$STATE_DIR/gpu.conf" ]]; then
+		printf '# no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.conf"
+		echo "other" >"$STATE_DIR/gpu"
+		echo "wrote fallback gpu.conf"
+	fi
+	if [[ ! -f "$STATE_DIR/vnc-mod-active.conf" ]]; then
+		printf '# Managed by hypr-vnc-mod — empty when no VNC session\n' >"$STATE_DIR/vnc-mod-active.conf"
+		echo "wrote fallback vnc-mod-active.conf"
+	fi
+
+	if [[ ! -x /usr/bin/uwsm ]]; then
+		echo "uwsm not found at /usr/bin/uwsm"
+		exit 1
+	fi
+	echo "exec /usr/bin/uwsm start hyprland.desktop"
+} >>"$LOG" 2>&1
+
+exec /usr/bin/uwsm start hyprland.desktop

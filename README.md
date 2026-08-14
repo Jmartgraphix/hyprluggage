@@ -529,11 +529,13 @@ hyprluggage fix
 - Verify you're on Arch Linux or CachyOS
 - See [install/themes/README.md](install/themes/README.md) for theme-specific issues
 
-**Hyprland not starting / greetd crash loop?**
-- Check logs: `journalctl -u greetd -b` or `~/.local/share/hyprland/hyprland.log`
-- If you see `greeter exited without creating a session` / `start-limit-hit`, tuigreet's session command is wrong — it must use `--cmd`. Re-apply the template from this repo (as the install user):
+**Hyprland not starting / greetd login loops back to tuigreet?**
+- Check: `journalctl -u greetd -b` and `~/.local/state/hyprluggage/session.log`
+- If you see `greeter exited without creating a session` / `start-limit-hit`, tuigreet's session command is wrong — it must use `--cmd`.
+- After pulling a greetd fix, re-apply as the install user:
 
 ```bash
+sudo install -Dm755 ~/hyprluggage/.local/bin/hyprluggage-session /usr/local/bin/hyprluggage-session
 sed "s/{{USER}}/$USER/g" ~/hyprluggage/install/greetd-config.toml | sudo tee /etc/greetd/config.toml
 sudo systemctl reset-failed greetd
 sudo systemctl restart greetd

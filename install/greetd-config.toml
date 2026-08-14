@@ -3,19 +3,20 @@
 # designating the VT.
 vt = 2
 
-# HyprLuggage default session: greetd runs tuigreet, which starts Hyprland on login.
+# HyprLuggage: greetd runs tuigreet; after login the session is hyprluggage-session
+# (hw-ensure stubs, then uwsm + Hyprland).
 # The installer replaces {{USER}} with the username running ./install.sh.
 #
-# Session command MUST be passed to tuigreet with --cmd. Trailing bare args are
-# treated as tuigreet flags and make the greeter exit immediately (crash loop).
-# hyprluggage-session runs hw-ensure, then uwsm + Hyprland.
+# tuigreet MUST get the session via --cmd. Bare trailing args are treated as
+# tuigreet flags and the greeter exits (crash loop).
+# Use /usr/local/bin so greetd does not depend on a stow symlink in $HOME.
 
 [initial_session]
 # Auto-login session (runs directly on boot as {{USER}})
-command = "/home/{{USER}}/.local/bin/hyprluggage-session"
+command = "/usr/local/bin/hyprluggage-session"
 user = "{{USER}}"
 
 [default_session]
-# Greeter after logout / if initial_session is unset
-command = "tuigreet --time --time-format '%H:%M' --asterisks --greeting 'Welcome to Hyprluggage' --theme 'border=lightgray;prompt=white;title=white;time=lightgray;container=blue;action=cyan;button=orange' --cmd /home/{{USER}}/.local/bin/hyprluggage-session"
+# Greeter after logout / if initial_session fails
+command = "tuigreet --time --time-format '%H:%M' --asterisks --greeting 'Welcome to Hyprluggage' --theme 'border=lightgray;prompt=white;title=white;time=lightgray;container=blue;action=cyan;button=orange' --cmd /usr/local/bin/hyprluggage-session"
 user = "greeter"

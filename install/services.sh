@@ -235,6 +235,14 @@ if pkg_installed greetd; then
     GREETD_CONFIG="/etc/greetd/config.toml"
     
     if [[ -f "$GREETD_TEMPLATE" ]]; then
+        # System-wide session wrapper so greetd does not depend on ~/.local/bin stow
+        SESSION_SRC="$DOTFILES_ROOT/.local/bin/hyprluggage-session"
+        if [[ -f "$SESSION_SRC" ]]; then
+            sudo install -Dm755 "$SESSION_SRC" /usr/local/bin/hyprluggage-session \
+                && ok "hyprluggage-session → /usr/local/bin" \
+                || warn "failed to install /usr/local/bin/hyprluggage-session"
+        fi
+
         # Create greetd config directory (don't fail if it already exists)
         sudo mkdir -p /etc/greetd || true
         
