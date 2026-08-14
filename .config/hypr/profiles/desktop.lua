@@ -1,0 +1,2 @@
+-- Hyprluggage desktop profile overlay
+-- hypridle stays killed via autostart.lua (streaming-safe default)

@@ -94,11 +94,16 @@ else
     printf '%s\n' "$HYPRLUGGAGE_GPU" >"$STATE_DIR/gpu"
     printf '# Managed by install.sh — form factor: %s\nsource = %s/.config/hypr/profiles/%s.conf\n' \
         "$HYPRLUGGAGE_PROFILE" "$HOME" "$HYPRLUGGAGE_PROFILE" >"$STATE_DIR/profile.conf"
+    printf -- '-- Managed by install.sh — form factor: %s\ndofile("%s/.config/hypr/profiles/%s.lua")\n' \
+        "$HYPRLUGGAGE_PROFILE" "$HOME" "$HYPRLUGGAGE_PROFILE" >"$STATE_DIR/profile.lua"
     if [[ "$HYPRLUGGAGE_GPU" == "nvidia" ]]; then
         printf '# Managed by install.sh — GPU: nvidia\nsource = %s/.config/hypr/profiles/nvidia.conf\n' \
             "$HOME" >"$STATE_DIR/gpu.conf"
+        printf -- '-- Managed by install.sh — GPU: nvidia\ndofile("%s/.config/hypr/profiles/nvidia.lua")\n' \
+            "$HOME" >"$STATE_DIR/gpu.lua"
     else
         printf '# Managed by install.sh — no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.conf"
+        printf -- '-- Managed by install.sh — no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.lua"
     fi
 fi
 export HYPRLUGGAGE_PROFILE HYPRLUGGAGE_GPU

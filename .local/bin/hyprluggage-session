@@ -42,13 +42,18 @@ if [[ -e $HOME/.config/autostart/cachyos-hello.desktop || -e /etc/skel/.config/a
 	printf '[Desktop Entry]\nHidden=true\n' >"$HOME/.config/autostart/cachyos-hello.desktop"
 fi
 
-if [[ ! -f $STATE_DIR/profile.conf ]]; then
-	echo "source = $HOME/.config/hypr/profiles/desktop.conf" >"$STATE_DIR/profile.conf"
+if [[ ! -f $STATE_DIR/profile.lua ]]; then
 	echo desktop >"$STATE_DIR/profile"
+	printf -- '-- Managed by hyprluggage-session\ndofile("%s/.config/hypr/profiles/desktop.lua")\n' "$HOME" >"$STATE_DIR/profile.lua"
+	printf '# Managed by hyprluggage-session\nsource = %s/.config/hypr/profiles/desktop.conf\n' "$HOME" >"$STATE_DIR/profile.conf"
 fi
-if [[ ! -f $STATE_DIR/gpu.conf ]]; then
-	printf '# no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.conf"
+if [[ ! -f $STATE_DIR/gpu.lua ]]; then
 	echo other >"$STATE_DIR/gpu"
+	printf -- '-- no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.lua"
+	printf '# no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.conf"
+fi
+if [[ ! -f $STATE_DIR/vnc-mod-active.lua ]]; then
+	printf -- '-- Managed by hypr-vnc-mod — empty when no VNC session\n' >"$STATE_DIR/vnc-mod-active.lua"
 fi
 if [[ ! -f $STATE_DIR/vnc-mod-active.conf ]]; then
 	printf '# Managed by hypr-vnc-mod — empty when no VNC session\n' >"$STATE_DIR/vnc-mod-active.conf"
@@ -65,8 +70,9 @@ if [[ $in_vm -eq 1 ]]; then
 	export AQ_NO_MODIFIERS=1
 	log "virt detected: AQ_NO_MODIFIERS=1"
 	# NVIDIA overlay in a guest makes Aquamarine fail to start the compositor
-	if grep -q nvidia.conf "$STATE_DIR/gpu.conf" 2>/dev/null; then
+	if grep -qE 'nvidia\.(conf|lua)' "$STATE_DIR/gpu.conf" "$STATE_DIR/gpu.lua" 2>/dev/null; then
 		printf '# no NVIDIA GPU overlay (forced off under virt)\n' >"$STATE_DIR/gpu.conf"
+		printf -- '-- no NVIDIA GPU overlay (forced off under virt)\n' >"$STATE_DIR/gpu.lua"
 		echo other >"$STATE_DIR/gpu"
 		log "cleared nvidia overlay for virt"
 	fi

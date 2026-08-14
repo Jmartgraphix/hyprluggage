@@ -8,6 +8,8 @@ PROFILE_FILE="$STATE_DIR/profile"
 GPU_FILE="$STATE_DIR/gpu"
 PROFILE_CONF="$STATE_DIR/profile.conf"
 GPU_CONF="$STATE_DIR/gpu.conf"
+PROFILE_LUA="$STATE_DIR/profile.lua"
+GPU_LUA="$STATE_DIR/gpu.lua"
 HYPR_PROFILES="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/profiles"
 
 detect_nvidia() {
@@ -46,6 +48,10 @@ write_profile_stub() {
 # Managed by hyprluggage-hw-ensure — form factor: $profile
 source = $HYPR_PROFILES/${profile}.conf
 EOF
+	cat >"$PROFILE_LUA" <<EOF
+-- Managed by hyprluggage-hw-ensure — form factor: $profile
+dofile("$HYPR_PROFILES/${profile}.lua")
+EOF
 }
 
 write_gpu_stub() {
@@ -57,9 +63,16 @@ write_gpu_stub() {
 # Managed by hyprluggage-hw-ensure — GPU: nvidia
 source = $HYPR_PROFILES/nvidia.conf
 EOF
+		cat >"$GPU_LUA" <<EOF
+-- Managed by hyprluggage-hw-ensure — GPU: nvidia
+dofile("$HYPR_PROFILES/nvidia.lua")
+EOF
 	else
 		cat >"$GPU_CONF" <<'EOF'
 # Managed by hyprluggage-hw-ensure — no NVIDIA GPU overlay
+EOF
+		cat >"$GPU_LUA" <<'EOF'
+-- Managed by hyprluggage-hw-ensure — no NVIDIA GPU overlay
 EOF
 	fi
 }
@@ -124,7 +137,7 @@ usage() {
 	cat <<'EOF'
 Usage: hyprluggage-hw-ensure <command>
 
-  ensure              Write profile.conf / gpu.conf if missing (or refresh from saved choice)
+  ensure              Write profile/gpu stubs if missing (or refresh from saved choice)
   set <profile> <gpu> Force profile (desktop|laptop) and gpu (nvidia|other)
   detect              Print detected form=, gpu=, virt= (no write)
 

@@ -19,10 +19,12 @@ if [[ -z "${WAYLAND_DISPLAY}" ]]; then
 fi
 
 HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
-GENERATED="$HYPR_DIR/vnc-mod-generated.conf"
+GENERATED="$HYPR_DIR/vnc-mod-generated.lua"
+GENERATED_CONF="$HYPR_DIR/vnc-mod-generated.conf"
 # Outside the stowed ~/.config/hypr tree so apply/clear never dirties the git repo
 ACTIVE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
-ACTIVE="$ACTIVE_DIR/vnc-mod-active.conf"
+ACTIVE="$ACTIVE_DIR/vnc-mod-active.lua"
+ACTIVE_CONF="$ACTIVE_DIR/vnc-mod-active.conf"
 STATE_DIR="${XDG_RUNTIME_DIR}/wayvnc-vncmod"
 STATE_FILE="$STATE_DIR/active"
 GEN="${SCRIPT_DIR}/hypr-vnc-mod-gen.sh"
@@ -30,6 +32,9 @@ GEN="${SCRIPT_DIR}/hypr-vnc-mod-gen.sh"
 write_active_empty() {
   mkdir -p "$ACTIVE_DIR"
   cat > "$ACTIVE" << 'INNER'
+-- Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)
+INNER
+  cat > "$ACTIVE_CONF" << 'INNER'
 # Managed by hypr-vnc-mod — empty when no VNC session (no extra binds)
 INNER
 }
@@ -37,8 +42,12 @@ INNER
 write_active_source() {
   mkdir -p "$ACTIVE_DIR"
   cat > "$ACTIVE" << INNER
+-- Managed by hypr-vnc-mod — loaded only while VNC clients are connected
+dofile("$GENERATED")
+INNER
+  cat > "$ACTIVE_CONF" << INNER
 # Managed by hypr-vnc-mod — loaded only while VNC clients are connected
-source = $GENERATED
+source = $GENERATED_CONF
 INNER
 }
 
@@ -66,7 +75,8 @@ cmd_generate() {
     echo "missing generator: $GEN" >&2
     return 1
   fi
-  "$GEN" "$GENERATED"
+  # Generator still reads .conf bind sources; emits both .conf seed and .lua for Hyprland
+  "$GEN" "$GENERATED_CONF"
 }
 
 cmd_apply() {
@@ -76,7 +86,7 @@ cmd_apply() {
   if hypr_reload; then
     touch "$STATE_FILE"
     logger -t wayvnc-vncmod "applied CTRL+ALT VNC mod binds"
-    echo "vnc-mod: applied ($(grep -cE '^\s*bind' "$GENERATED" 2>/dev/null || echo 0) binds)"
+    echo "vnc-mod: applied ($(grep -cE '^\s*hl\.bind' "$GENERATED" 2>/dev/null || echo 0) binds)"
   else
     echo "vnc-mod: generated but hyprctl reload failed" >&2
     return 1
@@ -101,12 +111,12 @@ cmd_status() {
     echo "state: inactive (desktop Super-only)"
   fi
   if [[ -f "$GENERATED" ]]; then
-    echo "generated: $(grep -cE '^\s*bind' "$GENERATED" 2>/dev/null || echo 0) binds in $GENERATED"
+    echo "generated: $(grep -cE '^\s*hl\.bind' "$GENERATED" 2>/dev/null || echo 0) binds in $GENERATED"
   else
     echo "generated: missing (run: hypr-vnc-mod generate)"
   fi
   if [[ -f "$ACTIVE" ]] && grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null; then
-    echo "active-file: sourcing generated conf"
+    echo "active-file: dofile generated lua"
   else
     echo "active-file: empty/not sourcing"
   fi

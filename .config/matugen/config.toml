@@ -1,8 +1,8 @@
 [config]
 
 [templates.hyprland]
-input_path = '~/.config/matugen/templates/hyprland-colors.conf'
-output_path = '~/hyprluggage/themes/dynamic/.config/hypr/theme/colors.conf'
+input_path = '~/.config/matugen/templates/hyprland-colors.lua'
+output_path = '~/hyprluggage/themes/dynamic/.config/hypr/theme/colors.lua'
 
 [templates.kitty]
 input_path = '~/.config/matugen/templates/kitty-colors.conf'
