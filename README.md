@@ -535,14 +535,19 @@ hyprluggage fix
 - After pulling a greetd fix, re-apply as the install user:
 
 ```bash
-sudo install -Dm755 ~/hyprluggage/.local/bin/hyprluggage-session /usr/local/bin/hyprluggage-session
+cd ~/hyprluggage && git pull
+sudo install -Dm755 ~/hyprluggage/.local/bin/hyprluggage-session /etc/greetd/hyprluggage-session
+sudo mkdir -p /etc/tuigreet
+sudo install -Dm644 ~/hyprluggage/install/tuigreet-config.toml /etc/tuigreet/config.toml
 sed "s/{{USER}}/$USER/g" ~/hyprluggage/install/greetd-config.toml | sudo tee /etc/greetd/config.toml
 sudo systemctl reset-failed greetd
 sudo systemctl restart greetd
 ```
 
-- Verify graphics drivers are installed
-- Ensure you're using a Wayland-compatible setup
+If it still loops, check:
+- `/tmp/hyprluggage-session-$(id -u).log`
+- `~/.local/state/hyprluggage/session.log`
+- `journalctl -u greetd -b --no-pager | tail -50`
 
 **Keybindings not working?**
 - Check `~/.config/hypr/bindings.conf` (and `tiling.conf` / `media.conf`) for conflicts

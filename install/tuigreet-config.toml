@@ -1,0 +1,9 @@
+# Installed to /etc/tuigreet/config.toml by install/services.sh
+# CLI --cmd still comes from greetd-config.toml (must stay a simple argv).
+
+[greeter]
+time = true
+time-format = "%H:%M"
+greeting = "Welcome to Hyprluggage"
+asterisks = true
+theme = "border=lightgray;prompt=white;title=white;time=lightgray;container=blue;action=cyan;button=orange"

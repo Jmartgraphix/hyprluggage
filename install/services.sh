@@ -238,9 +238,18 @@ if pkg_installed greetd; then
         # System-wide session wrapper so greetd does not depend on ~/.local/bin stow
         SESSION_SRC="$DOTFILES_ROOT/.local/bin/hyprluggage-session"
         if [[ -f "$SESSION_SRC" ]]; then
-            sudo install -Dm755 "$SESSION_SRC" /usr/local/bin/hyprluggage-session \
-                && ok "hyprluggage-session → /usr/local/bin" \
-                || warn "failed to install /usr/local/bin/hyprluggage-session"
+            sudo install -Dm755 "$SESSION_SRC" /etc/greetd/hyprluggage-session \
+                && ok "hyprluggage-session → /etc/greetd" \
+                || warn "failed to install /etc/greetd/hyprluggage-session"
+            sudo install -Dm755 "$SESSION_SRC" /usr/local/bin/hyprluggage-session || true
+        fi
+
+        TUIGREET_SRC="$DOTFILES_ROOT/install/tuigreet-config.toml"
+        if [[ -f "$TUIGREET_SRC" ]]; then
+            sudo mkdir -p /etc/tuigreet
+            sudo install -Dm644 "$TUIGREET_SRC" /etc/tuigreet/config.toml \
+                && ok "tuigreet config" \
+                || warn "failed to install /etc/tuigreet/config.toml"
         fi
 
         # Create greetd config directory (don't fail if it already exists)

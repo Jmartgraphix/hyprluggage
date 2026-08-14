@@ -1,50 +1,64 @@
 #!/usr/bin/bash
-# Greetd / tuigreet session entrypoint for Hyprluggage.
-# Must be a login-session command: write Hyprland source stubs, then exec uwsm.
-# Do not use `env bash` or `set -u` — greetd starts this with a stripped environment.
+# Greetd session: write Hyprland stubs, then start Hyprland via uwsm.
+# greetd gives a stripped environment — set XDG_* ourselves or uwsm cannot
+# find compositor desktop files ("No compositor was selected").
 
-export PATH="/usr/local/bin:/usr/bin:/bin:${HOME:+$HOME/.local/bin:}${PATH:-}"
-export HOME="${HOME:-$(getent passwd "$(id -un)" | cut -d: -f6)}"
-export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export PATH="/usr/local/bin:/usr/bin:/bin${HOME:+:$HOME/.local/bin}${PATH:+:$PATH}"
+if [[ -z "${HOME:-}" ]]; then
+	HOME=$(getent passwd "$(id -un)" | cut -d: -f6)
+	export HOME
+fi
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
 
 STATE_DIR="${XDG_STATE_HOME}/hyprluggage"
 LOG="$STATE_DIR/session.log"
-mkdir -p "$STATE_DIR"
+TMPLOG="/tmp/hyprluggage-session-$(id -u).log"
+mkdir -p "$STATE_DIR" 2>/dev/null || true
 
-{
-	echo "---- $(date -Iseconds) uid=$(id -u) user=$(id -un) home=$HOME ----"
+log() { echo "$*" | tee -a "$TMPLOG" >>"$LOG" 2>/dev/null; }
 
-	if [[ -x "$HOME/.local/bin/hyprluggage-hw-ensure" ]]; then
-		"$HOME/.local/bin/hyprluggage-hw-ensure" ensure || echo "hw-ensure failed ($?)"
-	elif [[ -x /usr/local/bin/hyprluggage-hw-ensure ]]; then
-		/usr/local/bin/hyprluggage-hw-ensure ensure || echo "hw-ensure failed ($?)"
-	fi
-	if [[ -x "$HOME/.local/bin/hypr-vnc-mod" ]]; then
-		"$HOME/.local/bin/hypr-vnc-mod" ensure || echo "vnc-mod ensure failed ($?)"
-	fi
+log "---- $(date -Iseconds) uid=$(id -u) user=$(id -un) home=$HOME ----"
+log "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR XDG_DATA_DIRS=$XDG_DATA_DIRS"
 
-	# Hyprland sources these; missing files make it exit and bounce to tuigreet.
-	if [[ ! -f "$STATE_DIR/profile.conf" ]]; then
-		echo "source = $HOME/.config/hypr/profiles/desktop.conf" >"$STATE_DIR/profile.conf"
-		echo "desktop" >"$STATE_DIR/profile"
-		echo "wrote fallback profile.conf"
-	fi
-	if [[ ! -f "$STATE_DIR/gpu.conf" ]]; then
-		printf '# no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.conf"
-		echo "other" >"$STATE_DIR/gpu"
-		echo "wrote fallback gpu.conf"
-	fi
-	if [[ ! -f "$STATE_DIR/vnc-mod-active.conf" ]]; then
-		printf '# Managed by hypr-vnc-mod — empty when no VNC session\n' >"$STATE_DIR/vnc-mod-active.conf"
-		echo "wrote fallback vnc-mod-active.conf"
-	fi
+if [[ -x $HOME/.local/bin/hyprluggage-hw-ensure ]]; then
+	"$HOME/.local/bin/hyprluggage-hw-ensure" ensure >>"$TMPLOG" 2>&1 || log "hw-ensure failed ($?)"
+fi
+if [[ -x $HOME/.local/bin/hypr-vnc-mod ]]; then
+	"$HOME/.local/bin/hypr-vnc-mod" ensure >>"$TMPLOG" 2>&1 || log "vnc-mod ensure failed ($?)"
+fi
 
-	if [[ ! -x /usr/bin/uwsm ]]; then
-		echo "uwsm not found at /usr/bin/uwsm"
-		exit 1
-	fi
-	echo "exec /usr/bin/uwsm start hyprland.desktop"
-} >>"$LOG" 2>&1
+if [[ ! -f $STATE_DIR/profile.conf ]]; then
+	echo "source = $HOME/.config/hypr/profiles/desktop.conf" >"$STATE_DIR/profile.conf"
+	echo desktop >"$STATE_DIR/profile"
+	log "wrote fallback profile.conf"
+fi
+if [[ ! -f $STATE_DIR/gpu.conf ]]; then
+	printf '# no NVIDIA GPU overlay\n' >"$STATE_DIR/gpu.conf"
+	echo other >"$STATE_DIR/gpu"
+	log "wrote fallback gpu.conf"
+fi
+if [[ ! -f $STATE_DIR/vnc-mod-active.conf ]]; then
+	printf '# Managed by hypr-vnc-mod — empty when no VNC session\n' >"$STATE_DIR/vnc-mod-active.conf"
+	log "wrote fallback vnc-mod-active.conf"
+fi
 
-exec /usr/bin/uwsm start hyprland.desktop
+if command -v systemd-detect-virt >/dev/null 2>&1 && systemd-detect-virt -q; then
+	export AQ_NO_MODIFIERS=1
+	log "virt detected: AQ_NO_MODIFIERS=1"
+fi
+
+if [[ ! -x /usr/bin/uwsm || ! -x /usr/bin/Hyprland ]]; then
+	log "missing /usr/bin/uwsm or /usr/bin/Hyprland"
+	exit 1
+fi
+
+# Start Hyprland by path so uwsm does not need to resolve a .desktop ID
+# (stripped greetd env often has empty XDG_DATA_DIRS → red "compositor" error).
+log "exec /usr/bin/uwsm start -e -D Hyprland -- /usr/bin/Hyprland"
+exec /usr/bin/uwsm start -e -D Hyprland -- /usr/bin/Hyprland
