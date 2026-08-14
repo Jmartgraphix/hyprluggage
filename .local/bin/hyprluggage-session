@@ -35,6 +35,13 @@ if [[ -x $HOME/.local/bin/hypr-vnc-mod ]]; then
 	"$HOME/.local/bin/hypr-vnc-mod" ensure >>"$TMPLOG" 2>&1 || log "vnc-mod ensure failed ($?)"
 fi
 
+# CachyOS copies Hello into ~/.config/autostart from /etc/skel. Hide it before
+# UWSM starts xdg-desktop-autostart.target (Hyprluggage has its own first-run).
+mkdir -p "$HOME/.config/autostart"
+if [[ -e $HOME/.config/autostart/cachyos-hello.desktop || -e /etc/skel/.config/autostart/cachyos-hello.desktop ]]; then
+	printf '[Desktop Entry]\nHidden=true\n' >"$HOME/.config/autostart/cachyos-hello.desktop"
+fi
+
 if [[ ! -f $STATE_DIR/profile.conf ]]; then
 	echo "source = $HOME/.config/hypr/profiles/desktop.conf" >"$STATE_DIR/profile.conf"
 	echo desktop >"$STATE_DIR/profile"

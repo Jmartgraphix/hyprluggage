@@ -6,6 +6,10 @@ MARKER="$HOME/.local/state/hyprluggage/first-run-done"
 # Wait for Hyprland to initialize
 sleep 2
 
+# CachyOS ISO autostarts Hello; Hyprluggage has its own welcome notifications
+mkdir -p "$HOME/.config/autostart"
+printf '[Desktop Entry]\nHidden=true\n' >"$HOME/.config/autostart/cachyos-hello.desktop"
+
 # Apply default theme
 ~/hyprluggage/install/themes/hyprluggage switch octarine
 

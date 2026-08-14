@@ -100,13 +100,15 @@ if pkg_installed bluez; then
     sudo systemctl enable --now bluetooth &>/dev/null && ok "bluetooth" || warn "bluetooth failed"
 fi
 
-# ── Tray Applets ──────────────────────────────────────────────────────────────
-# Disable blueman/nm-applet (waybar handles these)
-for app in blueman nm-applet; do
-    [[ -f "/etc/xdg/autostart/${app}.desktop" ]] || continue
-    mkdir -p ~/.config/autostart
-    echo -e "[Desktop Entry]\nHidden=true" > ~/.config/autostart/${app}.desktop
-    ok "Disabled ${app} tray (waybar module used instead)"
+# ── Tray Applets / distro welcome ─────────────────────────────────────────────
+# Disable blueman/nm-applet (waybar handles these). Hide CachyOS Hello from
+# /etc/skel autostart so a fresh ISO user does not get it on every login.
+mkdir -p ~/.config/autostart
+for app in blueman nm-applet cachyos-hello; do
+    if [[ -f "/etc/xdg/autostart/${app}.desktop" || -f "$HOME/.config/autostart/${app}.desktop" || -f "/etc/skel/.config/autostart/${app}.desktop" ]]; then
+        printf '[Desktop Entry]\nHidden=true\n' >"$HOME/.config/autostart/${app}.desktop"
+        ok "Disabled ${app} autostart"
+    fi
 done
 
 # ── GTK ───────────────────────────────────────────────────────────────────────
