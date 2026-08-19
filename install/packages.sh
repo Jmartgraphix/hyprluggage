@@ -82,7 +82,7 @@ packages=(
 applications=(
 	 zen-browser-bin firefox chromium
 	obsidian bitwarden code visual-studio-code-bin
-	vesktop-bin discord keychain zed opencode
+	vesktop-bin discord keychain zed opencode herdr-bin
 	mpv yt-dlp steam lutris gamemode mangohud typora
 )
 

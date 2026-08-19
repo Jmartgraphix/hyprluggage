@@ -213,6 +213,7 @@ The installer will:
    - Extra browsers (Firefox, Chromium, Zen)
    - Editors (VS Code, Zed, Obsidian)
    - Communication (Discord, Vesktop)
+   - Coding agents (OpenCode, Herdr)
    - And other productivity apps
 
 3. **Set up system services:**
