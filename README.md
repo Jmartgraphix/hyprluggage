@@ -202,7 +202,7 @@ The installer will:
    - Browser (Brave)
    - Remote desktop (wayvnc) and SSH (openssh)
    - Firewall (ufw) with allow rules for SSH, VNC, LocalSend, and KDE Connect
-   - Terminal emulators (Kitty, Alacritty; Ghostty configs included if you install it yourself)
+   - Terminal emulators (Kitty, Ghostty, Alacritty; Kitty is the default Super+Return terminal)
    - Shell and tools (Fish, Starship, tmux)
    - File managers (Thunar, Yazi)
    - Editor (Neovim)
@@ -268,7 +268,7 @@ After installation:
    Or press `Super + Ctrl + Shift + Space` for the interactive picker
 3. **Explore keybindings:** Press `Super + K` to see all available shortcuts
 4. **Customize:** Edit configs in `~/.config/` - they won't be overwritten
-5. **Switch themes anytime:** Use `hyprluggage switch` or the TUI (`Super + I`)
+5. **Switch themes anytime:** Use `hyprluggage switch` or the TUI (`Super + I`). The TUI also has **Choose Shell** and **Choose Terminal** (Super+Return / tmux only; system menus stay on Kitty).
 
 ---
 
@@ -302,7 +302,7 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 
 | Key | Action |
 |-----|--------|
-| `Super + Return` | Terminal |
+| `Super + Return` | Working terminal (Kitty default; change in Hyprluggage TUI) |
 | `Super + B` | Browser |
 | `Super + E` | File Manager (Thunar) |
 | `Super + M` | Spotify |
@@ -417,7 +417,7 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf), [tiling.conf](.con
 | Launcher | [Rofi](https://github.com/lbonn/rofi) | Application launcher and menu system with multiple modes |
 | Wallpaper | [awww](https://codeberg.org/LGFae/awww) | Wayland wallpaper daemon (theme wallpapers + Matugen) |
 | OSD | [SwayOSD](https://github.com/ErikReider/SwayOSD) | On-screen display for volume, brightness, and caps lock |
-| Terminal | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Alacritty](https://alacritty.org/) | GPU-accelerated terminals installed by default; [Ghostty](https://ghostty.org/) configs included if you install it |
+| Terminal | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Ghostty](https://ghostty.org/) / [Alacritty](https://alacritty.org/) | All three installed; Kitty is the default Super+Return terminal and system TUI host. Pick Ghostty or Alacritty as the working terminal from the Hyprluggage TUI. Alacritty also runs the screensaver. |
 | File Manager | [Thunar](https://docs.xfce.org/xfce/thunar/start) (GUI) / [Yazi](https://github.com/sxyazi/yazi) (CLI) | Dual file managers for GUI and terminal workflows |
 | Notifications | [Mako](https://github.com/emersion/mako) | Lightweight notification daemon with theme support |
 | Lock screen | [Hyprlock](https://github.com/hyprwm/hyprlock) | Secure lock screen integrated with Hyprland |
@@ -439,7 +439,7 @@ All configuration files are located in `~/.config/`. You can edit them directly�
 - **Hyprland settings:** `~/.config/hypr/` - Window rules, animations, monitors
 - **Waybar:** `~/.config/waybar/` - Status bar modules and styling
 - **Rofi:** `~/.config/rofi/` - Launcher appearance and scripts
-- **Terminal:** `~/.config/kitty/` or `~/.config/alacritty/` - Terminal settings
+- **Terminal:** `~/.config/kitty/`, `~/.config/ghostty/`, or `~/.config/alacritty/` - Terminal settings
 - **Shell:** `~/.config/fish/` - Fish shell configuration
 
 **Theme customization:**
@@ -462,9 +462,9 @@ All configuration files are located in `~/.config/`. You can edit them directly�
 │   ├── mako/           # Notifications
 │   ├── swayosd/        # OSD (volume/brightness)
 │   ├── wayvnc/         # Remote desktop server
-│   ├── kitty/          # Terminal
-│   ├── ghostty/        # Terminal (alt; not auto-installed)
-│   ├── alacritty/      # Terminal (alt)
+│   ├── kitty/          # Terminal (system TUIs + default Super+Return)
+│   ├── ghostty/        # Terminal (optional working terminal)
+│   ├── alacritty/      # Terminal (screensaver + optional working terminal)
 │   ├── nvim/           # Neovim
 │   ├── fish/           # Shell
 │   ├── tmux/           # Terminal multiplexer

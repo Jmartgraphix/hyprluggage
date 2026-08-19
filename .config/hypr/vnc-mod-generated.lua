@@ -23,13 +23,13 @@ hl.bind("CTRL + ALT + SHIFT + F12", hl.dsp.exec_cmd("pkill sunshine && sunshine 
 -- VNC: SUPER CTRL + A → CTRL ALT SHIFT + F6
 hl.bind("CTRL + ALT + SHIFT + F6", hl.dsp.exec_cmd(string.format("%s \"https://gemini.google.com\"", webapp)), { description = "Gemini (VNC)" })
 
--- from: bindd = SUPER SHIFT, RETURN, Attach tmux session, exec, $terminal -e tmux a
+-- from: bindd = SUPER SHIFT, RETURN, Attach tmux session, exec, $scrDir/launch-terminal -e tmux a
 -- VNC: SUPER SHIFT + RETURN → CTRL ALT SHIFT + RETURN
-hl.bind("CTRL + ALT + SHIFT + RETURN", hl.dsp.exec_cmd(string.format("%s -e tmux a", terminal)), { description = "Attach tmux (VNC)" })
+hl.bind("CTRL + ALT + SHIFT + RETURN", hl.dsp.exec_cmd(string.format("%s/launch-terminal -e tmux a", scrDir)), { description = "Attach tmux (VNC)" })
 
--- from: bindd = SUPER ALT, RETURN, New tmux session, exec, $terminal -e tmux new -As main
+-- from: bindd = SUPER ALT, RETURN, New tmux session, exec, $scrDir/launch-terminal -e tmux new -As main
 -- VNC: SUPER ALT + RETURN → CTRL ALT SHIFT + apostrophe
-hl.bind("CTRL + ALT + SHIFT + apostrophe", hl.dsp.exec_cmd(string.format("%s -e tmux new -As main", terminal)), { description = "New tmux session (VNC)" })
+hl.bind("CTRL + ALT + SHIFT + apostrophe", hl.dsp.exec_cmd(string.format("%s/launch-terminal -e tmux new -As main", scrDir)), { description = "New tmux session (VNC)" })
 
 -- from: bindd = SUPER SHIFT,I,Web App Install, exec, kitty --title webapp-install -e $scrDir/webapp-install
 -- VNC: SUPER SHIFT + I → CTRL ALT SHIFT + I
@@ -218,8 +218,8 @@ hl.bind("CTRL + ALT + P", hl.dsp.exec_cmd(string.format("%s/screenshot", scrDir)
 -- from: bindd = SUPER, Q, Close window, killactive,
 hl.bind("CTRL + ALT + Q", hl.dsp.window.close(), { description = "Close window" })
 
--- from: bindd = SUPER, RETURN, Terminal, exec, uwsm-app -- $terminal --dir="$(cwd-terminal)"
-hl.bind("CTRL + ALT + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s --dir=\"$(cwd-terminal)\"", terminal)), { description = "Terminal" })
+-- from: bindd = SUPER, RETURN, Terminal, exec, uwsm-app -- $scrDir/launch-terminal --dir="$(cwd-terminal)"
+hl.bind("CTRL + ALT + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s/launch-terminal --dir=\"$(cwd-terminal)\"", scrDir)), { description = "Terminal" })
 
 -- from: bindd = SUPER, S, Wiremix, exec, $terminal --class=Wiremix -e wiremix
 hl.bind("CTRL + ALT + S", hl.dsp.exec_cmd(string.format("%s --class=Wiremix -e wiremix", terminal)), { description = "Wiremix" })

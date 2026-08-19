@@ -21,7 +21,7 @@ packages=(
 	waybar rofi mako swayosd awww wlogout brave-bin wayvnc
 
 	# Terminal & Shell
-	kitty alacritty fish starship tmux
+	kitty alacritty ghostty fish starship tmux
 
 	# CLI Tools
 	eza bat fd ripgrep fzf zoxide jq

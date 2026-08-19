@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+BOLD='\e[1m'
+YELLOW='\e[93m'
+GREEN='\e[92m'
+RESET='\e[0m'
+
+info()  { echo -e "${BOLD}${YELLOW}$1${RESET}"; }
+ok()    { echo -e "${BOLD}${GREEN}>> $1${RESET}\n"; }
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
+STATE_FILE="$STATE_DIR/terminal"
+
+current="kitty"
+[[ -f "$STATE_FILE" ]] && current=$(tr -d '[:space:]' <"$STATE_FILE")
+case "$current" in
+  kitty|ghostty|alacritty) ;;
+  *) current="kitty" ;;
+esac
+
+install_if_missing() {
+  command -v "$1" &>/dev/null && return
+  info "$1 not found. Installing..."
+  sudo pacman -S --noconfirm "$1"
+}
+
+set_terminal() {
+  install_if_missing "$1"
+  mkdir -p "$STATE_DIR"
+  echo "$1" >"$STATE_FILE"
+  ok "Working terminal: $1"
+  echo "Super+Return and tmux binds now open $1."
+  command -v notify-send &>/dev/null && notify-send "Working terminal" "$1"
+  sleep 2
+}
+
+term=$(gum choose --height 5 --selected="$current" --header "Choose your working terminal (Super+Return, tmux)  [current: $current]" kitty ghostty alacritty quit)
+
+case $term in
+  kitty|ghostty|alacritty) set_terminal "$term" ;;
+  quit) echo "Exiting."; exit 0 ;;
+  *)    echo "Invalid choice."; exit 1 ;;
+esac

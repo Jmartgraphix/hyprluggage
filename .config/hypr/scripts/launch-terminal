@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Launch the user's working terminal (Super+Return and tmux binds).
+# System TUIs stay on kitty; screensaver stays on alacritty.
+# Choice is stored in ~/.local/state/hyprluggage/terminal (default: kitty).
+
+set -euo pipefail
+
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage/terminal"
+term="kitty"
+if [[ -f "$STATE" ]]; then
+  term=$(tr -d '[:space:]' <"$STATE")
+fi
+
+case "$term" in
+  kitty|ghostty|alacritty) ;;
+  *) term="kitty" ;;
+esac
+
+command -v "$term" &>/dev/null || term="kitty"
+
+dir=""
+class=""
+title=""
+cmd=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dir|--directory|--working-directory)
+      dir="${2:-}"
+      shift 2
+      ;;
+    --dir=*|--directory=*|--working-directory=*)
+      dir="${1#*=}"
+      shift
+      ;;
+    --class)
+      class="${2:-}"
+      shift 2
+      ;;
+    --class=*)
+      class="${1#*=}"
+      shift
+      ;;
+    --title)
+      title="${2:-}"
+      shift 2
+      ;;
+    --title=*)
+      title="${1#*=}"
+      shift
+      ;;
+    -e)
+      shift
+      cmd=("$@")
+      break
+      ;;
+    *)
+      cmd=("$@")
+      break
+      ;;
+  esac
+done
+
+args=()
+case "$term" in
+  kitty)
+    [[ -n "$dir" ]] && args+=(--dir="$dir")
+    [[ -n "$class" ]] && args+=(--class="$class")
+    [[ -n "$title" ]] && args+=(--title="$title")
+    [[ ${#cmd[@]} -gt 0 ]] && args+=(-e "${cmd[@]}")
+    exec kitty "${args[@]}"
+    ;;
+  ghostty)
+    [[ -n "$dir" ]] && args+=(--working-directory="$dir")
+    [[ -n "$class" ]] && args+=(--class="$class")
+    [[ -n "$title" ]] && args+=(--title="$title")
+    [[ ${#cmd[@]} -gt 0 ]] && args+=(-e "${cmd[@]}")
+    exec ghostty "${args[@]}"
+    ;;
+  alacritty)
+    [[ -n "$dir" ]] && args+=(--working-directory "$dir")
+    [[ -n "$class" ]] && args+=(--class "$class")
+    [[ -n "$title" ]] && args+=(--title "$title")
+    [[ ${#cmd[@]} -gt 0 ]] && args+=(-e "${cmd[@]}")
+    exec alacritty "${args[@]}"
+    ;;
+esac

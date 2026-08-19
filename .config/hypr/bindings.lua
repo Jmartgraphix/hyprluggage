@@ -1,4 +1,5 @@
 -- Converted from bindings.conf (keep .conf as revert backup)
+-- terminal is kitty for system TUIs; Super+Return / tmux use launch-terminal.
 local home = os.getenv("HOME")
 local terminal = "kitty"
 local browser = home .. "/.config/hypr/scripts/launch-browser"
@@ -10,7 +11,7 @@ local rofiDir = home .. "/.config/rofi/scripts"
 local scrDir = home .. "/.config/hypr/scripts"
 
 
-hl.bind("SUPER + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s --dir=\"$(cwd-terminal)\"", terminal)), { description = "Terminal" })
+hl.bind("SUPER + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s/launch-terminal --dir=\"$(cwd-terminal)\"", scrDir)), { description = "Terminal" })
 hl.bind("SUPER + B", hl.dsp.exec_cmd(string.format("%s", browser)), { description = "Browser" })
 hl.bind("SUPER + E", hl.dsp.exec_cmd("uwsm app -- thunar"), { description = "File manager" })
 hl.bind("SUPER + M", hl.dsp.exec_cmd(string.format("%s spotify spotify-launcher", focus)), { description = "Music" })
@@ -39,8 +40,8 @@ hl.bind("SUPER + X", hl.dsp.exec_cmd(string.format("%s \"https://x.com/\"", weba
 hl.bind("SUPER + Z", hl.dsp.exec_cmd(string.format("%s \"https://www.linkedin.com/feed/\"", webapp)), { description = "Linkedin" })
 hl.bind("SUPER + T", hl.dsp.exec_cmd(string.format("%s \"https://app.todoist.com\"", webapp)), { description = "Todoist" })
 hl.bind("SUPER + BACKSLASH", hl.dsp.exec_cmd(string.format("%s \"https://devhints.io/\"", webapp)), { description = "Learn" })
-hl.bind("SUPER + SHIFT + RETURN", hl.dsp.exec_cmd(string.format("%s -e tmux a", terminal)), { description = "Attach tmux session" })
-hl.bind("SUPER + ALT + RETURN", hl.dsp.exec_cmd(string.format("%s -e tmux new -As main", terminal)), { description = "New tmux session" })
+hl.bind("SUPER + SHIFT + RETURN", hl.dsp.exec_cmd(string.format("%s/launch-terminal -e tmux a", scrDir)), { description = "Attach tmux session" })
+hl.bind("SUPER + ALT + RETURN", hl.dsp.exec_cmd(string.format("%s/launch-terminal -e tmux new -As main", scrDir)), { description = "New tmux session" })
 hl.bind("SUPER + SHIFT + N", hl.dsp.exec_cmd(string.format("%s/wifi", rofiDir)), { description = "Wifi Menu" })
 hl.bind("SUPER + N", hl.dsp.exec_cmd("makoctl dismiss -a"), { description = "Dismiss Notifications" })
 hl.bind("SUPER + SHIFT + I", hl.dsp.exec_cmd(string.format("kitty --title webapp-install -e %s/webapp-install", scrDir)), { description = "Web App Install" })

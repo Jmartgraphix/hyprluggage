@@ -5,19 +5,25 @@ if ! command -v tte &>/dev/null; then
   exit 1
 fi
 
-# Exit early if screensave is already running
+# Exit early if screensaver is already running
 pgrep -f "alacritty --class Screensaver" && exit 0
 
 focused=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')
 
-for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
-  hyprctl dispatch focusmonitor $m
+# Hyprland 0.55 Lua: hyprctl dispatch takes hl.dsp.* calls, not legacy "focusmonitor DP-1"
+focus_monitor() {
+  local name="$1"
+  [[ -n "$name" ]] || return 0
+  hyprctl dispatch "hl.dsp.focus({ monitor = \"${name}\" })"
+}
 
-  # FIXME: Find a way to make this generic where we it can work for kitty + ghostty
-  hyprctl dispatch exec -- \
-    alacritty --class Screensaver \
-    --config-file ~/.config/alacritty/screensaver.toml \
-    -e ~/.config/hypr/scripts/screensaver
+for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
+  focus_monitor "$m"
+
+  # Alacritty is the screensaver host (not the user's working terminal)
+  alacritty --class Screensaver \
+    --config-file "$HOME/.config/alacritty/screensaver.toml" \
+    -e "$HOME/.config/hypr/scripts/screensaver" &
 done
 
-hyprctl dispatch focusmonitor $focused
+focus_monitor "$focused"

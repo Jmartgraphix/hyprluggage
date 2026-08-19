@@ -95,7 +95,7 @@ Edit configs in `themes/my-theme/.config/` and add wallpapers to `themes/my-them
 ## Dependencies
 
 - Required: `stow`, `hyprctl`, `awww`
-- Terminal (one of): `kitty`, `ghostty`, `alacritty`
+- Terminals: `kitty`, `ghostty`, `alacritty` (all installed; Kitty is default Super+Return)
 - Optional: `waybar`, `rofi`, `gum`, `tte`, `matugen`
 
 ## Troubleshooting

@@ -246,7 +246,7 @@ Commands:
   switch [theme]     Switch theme (menu if no name given)
   browse             Browse & import Omarchy themes with preview
   import <url>       Import Omarchy theme from GitHub
-  tui                Interactive theme browser & manager
+  tui                Theme browser, shell & working-terminal pickers
   list               Show all themes
   current            Print current theme
   reload             Re-apply current theme
