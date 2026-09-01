@@ -304,6 +304,26 @@ else
     info "wayvnc not installed — skip remote desktop services"
 fi
 
+# ── Sunshine Hyprland mod (Moonlight) ──────────────────────────────────
+# Super is often missing on Moonlight clients; same Ctrl+Alt twins as VNC.
+if command -v sunshine &>/dev/null || pkg_installed sunshine 2>/dev/null; then
+    if [[ -x "$HOME/.local/bin/hypr-vnc-mod" ]]; then
+        "$HOME/.local/bin/hypr-vnc-mod" ensure &>/dev/null || true
+    fi
+    if systemctl --user daemon-reload &>/dev/null; then
+        systemctl --user enable sunshine-mod-bridge.service &>/dev/null \
+            && ok "sunshine-mod-bridge (Ctrl+Alt Super twins)" \
+            || warn "sunshine-mod-bridge: enable failed (after login: systemctl --user enable sunshine-mod-bridge)"
+        if systemctl --user is-active -q graphical-session.target; then
+            systemctl --user start sunshine-mod-bridge.service &>/dev/null || true
+        fi
+    else
+        warn "sunshine-mod-bridge: systemd --user not available yet (enable after first graphical login)"
+    fi
+else
+    info "sunshine not installed — skip Sunshine Ctrl+Alt Super twins"
+fi
+
 # ── SSH ──────────────────────────────────────────────────────────────────────
 if pkg_installed openssh; then
     sudo systemctl enable --now sshd &>/dev/null && ok "sshd" || warn "sshd failed"

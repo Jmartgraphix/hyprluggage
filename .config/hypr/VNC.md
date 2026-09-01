@@ -1,13 +1,14 @@
 # Hyprluggage over VNC (wayvnc + browser gateways)
 
-Super/Win is often swallowed by the local OS or browser. Hyprluggage ships a **Ctrl+Alt** twin of every Super bind for remote sessions.
+Super/Win is often swallowed by the local OS, browser, or Moonlight client. Hyprluggage ships a **Ctrl+Alt** twin of every Super bind for remote sessions.
 
 ## How it works
 1. **wayvnc** shares the Hyprland session (systemd user: `wayvnc.service`).
-2. On a real client connect, **wayvnc-clipboard-bridge**:
+2. On a real VNC client connect, **wayvnc-clipboard-bridge**:
    - pauses `cliphist` / `wl-clip-persist` (avoids Wayland data-device crashes)
-   - runs `hypr-vnc-mod apply` → loads `vnc-mod-generated.conf` via `vnc-mod-active.conf`
-3. On disconnect: restores clipboard helpers and clears VNC binds (`hyprctl reload`).
+   - runs `hypr-vnc-mod apply vnc` → loads `vnc-mod-generated.conf` via `vnc-mod-active.conf`
+3. On VNC disconnect: restores clipboard helpers and drops the VNC hold. Hyprland reloads only if Sunshine is also idle.
+4. **Sunshine** (Moonlight): `sunshine-mod-bridge` watches GameStream `/serverinfo` and runs `hypr-vnc-mod apply sunshine` while a stream is busy, then `clear sunshine` when it goes free. Same Ctrl+Alt twins as VNC.
 
 ## Keys (remote)
 | Action | Keys |
@@ -28,25 +29,27 @@ Space-family Super chords collide under Ctrl+Alt, so several theme binds are **r
 At the physical keyboard, Super is unchanged.
 
 ## Fresh install
-Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units). Install also adds `ufw allow 5900/tcp` (UFW is enabled only if it was already active). Units are `WantedBy=graphical-session.target` so they start with Hyprland, not at boot — binding them to `default.target` pulled in an empty graphical session and made UWSM/greetd refuse to start.
+Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units). Sunshine's Ctrl+Alt twins are enabled when `sunshine` is installed. Install also adds `ufw allow 5900/tcp` (UFW is enabled only if it was already active). Units are `WantedBy=graphical-session.target` so they start with Hyprland, not at boot — binding them to `default.target` pulled in an empty graphical session and made UWSM/greetd refuse to start.
 
 Manual:
 ```bash
 hypr-vnc-mod ensure
 systemctl --user enable wayvnc wayvnc-clipboard-bridge
+systemctl --user enable sunshine-mod-bridge   # if Sunshine/Moonlight is installed
 ```
 
 After changing Super binds:
 ```bash
 hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
-# next VNC session apply will also regenerate
+# next VNC or Sunshine apply will also regenerate
 ```
 
 ## Files
 | Path | Role |
 |------|------|
-| `~/.local/bin/hypr-vnc-mod` | apply / clear / generate / ensure |
+| `~/.local/bin/hypr-vnc-mod` | apply / clear / generate / ensure (`vnc` or `sunshine` holders) |
 | `~/.local/bin/hypr-vnc-mod-gen.sh` | generator |
+| `~/.local/bin/sunshine-mod-bridge.sh` | load twins while a Moonlight stream is busy |
 | `~/.config/hypr/vnc-mod-generated.conf` | committed seed map |
 | `~/.local/state/hyprluggage/vnc-mod-active.conf` | runtime toggle (created by `ensure` / apply / clear; outside stow so git stays clean) |
 | `~/.config/wayvnc/config` | listen `0.0.0.0:5900` |

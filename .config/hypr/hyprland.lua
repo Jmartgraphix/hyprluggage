@@ -22,5 +22,5 @@ local state = (os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/sta
 pcall(dofile, state .. "/profile.lua")
 pcall(dofile, state .. "/gpu.lua")
 
--- VNC: Ctrl+Alt Super twins (hypr-vnc-mod); stub lives outside stow
+-- VNC/Sunshine: Ctrl+Alt Super twins (hypr-vnc-mod); stub lives outside stow
 pcall(dofile, state .. "/vnc-mod-active.lua")
