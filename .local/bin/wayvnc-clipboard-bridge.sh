@@ -2,7 +2,7 @@
 # On real VNC sessions (debounced):
 #   - pause clipboard helpers (avoid wayvnc data-device crash with cliphist)
 #   - load CTRL+ALT twins of SUPER Hyprland binds (Super often blocked in browser)
-# On disconnect: reverse both.
+# On disconnect: reverse both (Sunshine can keep the same binds held).
 set -euo pipefail
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export PATH="$HOME/.local/bin:/usr/bin:/bin:$PATH"
@@ -47,11 +47,11 @@ else:
 
 enter_vnc_mode() {
   "$HELPERS" pause || true
-  "$VNCMOD" apply || true
+  "$VNCMOD" apply vnc || true
 }
 
 leave_vnc_mode() {
-  "$VNCMOD" clear || true
+  "$VNCMOD" clear vnc || true
   "$HELPERS" resume || true
 }
 

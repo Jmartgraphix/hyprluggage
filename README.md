@@ -51,7 +51,7 @@
 - **Rofi menus** — App launcher, emoji picker, clipboard, wallpaper selector, power profiles
 - **Dual mode** — Vibe (animations + blur) or Focus (minimal + fast)
 - **Music integration** — MPD + RMPC + Cava visualizer
-- **Remote desktop** — wayvnc with Ctrl+Alt Super-key twins for browser VNC (Gatwy/noVNC)
+- **Remote desktop** — wayvnc and Sunshine with Ctrl+Alt Super-key twins (Gatwy/noVNC and Moonlight)
 
 <details>
 <summary><b>Dual Mode System</b></summary>
@@ -123,7 +123,7 @@ HyprLuggage comes with a complete desktop environment setup:
 
 **Notifications** - Mako notification daemon with theme-aware styling. Dismiss all with `Super + N`.
 
-**Remote desktop** - wayvnc shares the session; over VNC use **Ctrl+Alt** instead of Super. See [Remote desktop (VNC)](#remote-desktop-vnc).
+**Remote desktop** - wayvnc and Sunshine share the session; over VNC or Moonlight use **Ctrl+Alt** instead of Super. See [Remote desktop (VNC)](#remote-desktop-vnc).
 
 ---
 
@@ -219,7 +219,7 @@ The installer will:
 3. **Set up system services:**
    - MPD (music daemon)
    - Greetd (display manager; session via `hyprluggage-session`, which runs hw-ensure then Hyprland)
-   - wayvnc + clipboard bridge (user units)
+   - wayvnc + clipboard bridge, and sunshine-mod-bridge when Sunshine is installed (user units)
    - sshd (enabled)
    - ufw allow rules for SSH, VNC, LocalSend, and KDE Connect
      - **Laptop:** UFW is enabled
@@ -427,7 +427,7 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf), [tiling.conf](.con
 | Visualizer | [Cava](https://github.com/karlstav/cava) | Audio spectrum visualizer for terminal |
 | Editor | [Neovim](https://neovim.io/) | Modern Vim fork with LSP support and theme integration |
 | Shell | [Fish](https://fishshell.com/) + [Starship](https://starship.rs/) | User-friendly shell with fast, customizable prompt |
-| Remote desktop | [wayvnc](https://github.com/any1/wayvnc) | VNC server for the Hyprland session (Ctrl+Alt Super twins) |
+| Remote desktop | [wayvnc](https://github.com/any1/wayvnc) / [Sunshine](https://github.com/LizardByte/Sunshine) | VNC and Moonlight for the Hyprland session (Ctrl+Alt Super twins) |
 
 ---
 
@@ -479,7 +479,7 @@ All configuration files are located in `~/.config/`. You can edit them directly�
 ├── .config/hypr/
 │   ├── profiles/       # desktop.conf, laptop.conf, nvidia.conf
 │   └── ...
-├── .local/bin/         # hyprluggage-hw-ensure, hypr-vnc-mod, ...
+├── .local/bin/         # hyprluggage-hw-ensure, hypr-vnc-mod, sunshine-mod-bridge, ...
 ├── scripts/            # Utility scripts
 └── install/            # Installer
     ├── packages.sh     # Package lists
@@ -495,12 +495,13 @@ Runtime stubs (outside the git tree): `~/.local/state/hyprluggage/profile.conf` 
 
 ## Remote desktop (VNC)
 
-Hyprluggage includes **wayvnc** and **Ctrl+Alt** Super-key twins for browser-based remote access (e.g. Gatwy/noVNC), because Super often does not reach the remote session.
+Hyprluggage includes **wayvnc**, **Sunshine**, and **Ctrl+Alt** Super-key twins for remote access (Gatwy/noVNC and Moonlight), because Super often does not reach the remote session.
 
 - At the desk: Super works as usual.
-- Over VNC: use **Ctrl+Alt** instead of Super; **Ctrl+Alt+K** shows remote keybinds.
+- Over VNC or Sunshine: use **Ctrl+Alt** instead of Super; **Ctrl+Alt+K** shows remote keybinds.
 - Some Space-family theme chords are remapped under Ctrl+Alt (documented in VNC.md).
 - Fresh install enables `wayvnc` and `wayvnc-clipboard-bridge` user units via `install/services.sh`.
+- If Sunshine is installed, `sunshine-mod-bridge` is enabled so Moonlight streams get the same twins.
 - Fresh install also enables `sshd` and adds ufw allow rules for SSH (`22/tcp`), VNC (`5900/tcp`), LocalSend (`53317` TCP/UDP), and KDE Connect (`1714–1764` TCP/UDP). On **laptop** profile, UFW is enabled; on **desktop**, UFW stays inactive unless it was already active.
 
 See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for setup, remaps, and files.
@@ -554,7 +555,7 @@ If it still loops, check:
 - Check `~/.config/hypr/bindings.conf` (and `tiling.conf` / `media.conf`) for conflicts
 - Reload Hyprland config: `hyprctl reload`
 - Verify the keybinding syntax is correct
-- Over VNC, use Ctrl+Alt instead of Super — see [VNC.md](.config/hypr/VNC.md)
+- Over VNC or Sunshine, use Ctrl+Alt instead of Super — see [VNC.md](.config/hypr/VNC.md)
 
 **Need more help?**
 - Check the [full keybindings list](.config/hypr/bindings.conf)

@@ -1,0 +1,14 @@
+[Unit]
+Description=Sunshine session hooks: Hyprland Ctrl+Alt Super binds
+After=graphical-session.target sunshine.service
+PartOf=graphical-session.target
+Wants=sunshine.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/sunshine-mod-bridge.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

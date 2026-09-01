@@ -50,7 +50,7 @@ hyprluggage fix             # fix broken symlinks
 | `Super + Backspace` | Toggle terminal transparency |
 | `Super + Ctrl + Backspace` | Toggle focus/vibe mode |
 
-Over VNC, use **Ctrl+Alt** instead of Super (some Space-family theme chords are remapped). See [`.config/hypr/VNC.md`](../../.config/hypr/VNC.md).
+Over VNC or Sunshine, use **Ctrl+Alt** instead of Super (some Space-family theme chords are remapped). See [`.config/hypr/VNC.md`](../../.config/hypr/VNC.md).
 
 ## How it works
 
