@@ -1,6 +1,6 @@
 #!/bin/bash
 # keyhints - show hyprland keybindings
-# During Gatwy/VNC sessions (hypr-vnc-mod active), show only Ctrl+Alt binds.
+# During Gatwy/VNC or Sunshine sessions (hypr-vnc-mod active), show only Ctrl+Alt binds.
 
 if pidof rofi >/dev/null; then
   pkill rofi
@@ -11,7 +11,7 @@ XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 VNC_STATE="${XDG_RUNTIME_DIR}/wayvnc-vncmod/active"
 
 if [[ -f "$VNC_STATE" ]]; then
-  PROMPT="VNC keybinds (Ctrl+Alt)"
+  PROMPT="Remote keybinds (Ctrl+Alt)"
   # Only remote Ctrl+Alt twins — not Super+Ctrl+Alt (or other Super chords)
   filter_list() { grep -E '^CTRL ALT( SHIFT)? \+'; }
 else
