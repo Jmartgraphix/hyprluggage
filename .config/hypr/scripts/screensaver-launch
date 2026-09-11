@@ -8,22 +8,48 @@ fi
 # Exit early if screensaver is already running
 pgrep -f "alacritty --class Screensaver" && exit 0
 
-focused=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')
-
 # Hyprland 0.55 Lua: hyprctl dispatch takes hl.dsp.* calls, not legacy "focusmonitor DP-1"
-focus_monitor() {
-  local name="$1"
-  [[ -n "$name" ]] || return 0
-  hyprctl dispatch "hl.dsp.focus({ monitor = \"${name}\" })"
-}
+config="$HOME/.config/alacritty/screensaver.toml"
+script="$HOME/.config/hypr/scripts/screensaver"
+cmd="alacritty --class Screensaver --config-file ${config} -e ${script}"
 
-for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
-  focus_monitor "$m"
+# Skip disabled outputs and mirrors (HDMI-A-2 mirrors DP-1).
+mapfile -t monitors < <(hyprctl monitors -j | jq -r '
+  .[]
+  | select(.disabled != true)
+  | select((.mirrorOf // "none") == "none")
+  | .name
+')
 
-  # Alacritty is the screensaver host (not the user's working terminal)
-  alacritty --class Screensaver \
-    --config-file "$HOME/.config/alacritty/screensaver.toml" \
-    -e "$HOME/.config/hypr/scripts/screensaver" &
+((${#monitors[@]} > 0)) || exit 1
+
+# Do not focusmonitor while instances are alive — cursor warps look like
+# mouse input and the first screensaver will pkill the rest.
+for m in "${monitors[@]}"; do
+  [[ -n "$m" ]] || continue
+  hyprctl dispatch "hl.dsp.exec_cmd(\"${cmd}\", { monitor = \"${m}\", fullscreen = true, float = true })"
 done
 
-focus_monitor "$focused"
+expected=${#monitors[@]}
+tries=40
+count=0
+while ((tries-- > 0)); do
+  count=$(hyprctl clients -j | jq '[.[] | select(.class == "Screensaver")] | length')
+  ((count >= expected)) && break
+  sleep 0.05
+done
+
+mapfile -t addrs < <(hyprctl clients -j | jq -r '.[] | select(.class == "Screensaver") | .address')
+i=0
+for m in "${monitors[@]}"; do
+  addr="${addrs[i]:-}"
+  i=$((i + 1))
+  [[ -n "$addr" && -n "$m" ]] || continue
+  hyprctl dispatch "hl.dsp.window.move({ monitor = \"${m}\", window = \"address:${addr}\", follow = false })"
+done
+
+# The inner script dismisses when the active window is not Screensaver.
+# Pin focus to one instance after placement (still inside its input grace).
+if [[ -n "${addrs[0]:-}" ]]; then
+  hyprctl dispatch "hl.dsp.focus({ window = \"address:${addrs[0]}\" })"
+fi

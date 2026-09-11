@@ -1,3 +1,8 @@
+# Separate process per monitor — default IPC would fold the second Super+L
+# instance into the first window on one screen.
+[general]
+ipc_socket = false
+
 [colors.primary]
 background = "#000000"
 foreground = "#ffffff"
