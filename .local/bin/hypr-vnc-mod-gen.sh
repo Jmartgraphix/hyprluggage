@@ -128,9 +128,8 @@ EXPLICIT = {
     ("SUPER SHIFT", "RETURN"): (["CTRL", "ALT", "SHIFT"], "RETURN", "Attach tmux (VNC)"),
     ("SUPER ALT", "RETURN"): (["CTRL", "ALT", "SHIFT"], "apostrophe", "New tmux session (VNC)"),
 
-    # Brightness media extras
-    ("SUPER ALT", "XF86AUDIORAISEVOLUME"): (["CTRL", "ALT", "SHIFT"], "XF86AudioRaiseVolume", None),
-    ("SUPER ALT", "XF86AUDIOLOWERVOLUME"): (["CTRL", "ALT", "SHIFT"], "XF86AudioLowerVolume", None),
+    # Volume-knob brightness is an ignore_mods handler in media.lua — do not
+    # twin Super/Super+Alt XF86Audio raise/lower (those chords double-fired).
 }
 
 candidates = []
@@ -143,6 +142,8 @@ for src in sources:
             continue
         indent, kw, tokens, rest = parsed
         key = key_token(rest)
+        if key.upper() in ("XF86AUDIORAISEVOLUME", "XF86AUDIOLOWERVOLUME"):
+            continue
         candidates.append({
             "indent": indent, "kw": kw, "tokens": tokens, "rest": rest, "key": key,
             "prio": super_priority(tokens), "src_line": line.strip(), "file": src.name,

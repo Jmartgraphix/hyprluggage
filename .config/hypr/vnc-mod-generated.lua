@@ -127,14 +127,6 @@ hl.bind("CTRL + ALT + SHIFT + R", hl.dsp.exec_cmd(string.format("%s/screenrecord
 -- VNC: SUPER ALT + R → CTRL ALT SHIFT + V
 hl.bind("CTRL + ALT + SHIFT + V", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-desktop-audio --with-microphone-audio --with-webcam", scrDir)), { description = "Screen recording + mic + webcam (VNC)" })
 
--- from: bindd = SUPER ALT, XF86AudioRaiseVolume, Brightness up, exec, $osdclient --brightness raise
--- VNC: SUPER ALT + XF86AudioRaiseVolume → CTRL ALT SHIFT + XF86AudioRaiseVolume
-hl.bind("CTRL + ALT + SHIFT + XF86AudioRaiseVolume", hl.dsp.exec_cmd(string.format("%s --brightness raise", osdclient)), { description = "Brightness up" })
-
--- from: bindd = SUPER ALT, XF86AudioLowerVolume, Brightness down, exec, $osdclient --brightness lower
--- VNC: SUPER ALT + XF86AudioLowerVolume → CTRL ALT SHIFT + XF86AudioLowerVolume
-hl.bind("CTRL + ALT + SHIFT + XF86AudioLowerVolume", hl.dsp.exec_cmd(string.format("%s --brightness lower", osdclient)), { description = "Brightness down" })
-
 -- from: bindd = SUPER SHIFT, LEFT, Swap window to the left, swapwindow, l
 -- VNC: SUPER SHIFT + LEFT → CTRL ALT SHIFT + H
 hl.bind("CTRL + ALT + SHIFT + H", hl.dsp.window.swap({ direction = "left" }), { description = "Swap window left (VNC)" })
@@ -232,12 +224,6 @@ hl.bind("CTRL + ALT + W", hl.dsp.exec_cmd(string.format("%s \"https://web.whatsa
 
 -- from: bindd = SUPER, X, X, exec, $webapp "https://x.com/"
 hl.bind("CTRL + ALT + X", hl.dsp.exec_cmd(string.format("%s \"https://x.com/\"", webapp)), { description = "X" })
-
--- from: bindd = SUPER, XF86AudioLowerVolume, Monitor Brightness down, exec, ddcutil setvcp 10 - 10
-hl.bind("CTRL + ALT + XF86AudioLowerVolume", hl.dsp.exec_cmd("ddcutil setvcp 10 - 10"), { description = "Monitor Brightness down" })
-
--- from: bindd = SUPER, XF86AudioRaiseVolume, Monitor Brightness up, exec, ddcutil setvcp 10 + 10
-hl.bind("CTRL + ALT + XF86AudioRaiseVolume", hl.dsp.exec_cmd("ddcutil setvcp 10 + 10"), { description = "Monitor Brightness up" })
 
 -- from: bindd = SUPER, Y, YouTube, exec, $webapp "https://youtube.com/"
 hl.bind("CTRL + ALT + Y", hl.dsp.exec_cmd(string.format("%s \"https://youtube.com/\"", webapp)), { description = "YouTube" })

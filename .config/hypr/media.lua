@@ -10,14 +10,74 @@ local rofiDir = home .. "/.config/rofi/scripts"
 local scrDir = home .. "/.config/hypr/scripts"
 
 
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(string.format("%s --output-volume raise", osdclient)), { description = "Volume up", repeating = true, locked = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(string.format("%s --output-volume lower", osdclient)), { description = "Volume down", repeating = true, locked = true })
+-- One bind per knob key. Lua's extra-mod matching was firing volume AND brightness
+-- together (Super+Alt hit swayosd + wpctl, and often ddcutil too).
+-- hl.is_key_down() takes XKB keysyms (Super_L), not bind masks (SUPER).
+local function super_down()
+	return hl.is_key_down("Super_L") or hl.is_key_down("Super_R")
+end
+
+local function alt_down()
+	return hl.is_key_down("Alt_L") or hl.is_key_down("Alt_R")
+end
+
+local function osd(args)
+	local mon = hl.get_active_monitor()
+	local name = mon and mon.name
+	local cmd
+	if type(name) == "string" and name ~= "" then
+		cmd = string.format("swayosd-client --monitor %s %s", name, args)
+	else
+		cmd = "swayosd-client " .. args
+	end
+	hl.dispatch(hl.dsp.exec_cmd(cmd))
+end
+
+local function ddc(dir)
+	local mon = hl.get_active_monitor()
+	local name = (mon and mon.name) or ""
+	local sign = dir > 0 and "+" or "-"
+	hl.dispatch(hl.dsp.exec_cmd(string.format("%s/ddc-brightness %s %s", scrDir, sign, name)))
+end
+
+local function knob(dir)
+	local super = super_down()
+	local alt = alt_down()
+	-- Super or Super+Alt: DDC on the focused monitor (no laptop backlight here).
+	-- Alt alone stays precise volume.
+	if super then
+		ddc(dir)
+	elseif alt then
+		osd(dir > 0 and "--output-volume +1" or "--output-volume -1")
+	else
+		osd(dir > 0 and "--output-volume raise" or "--output-volume lower")
+	end
+end
+
+hl.bind("XF86AudioRaiseVolume", function()
+	knob(1)
+end, {
+	description = "Volume / brightness up",
+	ignore_mods = true,
+	repeating = true,
+	locked = true,
+	dont_inhibit = true,
+	allow_input_capture = true,
+})
+hl.bind("XF86AudioLowerVolume", function()
+	knob(-1)
+end, {
+	description = "Volume / brightness down",
+	ignore_mods = true,
+	repeating = true,
+	locked = true,
+	dont_inhibit = true,
+	allow_input_capture = true,
+})
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd(string.format("%s --output-volume mute-toggle", osdclient)), { description = "Mute", repeating = true, locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd(string.format("%s --input-volume mute-toggle", osdclient)), { description = "Mute microphone", repeating = true, locked = true })
 hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd(string.format("%s --brightness raise", osdclient)), { description = "Brightness up", repeating = true, locked = true })
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd(string.format("%s --brightness lower", osdclient)), { description = "Brightness down", repeating = true, locked = true })
-hl.bind("ALT + XF86AudioRaiseVolume", hl.dsp.exec_cmd(string.format("%s --output-volume +1", osdclient)), { description = "Volume up precise", repeating = true, locked = true })
-hl.bind("ALT + XF86AudioLowerVolume", hl.dsp.exec_cmd(string.format("%s --output-volume -1", osdclient)), { description = "Volume down precise", repeating = true, locked = true })
 hl.bind("ALT + XF86MonBrightnessUp", hl.dsp.exec_cmd(string.format("%s --brightness +1", osdclient)), { description = "Brightness up precise", repeating = true, locked = true })
 hl.bind("ALT + XF86MonBrightnessDown", hl.dsp.exec_cmd(string.format("%s --brightness -1", osdclient)), { description = "Brightness down precise", repeating = true, locked = true })
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd(string.format("%s --playerctl next", osdclient)), { description = "Next track", locked = true })

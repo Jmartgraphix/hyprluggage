@@ -1,0 +1,99 @@
+#!/bin/bash
+# Adjust VCP 10 (brightness) on the focused Hyprland monitor via ddcutil.
+# Usage: ddc-brightness +|raise|-|lower [Monitor]
+set -euo pipefail
+
+dir="${1:-}"
+monitor="${2:-}"
+
+case "$dir" in
++ | raise | up) step="+ 10" ;;
+- | lower | down) step="- 10" ;;
+*)
+	echo "usage: ddc-brightness +|- [Monitor]" >&2
+	exit 2
+	;;
+esac
+
+if [[ -z "$monitor" ]]; then
+	monitor="$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused == true).name // empty')"
+fi
+
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/hyprluggage"
+cache="$cache_dir/ddc-buses"
+lock="${XDG_RUNTIME_DIR:-/tmp}/hyprluggage-ddc-brightness.lock"
+mkdir -p "$cache_dir"
+
+osd() {
+	local msg="$1"
+	local progress="${2:-}"
+	if [[ -n "$progress" ]]; then
+		swayosd-client --monitor "$monitor" \
+			--custom-icon display-brightness-symbolic \
+			--custom-progress "$progress" \
+			--custom-progress-text "$msg"
+	else
+		swayosd-client --monitor "$monitor" \
+			--custom-icon display-brightness-symbolic \
+			--custom-message "$msg"
+	fi
+}
+
+refresh_cache() {
+	local detect bus connector name
+	detect="$(ddcutil detect --sleep-multiplier=.2 2>/dev/null || true)"
+	: >"$cache"
+	bus=""
+	while IFS= read -r line; do
+		if [[ "$line" =~ /dev/i2c-([0-9]+) ]]; then
+			bus="${BASH_REMATCH[1]}"
+		elif [[ "$line" =~ DRM_connector:[[:space:]]*([^[:space:]]+) ]]; then
+			connector="${BASH_REMATCH[1]}"
+			name="${connector##*-}"
+			# card1-DP-1 → DP-1; keep HDMI-A-2 as HDMI-A-2
+			if [[ "$connector" =~ (DP-[0-9]+|HDMI-A-[0-9]+|eDP-[0-9]+)$ ]]; then
+				name="${BASH_REMATCH[1]}"
+			fi
+			if [[ -n "$bus" && -n "$name" ]]; then
+				echo "$name=$bus" >>"$cache"
+			fi
+			bus=""
+		fi
+	done <<<"$detect"
+}
+
+bus_for() {
+	local name="$1"
+	[[ -f "$cache" ]] || refresh_cache
+	local bus
+	bus="$(awk -F= -v n="$name" '$1==n {print $2; exit}' "$cache" 2>/dev/null || true)"
+	if [[ -z "$bus" ]]; then
+		refresh_cache
+		bus="$(awk -F= -v n="$name" '$1==n {print $2; exit}' "$cache" 2>/dev/null || true)"
+	fi
+	printf '%s' "$bus"
+}
+
+exec 9>"$lock"
+if ! flock -n 9; then
+	exit 0
+fi
+
+bus="$(bus_for "$monitor")"
+if [[ -z "$bus" ]]; then
+	osd "No DDC on ${monitor:-unknown}"
+	exit 1
+fi
+
+ddcutil --bus "$bus" --sleep-multiplier=.2 --noverify setvcp 10 $step >/dev/null
+
+terse="$(ddcutil --bus "$bus" --sleep-multiplier=.2 -t getvcp 10 2>/dev/null || true)"
+# VCP 10 C <current> <max>
+cur="$(awk '{print $4}' <<<"$terse")"
+max="$(awk '{print $5}' <<<"$terse")"
+if [[ "$cur" =~ ^[0-9]+$ && "$max" =~ ^[0-9]+$ && "$max" -gt 0 ]]; then
+	pct=$((cur * 100 / max))
+	osd "${pct}%" "$(awk -v c="$cur" -v m="$max" 'BEGIN { printf "%.3f", c / m }')"
+else
+	osd "Brightness ${dir}"
+fi

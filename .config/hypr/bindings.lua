@@ -6,7 +6,6 @@ local browser = home .. "/.config/hypr/scripts/launch-browser"
 local browser2 = "zen-browser"
 local webapp = home .. "/.config/hypr/scripts/launch-webapp"
 local focus = home .. "/.config/hypr/scripts/focus"
-local osdclient = "swayosd-client --monitor \"$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')\""
 local rofiDir = home .. "/.config/rofi/scripts"
 local scrDir = home .. "/.config/hypr/scripts"
 
@@ -83,8 +82,6 @@ hl.bind("SUPER + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-deskt
 hl.bind("SUPER + SHIFT + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-microphone-audio", scrDir)), { description = "Screen recording + mic" })
 hl.bind("SUPER + ALT + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-desktop-audio --with-microphone-audio --with-webcam", scrDir)), { description = "Screen recording + mic + webcam" })
 hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"), { description = "Color picker" })
-hl.bind("SUPER + ALT + XF86AudioRaiseVolume", hl.dsp.exec_cmd(string.format("%s --brightness raise", osdclient)), { description = "Brightness up" })
-hl.bind("SUPER + ALT + XF86AudioLowerVolume", hl.dsp.exec_cmd(string.format("%s --brightness lower", osdclient)), { description = "Brightness down" })
-hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("ddcutil setvcp 10 + 10"), { description = "Monitor Brightness up" })
-hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("ddcutil setvcp 10 - 10"), { description = "Monitor Brightness down" })
+-- Volume-knob brightness lives in media.lua (one ignore_mods handler so Super+Alt
+-- cannot also fire the volume binds).
 hl.bind("SUPER + F1", hl.dsp.exec_cmd(string.format("%s/toggle-monitor", scrDir)), { description = "Toggle Monitor Power" })
