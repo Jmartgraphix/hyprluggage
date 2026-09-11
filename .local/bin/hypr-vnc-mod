@@ -209,8 +209,9 @@ cmd_ensure() {
   fi
   migrate_legacy_state
   # Never leave remote mode on after ensure unless a holder is live
-  if grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null && [[ ! -f "$STATE_FILE" ]]; then
+  if grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null && [[ ! -f "$STATE_FILE" ]] && [[ "$(holder_count)" -eq 0 ]]; then
     write_active_empty || true
+    hypr_reload 2>/dev/null || true
   fi
   echo "vnc-mod: ensure ok ($ACTIVE)"
 }

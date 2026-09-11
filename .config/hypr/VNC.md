@@ -35,7 +35,7 @@ Manual:
 ```bash
 hypr-vnc-mod ensure
 systemctl --user enable wayvnc wayvnc-clipboard-bridge
-systemctl --user enable sunshine-mod-bridge   # if Sunshine/Moonlight is installed
+systemctl --user enable --now sunshine-mod-bridge   # if Sunshine/Moonlight is installed
 ```
 
 After changing Super binds:

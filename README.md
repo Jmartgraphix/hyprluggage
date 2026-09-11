@@ -501,7 +501,7 @@ Hyprluggage includes **wayvnc**, **Sunshine**, and **Ctrl+Alt** Super-key twins 
 - Over VNC or Sunshine: use **Ctrl+Alt** instead of Super; **Ctrl+Alt+K** shows remote keybinds.
 - Some Space-family theme chords are remapped under Ctrl+Alt (documented in VNC.md).
 - Fresh install enables `wayvnc` and `wayvnc-clipboard-bridge` user units via `install/services.sh`.
-- If Sunshine is installed, `sunshine-mod-bridge` is enabled so Moonlight streams get the same twins.
+- If Sunshine is installed, a fresh install enables `sunshine-mod-bridge` so Moonlight streams get the same twins. Existing installs: `systemctl --user enable --now sunshine-mod-bridge`.
 - Fresh install also enables `sshd` and adds ufw allow rules for SSH (`22/tcp`), VNC (`5900/tcp`), LocalSend (`53317` TCP/UDP), and KDE Connect (`1714–1764` TCP/UDP). On **laptop** profile, UFW is enabled; on **desktop**, UFW stays inactive unless it was already active.
 
 See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for setup, remaps, and files.

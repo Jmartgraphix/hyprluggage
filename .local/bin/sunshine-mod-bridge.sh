@@ -27,7 +27,7 @@ sunshine_port() {
 sunshine_busy() {
   local xml
   xml="$(curl -fsS -m 1 --noproxy '*' "http://127.0.0.1:$(sunshine_port)/serverinfo" 2>/dev/null || true)"
-  [[ "$xml" == *"<state>SUNSHINE_SERVER_BUSY</state>"* ]]
+  [[ "$xml" == *"SUNSHINE_SERVER_BUSY"* ]]
 }
 
 if [[ ! -x "$VNCMOD" ]]; then

@@ -1,8 +1,7 @@
 [Unit]
 Description=Sunshine session hooks: Hyprland Ctrl+Alt Super binds
-After=graphical-session.target sunshine.service
+After=graphical-session.target
 PartOf=graphical-session.target
-Wants=sunshine.service
 
 [Service]
 Type=simple
