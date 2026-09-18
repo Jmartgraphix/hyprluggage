@@ -345,7 +345,7 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 | `Super + K` | Show All Keybindings |
 | `Super + Shift + K` | Kill Application |
 | `Super + Arrow` | Move Focus |
-| `Super + Shift + Arrow` | Swap Window |
+| `Super + Shift + Arrow` | Move Window |
 | `Super + Ctrl + Left/Right` | Previous/Next Workspace |
 | `Super + -` / `Super + =` | Resize Window |
 | `Super + 1-9, 0` | Switch Workspace (1–10) |

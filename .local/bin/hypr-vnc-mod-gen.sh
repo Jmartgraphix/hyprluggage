@@ -100,11 +100,11 @@ EXPLICIT = {
     ("SUPER ALT", "RIGHT"): (["CTRL", "ALT", "SHIFT"], "right", "Theme next wallpaper (Super+Alt+Right)"),
     ("SUPER ALT", "UP"): (["CTRL", "ALT", "SHIFT"], "up", "Theme wallpapers cycle (Super+Alt+Up)"),
 
-    # Swap Super+Shift+arrows → vim keys on Shift tier
-    ("SUPER SHIFT", "LEFT"): (["CTRL", "ALT", "SHIFT"], "H", "Swap window left (VNC)"),
-    ("SUPER SHIFT", "RIGHT"): (["CTRL", "ALT", "SHIFT"], "L", "Swap window right (VNC)"),
-    ("SUPER SHIFT", "UP"): (["CTRL", "ALT", "SHIFT"], "K", "Swap window up (VNC)"),
-    ("SUPER SHIFT", "DOWN"): (["CTRL", "ALT", "SHIFT"], "J", "Swap window down (VNC)"),
+    # Move Super+Shift+arrows → vim keys on Shift tier
+    ("SUPER SHIFT", "LEFT"): (["CTRL", "ALT", "SHIFT"], "H", "Move window left (VNC)"),
+    ("SUPER SHIFT", "RIGHT"): (["CTRL", "ALT", "SHIFT"], "L", "Move window right (VNC)"),
+    ("SUPER SHIFT", "UP"): (["CTRL", "ALT", "SHIFT"], "K", "Move window up (VNC)"),
+    ("SUPER SHIFT", "DOWN"): (["CTRL", "ALT", "SHIFT"], "J", "Move window down (VNC)"),
 
     # Workspace Super+Ctrl+arrows
     ("SUPER CTRL", "LEFT"): (["CTRL", "ALT", "SHIFT"], "comma", "Previous workspace (VNC)"),
@@ -440,7 +440,7 @@ for label, pat in [
     ("Gemini", r"Gemini \(VNC\)"),
     ("EasyEffects", r"EasyEffects \(VNC\)"),
     ("Wall prev", r"Theme previous wallpaper"),
-    ("Swap left", r"Swap window left \(VNC\)"),
+    ("Move left", r"Move window left \(VNC\)"),
     ("Lock", r"Lock screen \(VNC\)"),
     ("Reboot", r"Reboot \(VNC\)"),
 ]:

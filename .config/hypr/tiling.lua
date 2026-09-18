@@ -34,10 +34,12 @@ hl.bind("SUPER + SHIFT + code:19", hl.dsp.window.move({ workspace = 10 }), { des
 hl.bind("ALT + TAB", hl.dsp.window.cycle_next(), { description = "Cycle to next window" })
 hl.bind("ALT + TAB", hl.dsp.window.alter_zorder({ mode = "top" }))
 hl.bind("SUPER + TAB", hl.dsp.focus({ workspace = "previous" }), { description = "Previous workspace" })
-hl.bind("SUPER + SHIFT + LEFT", hl.dsp.window.swap({ direction = "left" }), { description = "Swap window to the left" })
-hl.bind("SUPER + SHIFT + RIGHT", hl.dsp.window.swap({ direction = "right" }), { description = "Swap window to the right" })
-hl.bind("SUPER + SHIFT + UP", hl.dsp.window.swap({ direction = "up" }), { description = "Swap window up" })
-hl.bind("SUPER + SHIFT + DOWN", hl.dsp.window.swap({ direction = "down" }), { description = "Swap window down" })
+-- movewindow (not swapwindow): Super+Shift+Up places the focused window above
+-- its neighbor, including when they currently sit side-by-side.
+hl.bind("SUPER + SHIFT + LEFT", hl.dsp.window.move({ direction = "left" }), { description = "Move window to the left" })
+hl.bind("SUPER + SHIFT + RIGHT", hl.dsp.window.move({ direction = "right" }), { description = "Move window to the right" })
+hl.bind("SUPER + SHIFT + UP", hl.dsp.window.move({ direction = "up" }), { description = "Move window up" })
+hl.bind("SUPER + SHIFT + DOWN", hl.dsp.window.move({ direction = "down" }), { description = "Move window down" })
 hl.bind("SUPER + LEFT", hl.dsp.focus({ direction = "left" }), { description = "Move window focus left" })
 hl.bind("SUPER + RIGHT", hl.dsp.focus({ direction = "right" }), { description = "Move window focus right" })
 hl.bind("SUPER + UP", hl.dsp.focus({ direction = "up" }), { description = "Move window focus up" })
