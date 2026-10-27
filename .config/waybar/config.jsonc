@@ -4,6 +4,11 @@
   "position": "top",
   "spacing": 0,
   "height": 28,
+  "output": [
+    "DP-1",
+    "DP-3",
+    "eDP-1"
+  ],
   "modules-left": [
     "custom/logo",
     "mpris"
