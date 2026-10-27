@@ -20,9 +20,10 @@ hl.window_rule({ match = { title = "hyprluggage-browse" }, size = { 1200, 750 } 
 hl.window_rule({ match = { class = "com.github.wwmm.easyeffects" }, float = true })
 hl.window_rule({ match = { class = "com.github.wwmm.easyeffects" }, center = true })
 hl.window_rule({ match = { class = "com.github.wwmm.easyeffects" }, size = { 950, 850 } })
+-- Fullscreen + float only. center left a default-sized Alacritty when the
+-- fullscreen effect raced Alacritty's fork; screensaver-launch forces FS after map.
 hl.window_rule({ match = { class = "Screensaver" }, fullscreen = true })
 hl.window_rule({ match = { class = "Screensaver" }, float = true })
-hl.window_rule({ match = { class = "Screensaver" }, center = true })
 hl.window_rule({ match = { class = "^(Bitwarden)$" }, no_screen_share = true })
 hl.window_rule({ match = { class = "((google-)?[cC]hrom(e|ium)|[bB]rave-browser|[mM]icrosoft-edge|Vivaldi-stable|helium)" }, tag = "+chromium-based-browser" })
 hl.window_rule({ match = { class = "([fF]irefox|zen|librewolf)" }, tag = "+firefox-based-browser" })

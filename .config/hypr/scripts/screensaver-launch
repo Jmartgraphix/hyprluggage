@@ -5,10 +5,16 @@ if ! command -v tte &>/dev/null; then
   exit 1
 fi
 
-# Exit early if screensaver is already running
-pgrep -f "alacritty --class Screensaver" && exit 0
+# Exit early if a Screensaver window is already mapped.
+# Avoid pgrep -f on the alacritty argv — that false-matches shells whose
+# command line merely mentions the launch string.
+if hyprctl clients -j | jq -e '[.[] | select(.class == "Screensaver")] | length > 0' >/dev/null; then
+  exit 0
+fi
 
-# Hyprland 0.55 Lua: hyprctl dispatch takes hl.dsp.* calls, not legacy "focusmonitor DP-1"
+# Hyprland 0.55+ Lua: hyprctl dispatch takes hl.dsp.* calls, not legacy "focusmonitor DP-1".
+# exec_cmd window rules often miss Alacritty because it forks before the surface maps —
+# so we wait for each new window and force float/move/fullscreen ourselves.
 config="$HOME/.config/alacritty/screensaver.toml"
 script="$HOME/.config/hypr/scripts/screensaver"
 cmd="alacritty --class Screensaver --config-file ${config} -e ${script}"
@@ -23,33 +29,60 @@ mapfile -t monitors < <(hyprctl monitors -j | jq -r '
 
 ((${#monitors[@]} > 0)) || exit 1
 
-# Do not focusmonitor while instances are alive — cursor warps look like
-# mouse input and the first screensaver will pkill the rest.
+known_json='[]'
+addrs=()
+
+wait_for_new_screensaver() {
+  local tries=60
+  local addr=""
+  while ((tries-- > 0)); do
+    addr=$(hyprctl clients -j | jq -r --argjson known "$known_json" '
+      [.[] | select(.class == "Screensaver") | .address]
+      | map(select(. as $a | ($known | index($a) | not)))
+      | .[0] // empty
+    ')
+    if [[ -n "$addr" ]]; then
+      printf '%s\n' "$addr"
+      return 0
+    fi
+    sleep 0.05
+  done
+  return 1
+}
+
+force_cover_monitor() {
+  local addr="$1"
+  local mon="$2"
+  hyprctl dispatch "hl.dsp.window.float({ action = \"enable\", window = \"address:${addr}\" })" >/dev/null
+  hyprctl dispatch "hl.dsp.window.move({ monitor = \"${mon}\", window = \"address:${addr}\", follow = false })" >/dev/null
+  hyprctl dispatch "hl.dsp.window.fullscreen({ action = \"set\", mode = \"fullscreen\", window = \"address:${addr}\" })" >/dev/null
+}
+
+# Spawn one monitor at a time and bind that new client to that output.
+# Parallel spawn + clients[] index matching used to leave a default-sized float
+# on whichever screen mapped first.
 for m in "${monitors[@]}"; do
   [[ -n "$m" ]] || continue
-  hyprctl dispatch "hl.dsp.exec_cmd(\"${cmd}\", { monitor = \"${m}\", fullscreen = true, float = true })"
+  hyprctl dispatch "hl.dsp.exec_cmd(\"${cmd}\", { monitor = \"${m}\", fullscreen = true, float = true })" >/dev/null
+
+  addr=$(wait_for_new_screensaver) || continue
+  known_json=$(jq -cn --argjson k "$known_json" --arg a "$addr" '$k + [$a]')
+  addrs+=("$addr")
+  force_cover_monitor "$addr" "$m"
 done
 
-expected=${#monitors[@]}
-tries=40
-count=0
-while ((tries-- > 0)); do
-  count=$(hyprctl clients -j | jq '[.[] | select(.class == "Screensaver")] | length')
-  ((count >= expected)) && break
-  sleep 0.05
-done
-
-mapfile -t addrs < <(hyprctl clients -j | jq -r '.[] | select(.class == "Screensaver") | .address')
+# Final pass once every instance exists — catches races where fullscreen
+# applied before the surface finished mapping.
 i=0
 for m in "${monitors[@]}"; do
   addr="${addrs[i]:-}"
   i=$((i + 1))
-  [[ -n "$addr" && -n "$m" ]] || continue
-  hyprctl dispatch "hl.dsp.window.move({ monitor = \"${m}\", window = \"address:${addr}\", follow = false })"
+  [[ -n "$addr" ]] || continue
+  force_cover_monitor "$addr" "$m"
 done
 
 # The inner script dismisses when the active window is not Screensaver.
 # Pin focus to one instance after placement (still inside its input grace).
 if [[ -n "${addrs[0]:-}" ]]; then
-  hyprctl dispatch "hl.dsp.focus({ window = \"address:${addrs[0]}\" })"
+  hyprctl dispatch "hl.dsp.focus({ window = \"address:${addrs[0]}\" })" >/dev/null
 fi
