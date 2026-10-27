@@ -28,6 +28,52 @@ hl.window_rule({ match = { class = "^(Bitwarden)$" }, no_screen_share = true })
 hl.window_rule({ match = { class = "((google-)?[cC]hrom(e|ium)|[bB]rave-browser|[mM]icrosoft-edge|Vivaldi-stable|helium)" }, tag = "+chromium-based-browser" })
 hl.window_rule({ match = { class = "([fF]irefox|zen|librewolf)" }, tag = "+firefox-based-browser" })
 hl.window_rule({ match = { tag = "chromium-based-browser" }, tile = true })
+-- Bitwarden extension popup (passkeys).
+-- Class is <browser>-<extension id>-<profile>, e.g. brave-nngceckbapebfimnlniiiahkandclblb-Default.
+-- initialTitle is _crx_<extension id>. Regexes are full matches, so the id alone never matches.
+local bitwarden_popup = {
+    float = true,
+    center = true,
+    size = { 420, 680 },
+    stay_focused = true,
+}
+hl.window_rule({
+    match = { class = ".*nngceckbapebfimnlniiiahkandclblb.*" },
+    float = bitwarden_popup.float,
+    center = bitwarden_popup.center,
+    size = bitwarden_popup.size,
+    stay_focused = bitwarden_popup.stay_focused,
+})
+hl.window_rule({
+    match = { initial_title = "^_crx_nngceckbapebfimnlniiiahkandclblb.*" },
+    float = bitwarden_popup.float,
+    center = bitwarden_popup.center,
+    size = bitwarden_popup.size,
+    stay_focused = bitwarden_popup.stay_focused,
+})
+
+-- Chromium may report the popup as the browser itself until the extension class is set.
+-- Float is static, so a late class change would otherwise leave it tiled beside the page.
+local function present_bitwarden_popup(w)
+    if w == nil or w.floating then
+        return
+    end
+    local class = w.class or ""
+    local initial_class = w.initial_class or ""
+    local initial_title = w.initial_title or ""
+    local id = "nngceckbapebfimnlniiiahkandclblb"
+    if not (class:find(id, 1, true) or initial_class:find(id, 1, true) or initial_title:find(id, 1, true)) then
+        return
+    end
+    local window = "address:" .. w.address
+    hl.dispatch(hl.dsp.window.float({ action = "on", window = window }))
+    hl.dispatch(hl.dsp.window.resize({ x = 420, y = 680, relative = false, window = window }))
+    hl.dispatch(hl.dsp.window.center({ window = window }))
+end
+
+hl.on("window.open", present_bitwarden_popup)
+hl.on("window.class", present_bitwarden_popup)
+hl.on("window.title", present_bitwarden_popup)
 hl.window_rule({ match = { tag = "chromium-based-browser" }, opacity = "1 0.97" })
 hl.window_rule({ match = { tag = "firefox-based-browser" }, opacity = "1 0.97" })
 hl.window_rule({ match = { initial_title = "((?i)(?:[a-z0-9-]+\\.)*youtube\\.com_/|app\\.zoom\\.us_/wc/home)" }, opacity = "1.0 1.0" })
