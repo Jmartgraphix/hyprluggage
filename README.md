@@ -207,6 +207,7 @@ The installer will:
    - File managers (Thunar, Yazi)
    - Editor (Neovim)
    - Music stack (MPD, RMPC, Cava)
+   - Theme maker (Aether)
    - And many more utilities
 
 2. **Install optional applications:**
@@ -293,6 +294,14 @@ hyprluggage help            # show help
 ```
 
 Or press `Super + Ctrl + Shift + Space` for the theme picker.
+
+### Making a theme with Aether
+
+Aether is installed with Hyprluggage. Open it, build a palette from a wallpaper, and press **Apply**. Hyprluggage saves that as a theme named `<name> (aether)` and switches to it. Applying the same theme again replaces it, so later tweaks show up.
+
+Leave **App templates** and **Desktop icons** alone. Apply only needs the palette and wallpaper. Hyprluggage themes the desktop from those.
+
+Remove an Aether theme like any other: open the TUI with `Super + I` and choose **Delete Themes**, or run `hyprluggage remove`.
 
 <a id="keybindings"></a>
 

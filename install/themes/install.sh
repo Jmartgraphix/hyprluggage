@@ -223,7 +223,16 @@ page_one() {
     spin "Arranging compartments" 0.4
     mkdir -p "$HYPRLUGGAGE_DIR" "$HOME/.config/rmpc/themes" "$HOME/.cache/wal"
     spin "Adjusting the settings" 0.35
-    chmod +x "$SCRIPT_DIR/hyprluggage" "$SCRIPT_DIR/hooks"/*.sh 2>/dev/null || true
+    chmod +x "$SCRIPT_DIR/hyprluggage" "$SCRIPT_DIR/hooks"/*.sh "$SCRIPT_DIR/aether-hook/post-apply.sh" 2>/dev/null || true
+    hook_src="$SCRIPT_DIR/aether-hook"
+    hook_dest="$HOME/.config/aether/custom/hyprluggage"
+    # Aether ignores symlinks when it scans custom apps, so this must be a real directory.
+    if [[ -L "$hook_dest" ]]; then
+        rm "$hook_dest"
+    fi
+    mkdir -p "$hook_dest"
+    cp -a "$hook_src/." "$hook_dest/"
+    chmod +x "$hook_dest/post-apply.sh"
     spin "Testing the mechanisms" 0.35
     check_mark "Luggage is ready"
 

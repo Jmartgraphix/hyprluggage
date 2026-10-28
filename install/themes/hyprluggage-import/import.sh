@@ -26,6 +26,7 @@ source "$SCRIPT_DIR/vesktop.sh"
 source "$SCRIPT_DIR/obsidian.sh"
 source "$SCRIPT_DIR/spicetify.sh"
 source "$SCRIPT_DIR/mako.sh"
+source "$SCRIPT_DIR/nvim.sh"
 
 write_configs() {
     local theme_name="$1" theme_dest="$2" theme_bg="$3" theme_fg="$4"; shift 4
@@ -47,6 +48,16 @@ write_configs() {
     bblue=${c[12]:-$blue} bmagenta=${c[13]:-$magenta} bcyan=${c[14]:-$cyan}
     bwhite=${c[15]:-#ffffff}
     accent=$blue
+    # Hyprluggage's bar, GTK theme, and shadows are dark. A light Aether
+    # palette would paint dark text on the dark bar and white shadows.
+    if (( $(luminance "$bg") > $(luminance "$fg") )); then
+        local swap=$bg
+        bg=$fg
+        fg=$swap
+        swap=$black
+        black=$white
+        white=$swap
+    fi
     surface=$(lighten "$bg" 20)
     
     gen_terminals
@@ -66,6 +77,75 @@ write_configs() {
     gen_mako
 }
 
+prepare_theme_dirs() {
+    local dest="$1"
+    mkdir -p "$dest"/{backgrounds,.cache/wal}
+    mkdir -p "$dest/.config"/{alacritty,btop/themes,cava,ghostty,gtk-3.0,gtk-4.0,hypr/theme,kitty,mako,nvim,obsidian,rmpc/themes,rofi,spicetify/Themes/hyprluggage,vesktop/themes,waybar,yazi}
+}
+
+copy_wallpapers() {
+    local src="$1" dest="$2" f wall
+    if [[ -d "$src/backgrounds" ]]; then
+        cp -a "$src/backgrounds/." "$dest/backgrounds/" 2>/dev/null || true
+    fi
+    shopt -s nullglob
+    for f in "$src"/background*.{jpg,jpeg,png,webp}; do
+        [[ -f "$f" ]] && cp "$f" "$dest/backgrounds/"
+    done
+    shopt -u nullglob
+    wall=$(find "$dest/backgrounds" -type f 2>/dev/null | sort -V | head -1)
+    [[ -n "$wall" ]] && ln -sfn "backgrounds/${wall##*/}" "$dest/wallpaper"
+    return 0
+}
+
+copy_overrides() {
+    local src="$1" dest="$2"
+    [[ -f "$src/btop.theme" ]] && cp "$src/btop.theme" "$dest/.config/btop/themes/current.theme"
+    [[ -f "$src/neovim.lua" ]] && cp "$src/neovim.lua" "$dest/.config/nvim/theme.lua"
+    [[ -f "$src/mako" ]] && cp "$src/mako" "$dest/.config/mako/config"
+    [[ -f "$src/.config/mako/config" ]] && cp "$src/.config/mako/config" "$dest/.config/mako/config"
+    [[ -f "$src/mako.ini" ]] && cp "$src/mako.ini" "$dest/.config/mako/config"
+    return 0
+}
+
+activate_theme() {
+    local name="$1"
+    local parent_script
+    parent_script="$(dirname "$SCRIPT_DIR")/hyprluggage"
+    if [[ "$(cat "$HOME/.config/hyprluggage/.current-theme" 2>/dev/null)" == "$name" ]]; then
+        "$parent_script" reload
+    else
+        "$parent_script" switch "$name"
+    fi
+}
+
+# Rebuild themes/<name> from a directory that has kitty.conf, alacritty.toml, or colors.toml.
+# kind=aether ignores Aether's app templates and writes Hyprluggage's own btop, mako, and neovim.
+build_theme() {
+    local name="$1" src="$2" kind="${3:-import}"
+    local dest="$THEMES_DIR/$name"
+    local colors bg fg
+    local palette
+
+    colors=$(get_colors "$src") || { err "no kitty.conf or alacritty.toml found"; exit 1; }
+    read -ra C <<< "$colors"
+    bg="${C[0]}"
+    fg="${C[1]}"
+    palette=("${C[@]:2}")
+    [[ -z "$bg" || -z "$fg" ]] && { err "no colors in $src"; exit 1; }
+
+    info "creating $name..."
+    rm -rf "$dest"
+    prepare_theme_dirs "$dest"
+    copy_wallpapers "$src" "$dest"
+    write_configs "$name" "$dest" "$bg" "$fg" "${palette[@]}"
+    if [[ "$kind" == "aether" ]]; then
+        gen_nvim
+    else
+        copy_overrides "$src" "$dest"
+    fi
+}
+
 run_import() {
     local url="$1"
     [[ -z "$url" ]] && { err "usage: hyprluggage import <url|user/repo>"; exit 1; }
@@ -73,16 +153,15 @@ run_import() {
     [[ "$url" =~ ^https?:// ]] || url="https://github.com/$url"
     url="${url%.git}"
     
-    local name
+    local name dest
     name=$(basename "$url" | sed 's/^omarchy-//; s/^omakub-//; s/-theme$//; s/-omarchy$//' | tr '[:upper:]' '[:lower:]')
     name="$name (omarchy)"
-    local dest="$THEMES_DIR/$name"
+    dest="$THEMES_DIR/$name"
     
     if [[ -d "$dest" ]]; then
         printf 'theme "%s" exists. overwrite? [y/N] ' "$name"
         read -r ans
         [[ "$ans" == "y" ]] || exit 0
-        rm -rf "$dest"
     fi
     
     local tmp="/tmp/hyprluggage-import.$$"
@@ -92,41 +171,19 @@ run_import() {
     git clone --depth 1 --quiet "$url" "$tmp/repo" || { err "clone failed"; exit 1; }
     
     info "extracting colors..."
-    local colors
-    colors=$(get_colors "$tmp/repo") || { err "no kitty.conf or alacritty.toml found"; exit 1; }
-    read -ra C <<< "$colors"
-    local bg="${C[0]}" fg="${C[1]}"
-    local palette=("${C[@]:2}")
-    
-    info "creating $name..."
-    mkdir -p "$dest"/{backgrounds,.cache/wal}
-    mkdir -p "$dest/.config"/{alacritty,btop/themes,cava,ghostty,gtk-3.0,gtk-4.0,hypr/theme,kitty,mako,nvim,obsidian,rmpc/themes,rofi,spicetify/Themes/hyprluggage,vesktop/themes,waybar,yazi}
-    
-    # copy wallpapers
-    [[ -d "$tmp/repo/backgrounds" ]] && cp "$tmp/repo/backgrounds"/* "$dest/backgrounds/" 2>/dev/null || true
-    for f in "$tmp/repo"/background*.{jpg,png,webp}; do
-        [[ -f "$f" ]] && cp "$f" "$dest/backgrounds/"
-    done 2>/dev/null
-    
-    local wall
-    wall=$(find "$dest/backgrounds" -type f 2>/dev/null | head -1)
-    [[ -n "$wall" ]] && ln -sfn "backgrounds/${wall##*/}" "$dest/wallpaper"
-    
-    write_configs "$name" "$dest" "$bg" "$fg" "${palette[@]}"
-    
-    # use original theme configs if available
-    [[ -f "$tmp/repo/btop.theme" ]] && cp "$tmp/repo/btop.theme" "$dest/.config/btop/themes/current.theme"
-    [[ -f "$tmp/repo/neovim.lua" ]] && cp "$tmp/repo/neovim.lua" "$dest/.config/nvim/theme.lua"
-    [[ -f "$tmp/repo/mako" ]] && cp "$tmp/repo/mako" "$dest/.config/mako/config"
-    [[ -f "$tmp/repo/.config/mako/config" ]] && cp "$tmp/repo/.config/mako/config" "$dest/.config/mako/config"
-    
+    build_theme "$name" "$tmp/repo"
     ok "imported $name"
-    local parent_script="$(dirname "$SCRIPT_DIR")/hyprluggage"
-    if [[ "$(cat "$HOME/.config/hyprluggage/.current-theme" 2>/dev/null)" == "$name" ]]; then
-        "$parent_script" reload
-    else
-        "$parent_script" switch "$name"
-    fi
+    activate_theme "$name"
 }
 
-run_import "$@"
+source "$SCRIPT_DIR/aether.sh"
+
+case "${1:-}" in
+    --aether)
+        shift
+        run_apply_aether "$@"
+        ;;
+    *)
+        run_import "$@"
+        ;;
+esac

@@ -58,6 +58,7 @@ packages=(
 
 	# Theming
 	matugen-bin nwg-look adw-gtk-theme bibata-cursor-theme-bin imagemagick
+	aether
 
 	# Rofi Extras
 	rofimoji wtype

@@ -1,0 +1,4 @@
+{
+  "template": "hook.txt",
+  "destination": "~/.local/state/hyprluggage/aether-last-apply"
+}

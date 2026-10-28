@@ -99,6 +99,9 @@ nuke_everything() {
     [[ -d "$HYPRLUGGAGE_DIR" ]] && rm -rf "$HYPRLUGGAGE_DIR" && ok "Hyprluggage config"
     [[ -f "$HOME/.current-theme" ]] && rm -f "$HOME/.current-theme" && ok "Legacy theme file"
     [[ -L "$HOME/.cache/wal/colors.json" ]] && rm -f "$HOME/.cache/wal/colors.json" && ok "Pywal symlink"
+    if [[ -L "$HOME/.config/aether/custom/hyprluggage" || -d "$HOME/.config/aether/custom/hyprluggage" ]]; then
+        rm -rf "$HOME/.config/aether/custom/hyprluggage" && ok "Aether apply hook"
+    fi
 
     echo
     ok "Complete removal done"

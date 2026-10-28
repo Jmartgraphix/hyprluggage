@@ -246,6 +246,8 @@ Commands:
   switch [theme]     Switch theme (menu if no name given)
   browse             Browse & import Omarchy themes with preview
   import <url>       Import Omarchy theme from GitHub
+  apply-aether [dir] [name]
+                     Convert an Aether theme into themes/<name> (aether)
   tui                Theme browser, shell & working-terminal pickers
   list               Show all themes
   current            Print current theme
@@ -274,6 +276,8 @@ Examples:
   hyprluggage switch tokyo-night
   hyprluggage import bjarneo/omarchy-sakura-theme
   hyprluggage import https://github.com/user/omarchy-theme
+  hyprluggage apply-aether
+  hyprluggage apply-aether ~/.config/aether/theme forest
 
 FAQ:
   Spotify not themed?
@@ -317,6 +321,10 @@ browse) exec "$SCRIPT_DIR/hyprluggage-tui" --browse-inner ;;
 import)
 	shift
 	cmd_import "$@"
+	;;
+apply-aether)
+	shift
+	"$SCRIPT_DIR/hyprluggage-import/import.sh" --aether "$@"
 	;;
 tui) exec "$SCRIPT_DIR/hyprluggage-tui" ;;
 reload) cmd_reload ;;
