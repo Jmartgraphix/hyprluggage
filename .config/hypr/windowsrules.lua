@@ -20,6 +20,14 @@ hl.window_rule({ match = { title = "hyprluggage-browse" }, size = { 1200, 750 } 
 hl.window_rule({ match = { class = "com.github.wwmm.easyeffects" }, float = true })
 hl.window_rule({ match = { class = "com.github.wwmm.easyeffects" }, center = true })
 hl.window_rule({ match = { class = "com.github.wwmm.easyeffects" }, size = { 950, 850 } })
+-- Satty, the SUPER+P screenshot editor. Leave size unset so the window
+-- matches the capture; a fixed size would crop the annotation canvas.
+hl.window_rule({
+    match = { class = "^com\\.gabm\\.satty$" },
+    float = true,
+    center = true,
+    opacity = "1 1",
+})
 -- Fullscreen + float only. center left a default-sized Alacritty when the
 -- fullscreen effect raced Alacritty's fork; screensaver-launch forces FS after map.
 hl.window_rule({ match = { class = "Screensaver" }, fullscreen = true })
