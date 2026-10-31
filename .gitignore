@@ -30,6 +30,7 @@ themes/* \(*\)/
 .config/fish/fish_variables
 .config/fish/install.log
 .config/fish/api.fish
+.config/fish/completions/grok.fish
 
 # Typora - ignore everything except custom themes
 .config/Typora/*

@@ -3,6 +3,30 @@
 hl.window_rule({ match = { class = "^$", title = "^$", xwayland = true, float = false, fullscreen = false, pin = false }, no_focus = true })
 hl.window_rule({ match = { class = ".*" }, suppress_event = "maximize" })
 hl.window_rule({ match = { class = ".*" }, opacity = "0.97 0.9" })
+-- Affinity's File/Document menus are Xwayland popups. Blur plus the global
+-- inactive opacity leaves them blank until the pointer moves. This rule is
+-- after the global opacity rule so it wins. Do not hide empty titles:
+-- those windows are the menus.
+hl.window_rule({ match = { class = "^affinity\\.exe$", title = "^Affinity$" }, workspace = 8 })
+hl.window_rule({ match = { title = "^affinity - Wine Desktop$" }, workspace = 8 })
+hl.window_rule({ match = { class = "^affinity\\.exe$" }, no_blur = true })
+hl.window_rule({ match = { class = "^affinity\\.exe$" }, opaque = true })
+hl.window_rule({ match = { class = "^affinity\\.exe$" }, opacity = "1 1" })
+hl.window_rule({ match = { title = "^affinity - Wine Desktop$" }, no_blur = true })
+hl.window_rule({ match = { title = "^affinity - Wine Desktop$" }, opaque = true })
+hl.window_rule({ match = { title = "^affinity - Wine Desktop$" }, opacity = "1 1" })
+-- Workspace switches leave this Xwayland window visible but without X input
+-- focus, so it ignores the pointer. xfocus.sh puts the focus back.
+local function focus_affinity_x11(w)
+    if w == nil or (w.class or "") ~= "affinity.exe" then
+        return
+    end
+    hl.exec_cmd(os.getenv("HOME") .. "/.local/share/affinity-wine/xfocus.sh")
+end
+hl.on("window.active", focus_affinity_x11)
+hl.on("workspace.active", function()
+    focus_affinity_x11(hl.get_active_window())
+end)
 hl.layer_rule({ match = { namespace = "selection" }, no_anim = true })
 hl.window_rule({ match = { tag = "floating-window" }, float = true })
 hl.window_rule({ match = { tag = "floating-window" }, center = true })
