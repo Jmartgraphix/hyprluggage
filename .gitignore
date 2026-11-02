@@ -6,6 +6,9 @@
 # Runtime symlinks created by hyprluggage hooks
 .config/waybar/colors.css
 .config/rofi/colors.rasi
+
+# Launcher favorites, aliases, and hidden apps (created on first run)
+.config/rofi/launcher/
 .config/yazi/theme.toml
 .config/btop/themes/current.theme
 .config/rmpc/themes/current.ron

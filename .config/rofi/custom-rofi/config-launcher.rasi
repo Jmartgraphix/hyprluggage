@@ -1,0 +1,113 @@
+@import "../colors.rasi"
+
+configuration {
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    font: "CaskaydiaCove Nerd Font Mono 11";
+    matching: "fuzzy";
+    sort: true;
+    sorting-method: "normal";
+    kb-accept-alt: "Alt+Return";
+    kb-element-next: "Alt+Down";
+    kb-custom-1: "Shift+Return";
+    kb-custom-2: "Tab";
+    hover-select: true;
+}
+
+* {
+    background-color: transparent;
+    text-color: @on-surface-variant;
+}
+
+window {
+    transparency: "real";
+    location: center;
+    anchor: center;
+    width: 460px;
+    border: 0;
+    border-radius: 12px;
+    background-color: @surface;
+}
+
+mainbox {
+    padding: 12px;
+    spacing: 10px;
+    background-color: transparent;
+    children: [ "inputbar", "listview" ];
+}
+
+inputbar {
+    padding: 10px 14px;
+    margin: 0;
+    border: 0;
+    border-radius: 8px;
+    background-color: @surface-container;
+    children: [ "entry" ];
+}
+
+prompt {
+    enabled: false;
+}
+
+entry {
+    placeholder: "search";
+    placeholder-color: @on-surface-variant;
+    background-color: transparent;
+    text-color: @on-surface-variant;
+    horizontal-align: 0.5;
+    cursor: text;
+    font: "CaskaydiaCove Nerd Font Mono 10";
+}
+
+listview {
+    columns: 1;
+    lines: 8;
+    spacing: 4px;
+    cycle: true;
+    dynamic: true;
+    scrollbar: false;
+    layout: vertical;
+    fixed-height: true;
+    fixed-columns: true;
+    background-color: transparent;
+}
+
+element {
+    padding: 8px 12px;
+    spacing: 10px;
+    border: 1px;
+    border-color: transparent;
+    border-radius: 8px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: transparent;
+    text-color: @on-surface-variant;
+}
+
+element selected.normal,
+element selected.active,
+element selected.urgent {
+    background-color: transparent;
+    text-color: @on-surface-variant;
+    border-color: @primary;
+}
+
+element-icon {
+    size: 26px;
+    background-color: transparent;
+    cursor: inherit;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+    highlight: inherit;
+    vertical-align: 0.5;
+    horizontal-align: 0.0;
+    cursor: inherit;
+    font: "CaskaydiaCove Nerd Font Mono 11";
+}

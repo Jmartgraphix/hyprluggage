@@ -35,9 +35,9 @@ hl.bind("CTRL + ALT + SHIFT + apostrophe", hl.dsp.exec_cmd(string.format("%s/lau
 -- VNC: SUPER SHIFT + I → CTRL ALT SHIFT + I
 hl.bind("CTRL + ALT + SHIFT + I", hl.dsp.exec_cmd(string.format("kitty --title webapp-install -e %s/webapp-install", scrDir)), { description = "Web App Install (VNC)" })
 
--- from: bindd = SUPER , SPACE, app-launcher, exec, pkill rofi || rofi -show drun
+-- from: bindd = SUPER , SPACE, app-launcher, exec, pkill rofi || ~/.config/rofi/scripts/launcher
 -- VNC: SUPER + SPACE → CTRL ALT + SPACE
-hl.bind("CTRL + ALT + SPACE", hl.dsp.exec_cmd("pkill rofi || rofi -show drun"), { description = "app-launcher" })
+hl.bind("CTRL + ALT + SPACE", hl.dsp.exec_cmd(string.format("pkill rofi || %s/.config/rofi/scripts/launcher", home)), { description = "app-launcher" })
 
 -- from: bindd = SUPER CTRL, B, Power Profiles, exec,   $rofiDir/power-profiles
 -- VNC: SUPER CTRL + B → CTRL ALT SHIFT + B

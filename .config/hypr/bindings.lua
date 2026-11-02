@@ -49,7 +49,7 @@ hl.bind("ALT + comma", hl.dsp.exec_cmd(string.format("%s/clipboard", rofiDir)), 
 hl.bind("SUPER + SHIFT + M", hl.dsp.exec_cmd(string.format("%s/rofibeats", rofiDir)), { description = "rofibeats" })
 hl.bind("ALT + period", hl.dsp.exec_cmd(string.format("%s/emoji", rofiDir)), { description = "emoji" })
 hl.bind("ALT + SPACE", hl.dsp.exec_cmd(string.format("%s/rofisearch", rofiDir)), { description = "Find" })
-hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("pkill rofi || rofi -show drun"), { description = "app-launcher" })
+hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("pkill rofi || ~/.config/rofi/scripts/launcher"), { description = "app-launcher" })
 hl.bind("SUPER + CTRL + B", hl.dsp.exec_cmd(string.format("%s/power-profiles", rofiDir)), { description = "Power Profiles" })
 hl.bind("SUPER + SHIFT + O", hl.dsp.exec_cmd(string.format("%s/pop-window", scrDir)), { description = "Pop window out (float & pin)" })
 hl.bind("SUPER + SHIFT + SPACE", hl.dsp.exec_cmd(string.format("%s/toggle-waybar", scrDir)), { description = "Toggle waybar" })

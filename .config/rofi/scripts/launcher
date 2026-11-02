@@ -1,0 +1,396 @@
+#!/usr/bin/env python3
+"""Hyprluggage app launcher. Rofi filters the list; this script only builds and runs it."""
+
+import ast
+import math
+import operator
+import os
+import shlex
+import subprocess
+import sys
+from pathlib import Path
+from urllib.parse import quote_plus
+
+HOME = Path.home()
+ROFI_DIR = Path(os.environ.get("XDG_CONFIG_HOME", HOME / ".config")) / "rofi"
+LIST_DIR = ROFI_DIR / "launcher"
+STATE_DIR = Path(os.environ.get("XDG_STATE_HOME", HOME / ".local/state")) / "hyprluggage"
+HISTORY = STATE_DIR / "launcher-history"
+ENGINE_FILE = STATE_DIR / "launcher-search-engine"
+CONFIG = ROFI_DIR / "custom-rofi" / "config-launcher.rasi"
+SCRIPTS = ROFI_DIR / "scripts"
+FOCUS = HOME / ".config/hypr/scripts/focus"
+
+COMMANDS = (
+    ("theme", "Theme", "themePicker", "preferences-desktop-theme"),
+    ("wallpaper", "Wallpaper", "wallPicker", "preferences-desktop-wallpaper"),
+    ("power", "Power", "powermenu", "system-shutdown"),
+    ("wifi", "Wifi", "wifi", "network-wireless"),
+    ("keyhints", "Keyhints", "keyhints", "preferences-desktop-keyboard"),
+)
+
+ENGINES = {
+    "google": ("Google", "google", "https://www.google.com/search?q="),
+    "duckduckgo": ("DuckDuckGo", "duckduckgo", "https://duckduckgo.com/?q="),
+}
+
+SEP = "\x1f"
+TRUE = ("true", "1", "yes")
+
+
+def ensure_state():
+    LIST_DIR.mkdir(parents=True, exist_ok=True)
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    for name in ("favorites", "aliases", "hidden"):
+        (LIST_DIR / name).touch()
+    HISTORY.touch()
+    if not ENGINE_FILE.exists():
+        ENGINE_FILE.write_text("google\n")
+
+
+def read_lines(path):
+    lines = []
+    for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = raw.strip()
+        if line and not line.startswith("#"):
+            lines.append(line)
+    return lines
+
+
+def engine():
+    value = ENGINE_FILE.read_text(encoding="utf-8", errors="replace").strip().lower()
+    return value if value in ENGINES else "google"
+
+
+def set_engine(name):
+    ENGINE_FILE.write_text(name + "\n")
+
+
+def data_dirs():
+    data_home = Path(os.environ.get("XDG_DATA_HOME", HOME / ".local/share"))
+    raw = os.environ.get("XDG_DATA_DIRS", "/usr/local/share:/usr/share")
+    system = [Path(part) for part in raw.split(":") if part]
+    ordered = system + [data_home]
+    return [path / "applications" for path in ordered]
+
+
+def parse_desktop(path):
+    entry = {}
+    in_entry = False
+    for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = raw.strip()
+        if line.startswith("["):
+            in_entry = line == "[Desktop Entry]"
+            continue
+        if not in_entry or not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if "[" in key:
+            continue
+        entry[key] = value
+    return entry
+
+
+def load_apps():
+    paths = {}
+    for directory in data_dirs():
+        if not directory.is_dir():
+            continue
+        for path in directory.glob("*.desktop"):
+            paths[path.name] = path
+    hidden = set(read_lines(LIST_DIR / "hidden"))
+    apps = {}
+    for desktop_id, path in paths.items():
+        if desktop_id in hidden:
+            continue
+        try:
+            entry = parse_desktop(path)
+        except OSError:
+            continue
+        kind = entry.get("Type", "Application")
+        if kind != "Application":
+            continue
+        if entry.get("Hidden", "").lower() in TRUE or entry.get("NoDisplay", "").lower() in TRUE:
+            continue
+        name = entry.get("Name", "").strip()
+        if not name:
+            continue
+        apps[desktop_id] = {
+            "id": desktop_id,
+            "name": name,
+            "icon": entry.get("Icon", "").strip() or "application-x-executable",
+            "class": entry.get("StartupWMClass", "").strip() or desktop_id.removesuffix(".desktop"),
+        }
+    return apps
+
+
+def aliases_for():
+    found = {}
+    for line in read_lines(LIST_DIR / "aliases"):
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        token, desktop_id = parts[0], parts[1]
+        found.setdefault(desktop_id, []).append(token)
+    return found
+
+
+def history_ids():
+    return read_lines(HISTORY)
+
+
+def remember(desktop_id):
+    items = [item for item in history_ids() if item != desktop_id]
+    items.insert(0, desktop_id)
+    HISTORY.write_text("\n".join(items[:100]) + "\n")
+
+
+def ordered_apps(apps):
+    favorites = [item for item in read_lines(LIST_DIR / "favorites") if item in apps]
+    favorite_set = set(favorites)
+    rest = [item for item in history_ids() if item in apps and item not in favorite_set]
+    seen = set(favorites) | set(rest)
+    named = sorted(
+        (desktop_id for desktop_id in apps if desktop_id not in seen),
+        key=lambda desktop_id: apps[desktop_id]["name"].lower(),
+    )
+    return [apps[item] for item in favorites + rest] + [apps[item] for item in named]
+
+
+def search_display(active):
+    other = "duck duck go" if active == "google" else "google"
+    return f"Hit tab to switch to {other}"
+
+
+def row(entry, **options):
+    payload = entry.encode()
+    if options:
+        extra = SEP.join(f"{key}{SEP}{value}" for key, value in options.items())
+        payload += b"\0" + extra.encode()
+    return payload + b"\n"
+
+
+def build_rows(active):
+    apps = load_apps()
+    alias_map = aliases_for()
+    chunks = []
+    for app in ordered_apps(apps):
+        meta = " ".join([app["name"], app["id"].removesuffix(".desktop"), *alias_map.get(app["id"], [])])
+        chunks.append(row(
+            "app:" + app["id"],
+            display=app["name"],
+            icon=app["icon"],
+            meta=meta,
+            info=app["class"],
+        ))
+    for key, label, _script, icon in COMMANDS:
+        chunks.append(row(
+            "cmd:" + key,
+            display=label,
+            icon=icon,
+            meta=label.lower(),
+        ))
+    label, icon, _url = ENGINES[active]
+    chunks.append(row(
+        "search",
+        display=search_display(active),
+        icon=icon,
+        meta="search google duckduckgo web " + label.lower(),
+        permanent="true",
+    ))
+    return b"".join(chunks), apps
+
+
+def run_rofi(payload, active_filter, select):
+    command = [
+        "rofi", "-dmenu",
+        "-config", str(CONFIG),
+        "-format", "f" + SEP + "s",
+        "-sync",
+        "-no-custom",
+        "-i",
+    ]
+    if active_filter:
+        command.extend(["-filter", active_filter])
+    if select:
+        command.extend(["-select", select])
+    result = subprocess.run(command, input=payload, capture_output=True)
+    text = result.stdout.decode(errors="replace").rstrip("\n")
+    if SEP in text:
+        typed, selected = text.split(SEP, 1)
+    else:
+        typed, selected = "", text
+    return result.returncode, typed, selected
+
+
+def open_url(url):
+    subprocess.Popen(["xdg-open", url], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def run_script(name):
+    path = SCRIPTS / name
+    subprocess.Popen([str(path)], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+MATH_CHARS = set("0123456789.+-*/%()eE_ \t")
+BINOPS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+UNARYOPS = {
+    ast.UAdd: operator.pos,
+    ast.USub: operator.neg,
+}
+
+
+def looks_like_math(text):
+    if not text or any(char not in MATH_CHARS for char in text):
+        return False
+    return any(char in "+-*/%" for char in text)
+
+
+def has_binop(node):
+    if isinstance(node, ast.Expression):
+        return has_binop(node.body)
+    if isinstance(node, ast.BinOp):
+        return True
+    if isinstance(node, ast.UnaryOp):
+        return has_binop(node.operand)
+    return False
+
+
+def eval_node(node):
+    if isinstance(node, ast.Expression):
+        return eval_node(node.body)
+    if isinstance(node, ast.Constant):
+        if type(node.value) is bool or not isinstance(node.value, (int, float)):
+            raise ValueError
+        return node.value
+    if isinstance(node, ast.UnaryOp) and type(node.op) in UNARYOPS:
+        return UNARYOPS[type(node.op)](eval_node(node.operand))
+    if isinstance(node, ast.BinOp) and type(node.op) in BINOPS:
+        left = eval_node(node.left)
+        right = eval_node(node.right)
+        if isinstance(node.op, ast.Pow) and isinstance(right, (int, float)) and abs(right) > 10000:
+            raise ArithmeticError
+        return BINOPS[type(node.op)](left, right)
+    raise ValueError
+
+
+def format_number(value):
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ArithmeticError
+        if value.is_integer():
+            return str(int(value))
+        return format(value, ".12g")
+    return str(value)
+
+
+def calculation(text):
+    stripped = text.strip().rstrip("=").strip()
+    if not looks_like_math(stripped):
+        return None
+    try:
+        tree = ast.parse(stripped, mode="eval")
+    except SyntaxError:
+        return ("error", "Can't calculate")
+    if not has_binop(tree):
+        return None
+    try:
+        value = eval_node(tree)
+        if type(value) is bool or not isinstance(value, (int, float)):
+            raise ArithmeticError
+        rendered = format_number(value)
+    except ZeroDivisionError:
+        return ("error", "Can't divide by zero")
+    except (ValueError, OverflowError, ArithmeticError):
+        return ("error", "Can't calculate")
+    return ("ok", rendered)
+
+
+def notify(summary, body=None):
+    command = ["notify-send", "--", summary]
+    if body is not None:
+        command.append(body)
+    subprocess.Popen(command, start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def publish_calculation(outcome):
+    kind, message = outcome
+    if kind == "ok":
+        copied = subprocess.run(["wl-copy", "--", message], check=False).returncode == 0
+        notify("Copied" if copied else "Couldn't copy", message)
+        return
+    notify(message)
+
+
+def launch_app(desktop_id, pattern, new_window):
+    launch = "uwsm-app -- gtk-launch " + shlex.quote(desktop_id)
+    if new_window or not FOCUS.exists():
+        subprocess.Popen(["uwsm-app", "--", "gtk-launch", desktop_id], start_new_session=True)
+        return
+    subprocess.Popen([str(FOCUS), pattern, launch], start_new_session=True)
+
+
+def act(selected, typed, new_window, apps):
+    if selected.startswith("app:"):
+        desktop_id = selected[4:]
+        app = apps.get(desktop_id)
+        if not app:
+            return
+        remember(desktop_id)
+        launch_app(desktop_id, app["class"], new_window)
+        return
+    if selected.startswith("cmd:"):
+        key = selected[4:]
+        for command_key, _label, script, _icon in COMMANDS:
+            if command_key == key:
+                run_script(script)
+                return
+        return
+    if selected == "search":
+        query = typed.strip()
+        if not query:
+            return
+        _label, _icon, prefix = ENGINES[engine()]
+        open_url(prefix + quote_plus(query))
+
+
+def main():
+    ensure_state()
+    active = engine()
+    if "--dump" in sys.argv:
+        payload, _apps = build_rows(active)
+        sys.stdout.buffer.write(payload)
+        return
+    typed = ""
+    select = ""
+    while True:
+        payload, apps = build_rows(active)
+        code, typed, selected = run_rofi(payload, typed, select)
+        if code == 11 and selected == "search":
+            active = "duckduckgo" if active == "google" else "google"
+            set_engine(active)
+            select = "search"
+            continue
+        if code == 11:
+            select = selected
+            continue
+        if code not in (0, 10):
+            return
+        outcome = calculation(typed)
+        if outcome is not None:
+            publish_calculation(outcome)
+            return
+        act(selected, typed, new_window=(code == 10), apps=apps)
+        return
+
+
+if __name__ == "__main__":
+    main()

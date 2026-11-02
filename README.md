@@ -105,7 +105,7 @@ Each theme includes multiple wallpapers and can be previewed using `hyprluggage 
 HyprLuggage comes with a complete desktop environment setup:
 
 **Rofi Menus** - Powerful launcher with multiple menus:
-- App launcher (`Super + Space`)
+- App launcher (`Super + Space`, `Ctrl + Alt + Space` over VNC). Fuzzy app list with favorites, recent apps, and the Theme, Wallpaper, Power, Wifi, and Keyhints commands. Tab on the search row switches Google and DuckDuckGo. Enter focuses an open app; Shift+Return launches a new window. An expression such as `1 + 1` or `1 + 1 =` copies the result to the clipboard.
 - Emoji picker (`Alt + .`)
 - Clipboard manager (`Alt + ,`)
 - Wallpaper selector (`Super + Alt + Space`)
@@ -333,7 +333,7 @@ Remove an Aether theme like any other: open the TUI with `Super + I` and choose 
 
 | Key | Action |
 |-----|--------|
-| `Super + Space` | App Launcher |
+| `Super + Space` | App launcher (fuzzy search, web search, calculator) |
 | `Alt + ,` | Clipboard |
 | `Alt + .` | Emoji Picker |
 | `Super + Ctrl + B` | Power Profiles |
@@ -448,7 +448,7 @@ All configuration files are located in `~/.config/`. You can edit them directlyâ
 - **Keybindings:** `~/.config/hypr/bindings.conf` - Modify or add shortcuts
 - **Hyprland settings:** `~/.config/hypr/` - Window rules, animations, monitors
 - **Waybar:** `~/.config/waybar/` - Status bar modules and styling
-- **Rofi:** `~/.config/rofi/` - Launcher appearance and scripts
+- **Rofi:** `~/.config/rofi/` - Launcher appearance and scripts. Favorites, aliases (`ff firefox.desktop`), and hidden apps are one per line in `~/.config/rofi/launcher/`.
 - **Terminal:** `~/.config/kitty/`, `~/.config/ghostty/`, or `~/.config/alacritty/` - Terminal settings
 - **Shell:** `~/.config/fish/` - Fish shell configuration
 
