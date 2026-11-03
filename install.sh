@@ -129,6 +129,10 @@ source "$DOTFILES/install/packages.sh"
 # Symlink dotfiles
 source "$DOTFILES/install/stow.sh"
 
+# Terminal calculator (separate repo, pinned tag)
+source "$DOTFILES/install/hyprmath.sh"
+install_hyprmath
+
 # Setup desktop entries
 source "$DOTFILES/install/desktop-entries.sh"
 

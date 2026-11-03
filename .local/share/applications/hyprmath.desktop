@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Calculator
+GenericName=Calculator
+Comment=Terminal calculator tape (hyprmath)
+Exec=kitty --title hyprluggage-calc -e hyprmath
+Icon=accessories-calculator
+Terminal=false
+Categories=Utility;Calculator;
+Keywords=calc;calculator;math;hyprmath;
+StartupNotify=false

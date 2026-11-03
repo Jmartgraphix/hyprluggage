@@ -19,6 +19,12 @@ fi
 mkdir -p "$TARGET_DIR"
 mkdir -p "$TARGET_DIR/icons"
 
+# Calculator (hyprmath)
+if [[ -f "$APPS_DIR/hyprmath.desktop" ]]; then
+    cat "$APPS_DIR/hyprmath.desktop" > "$TARGET_DIR/hyprmath.desktop"
+    ok "Calculator (hyprmath)"
+fi
+
 # Browser overrides
 if command -v brave &>/dev/null && [[ -f "$APPS_DIR/brave-browser.desktop" ]]; then
     cat "$APPS_DIR/brave-browser.desktop" > "$TARGET_DIR/brave-browser.desktop"

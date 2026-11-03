@@ -319,6 +319,7 @@ Remove an Aether theme like any other: open the TUI with `Super + I` and choose 
 | `Super + D` | Discord |
 | `Super + O` | Obsidian |
 | `Super + C` | Cursor |
+| `Super + Alt + C` | Calculator (hyprmath) |
 | `Super + /` | Bitwarden |
 | `Super + Shift + C` | Cava |
 | `Alt + M` | RMPC |
@@ -429,6 +430,7 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf), [tiling.conf](.con
 | OSD | [SwayOSD](https://github.com/ErikReider/SwayOSD) | On-screen display for volume, brightness, and caps lock |
 | Terminal | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Ghostty](https://ghostty.org/) / [Alacritty](https://alacritty.org/) | All three installed; Kitty is the default Super+Return terminal and system TUI host. Pick Ghostty or Alacritty as the working terminal from the Hyprluggage TUI. Alacritty also runs the screensaver. |
 | File Manager | [Thunar](https://docs.xfce.org/xfce/thunar/start) (GUI) / [Yazi](https://github.com/sxyazi/yazi) (CLI) | Dual file managers for GUI and terminal workflows |
+| Calculator | [hyprmath](https://github.com/Jmartgraphix/hyprmath) | Terminal calculator tape (Standard + Scientific); launcher still does one-shot math |
 | Notifications | [Mako](https://github.com/emersion/mako) | Lightweight notification daemon with theme support |
 | Lock screen | [Hyprlock](https://github.com/hyprwm/hyprlock) | Secure lock screen integrated with Hyprland |
 | Theme engine | [Matugen](https://github.com/InioX/matugen) | Material You color palette generator from wallpapers |
