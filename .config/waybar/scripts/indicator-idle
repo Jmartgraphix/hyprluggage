@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if pgrep -x hypridle >/dev/null; then
-  echo '{"text": ""}'
+  echo '{"text": "󰌾", "tooltip": "Screen lock on — click to keep the display awake", "class": "on"}'
 else
-  echo '{"text": "󰅶", "tooltip": "Screen Lock Off"}'
+  echo '{"text": "󰅶", "tooltip": "Screen lock off — display stays on. Click to turn it back on", "class": "off"}'
 fi

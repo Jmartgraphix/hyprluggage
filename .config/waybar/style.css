@@ -109,6 +109,10 @@ window#waybar {
   color: #a55555;
 }
 
+#custom-idle-indicator.off {
+  color: #e0af68;
+}
+
 #battery.warning {
   color: #e0af68;
 }
