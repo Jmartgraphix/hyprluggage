@@ -9,6 +9,10 @@
 
 # Launcher favorites, aliases, and hidden apps (created on first run)
 .config/rofi/launcher/
+
+# Python bytecode (launcher compiles on first run)
+__pycache__/
+*.pyc
 .config/yazi/theme.toml
 .config/btop/themes/current.theme
 .config/rmpc/themes/current.ron
