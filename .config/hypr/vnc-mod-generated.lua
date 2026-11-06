@@ -79,17 +79,17 @@ hl.bind("CTRL + ALT + SHIFT + SPACE", hl.dsp.exec_cmd(string.format("%s/wallPick
 -- VNC: SUPER CTRL ALT + SPACE → CTRL ALT SHIFT + G
 hl.bind("CTRL + ALT + SHIFT + G", hl.dsp.exec_cmd(string.format("%s/change-theme", scrDir)), { description = "Theme random wallpaper (Super+Ctrl+Alt+Space)" })
 
--- from: bindd = SUPER CTRL SHIFT , SPACE, Theme switcher, exec, ~/hyprluggage/install/themes/hyprluggage switch
+-- from: bindd = SUPER CTRL SHIFT , SPACE, Theme switcher, exec, $scrDir/hyprluggage-cmd switch
 -- VNC: SUPER CTRL SHIFT + SPACE → CTRL ALT SHIFT + Y
-hl.bind("CTRL + ALT + SHIFT + Y", hl.dsp.exec_cmd(string.format("%s/hyprluggage/install/themes/hyprluggage switch", home)), { description = "Theme switcher (Super+Ctrl+Shift+Space)" })
+hl.bind("CTRL + ALT + SHIFT + Y", hl.dsp.exec_cmd(string.format("%s/hyprluggage-cmd switch", scrDir)), { description = "Theme switcher (Super+Ctrl+Shift+Space)" })
 
--- from: bindd = SUPER, I, Theme Hyprluggage TUI, exec, kitty --title hyprluggage-tui -e ~/hyprluggage/install/themes/hyprluggage-tui
+-- from: bindd = SUPER, I, Theme Hyprluggage TUI, exec, $scrDir/hyprluggage-cmd tui
 -- VNC: SUPER + I → CTRL ALT + I
-hl.bind("CTRL + ALT + I", hl.dsp.exec_cmd(string.format("kitty --title hyprluggage-tui -e %s/hyprluggage/install/themes/hyprluggage-tui", home)), { description = "Theme Hyprluggage TUI" })
+hl.bind("CTRL + ALT + I", hl.dsp.exec_cmd(string.format("%s/hyprluggage-cmd tui", scrDir)), { description = "Theme Hyprluggage TUI" })
 
--- from: bindd = SUPER ALT, I, Theme browse, exec, kitty --title hyprluggage-browse -e ~/hyprluggage/install/themes/hyprluggage browse
+-- from: bindd = SUPER ALT, I, Theme browse, exec, $scrDir/hyprluggage-cmd browse
 -- VNC: SUPER ALT + I → CTRL ALT SHIFT + U
-hl.bind("CTRL + ALT + SHIFT + U", hl.dsp.exec_cmd(string.format("kitty --title hyprluggage-browse -e %s/hyprluggage/install/themes/hyprluggage browse", home)), { description = "Theme browse (Super+Alt+I)" })
+hl.bind("CTRL + ALT + SHIFT + U", hl.dsp.exec_cmd(string.format("%s/hyprluggage-cmd browse", scrDir)), { description = "Theme browse (Super+Alt+I)" })
 
 -- from: bindd = SUPER ALT, up, Theme wallpapers cycle, exec, $scrDir/cycle-wallpaper
 -- VNC: SUPER ALT + up → CTRL ALT SHIFT + up

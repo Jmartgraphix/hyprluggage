@@ -9,11 +9,17 @@ hypr=""
 # Once copied into ~/.config/aether/custom/hyprluggage, that relative path is the hook directory.
 if [[ -f "$here/../hyprluggage" && -x "$here/../hyprluggage" ]]; then
     hypr="$(cd "$here/.." && pwd)/hyprluggage"
-elif [[ -f "$HOME/hyprluggage/install/themes/hyprluggage" && -x "$HOME/hyprluggage/install/themes/hyprluggage" ]]; then
+elif [[ -f "${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage/dir" ]]; then
+    cand="$(<"${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage/dir")/install/themes/hyprluggage"
+    [[ -x "$cand" ]] && hypr="$cand"
+fi
+if [[ -z "$hypr" && -x "$HOME/hyprluggage/install/themes/hyprluggage" ]]; then
     hypr="$HOME/hyprluggage/install/themes/hyprluggage"
-elif command -v hyprluggage >/dev/null 2>&1; then
+fi
+if [[ -z "$hypr" ]] && command -v hyprluggage >/dev/null 2>&1; then
     hypr="$(command -v hyprluggage)"
-else
+fi
+if [[ -z "$hypr" ]]; then
     echo "hyprluggage not found" >&2
     exit 1
 fi

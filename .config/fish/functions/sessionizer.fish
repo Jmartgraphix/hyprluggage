@@ -1,3 +1,4 @@
 function sessionizer --description "Launch sessionX script"
-    $HOME/hyprluggage/scripts/sessionX
+    set -l hl_dir (hyprluggage-dir)
+    "$hl_dir/scripts/sessionX"
 end

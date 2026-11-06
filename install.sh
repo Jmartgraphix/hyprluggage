@@ -25,6 +25,8 @@ confirm "Continue?" || exit 0
 step "Hardware profile"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
 mkdir -p "$STATE_DIR"
+# Repo path for fish, keybinds, and scripts. Readers fall back to ~/hyprluggage.
+printf '%s\n' "$DOTFILES" >"$STATE_DIR/dir"
 
 # Prefer already-linked ensure, else repo copy
 HW_ENSURE=""

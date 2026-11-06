@@ -1,0 +1,12 @@
+#!/bin/bash
+# Print the Hyprluggage repo path. Install writes this file; otherwise ~/hyprluggage.
+state="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage/dir"
+if [[ -f "$state" ]]; then
+	dir="$(<"$state")"
+	dir="${dir%/}"
+	if [[ -n "$dir" && -d "$dir" ]]; then
+		printf '%s\n' "$dir"
+		exit 0
+	fi
+fi
+printf '%s\n' "$HOME/hyprluggage"

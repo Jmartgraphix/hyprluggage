@@ -24,6 +24,4 @@ starship init fish | source
 fish_add_path ~/.local/bin
 fish_add_path ~/.spicetify
 
-# Hyprluggage
-set -gx PATH /home/jmartin/hyprluggage/install/themes $PATH
 fish_add_path $HOME/.local/bin

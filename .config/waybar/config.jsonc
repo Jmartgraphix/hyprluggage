@@ -47,7 +47,7 @@
   },
   "custom/logo": {
     "format": "󰜦",
-    "on-click": "kitty --title hyprluggage-tui -e ~/hyprluggage/install/themes/hyprluggage-tui",
+    "on-click": "~/.config/hypr/scripts/hyprluggage-cmd tui",
     "on-click-right": "~/.config/rofi/scripts/rofibeats",
     "tooltip": false
   },
@@ -90,7 +90,7 @@
   "custom/theme": {
     "format": "󰏘",
     "tooltip-format": "Themes. Right-click picks a wallpaper.",
-    "on-click": "~/hyprluggage/install/themes/hyprluggage switch",
+    "on-click": "~/.config/hypr/scripts/hyprluggage-cmd switch",
     "on-click-right": "~/.config/waybar/scripts/wall-picker",
     "on-click-middle": "~/.config/waybar/scripts/random-wall"
   },

@@ -1,0 +1,18 @@
+#!/bin/bash
+# hyprluggage-cmd <tui|switch|browse|command> [args...]
+set -euo pipefail
+dir="$("$HOME/.config/hypr/scripts/hyprluggage-dir")"
+bin="$dir/install/themes/hyprluggage"
+action="${1:-switch}"
+shift || true
+case "$action" in
+tui)
+	exec kitty --title hyprluggage-tui -e "$dir/install/themes/hyprluggage-tui" "$@"
+	;;
+browse)
+	exec kitty --title hyprluggage-browse -e "$bin" browse "$@"
+	;;
+*)
+	exec "$bin" "$action" "$@"
+	;;
+esac
