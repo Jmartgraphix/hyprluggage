@@ -210,8 +210,8 @@ hl.bind("CTRL + ALT + P", hl.dsp.exec_cmd(string.format("%s/screenshot", scrDir)
 -- from: bindd = SUPER, Q, Close window, killactive,
 hl.bind("CTRL + ALT + Q", hl.dsp.window.close(), { description = "Close window" })
 
--- from: bindd = SUPER, RETURN, Terminal, exec, uwsm-app -- $scrDir/launch-terminal --dir="$(cwd-terminal)"
-hl.bind("CTRL + ALT + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s/launch-terminal --dir=\"$(cwd-terminal)\"", scrDir)), { description = "Terminal" })
+-- from: bindd = SUPER, RETURN, Terminal, exec, uwsm-app -- $scrDir/launch-terminal --dir="$($scrDir/cwd-terminal)"
+hl.bind("CTRL + ALT + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s/launch-terminal --dir=\"$(%s/cwd-terminal)\"", scrDir, scrDir)), { description = "Terminal" })
 
 -- from: bindd = SUPER, S, Wiremix, exec, $terminal --class=Wiremix -e wiremix
 hl.bind("CTRL + ALT + S", hl.dsp.exec_cmd(string.format("%s --class=Wiremix -e wiremix", terminal)), { description = "Wiremix" })

@@ -10,7 +10,7 @@ local rofiDir = home .. "/.config/rofi/scripts"
 local scrDir = home .. "/.config/hypr/scripts"
 
 
-hl.bind("SUPER + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s/launch-terminal --dir=\"$(cwd-terminal)\"", scrDir)), { description = "Terminal" })
+hl.bind("SUPER + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s/launch-terminal --dir=\"$(%s/cwd-terminal)\"", scrDir, scrDir)), { description = "Terminal" })
 hl.bind("SUPER + B", hl.dsp.exec_cmd(string.format("%s", browser)), { description = "Browser" })
 hl.bind("SUPER + E", hl.dsp.exec_cmd("uwsm app -- thunar"), { description = "File manager" })
 hl.bind("SUPER + M", hl.dsp.exec_cmd(string.format("%s spotify spotify-launcher", focus)), { description = "Music" })
