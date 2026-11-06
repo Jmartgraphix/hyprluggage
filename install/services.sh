@@ -172,11 +172,24 @@ if pkg_installed spicetify-cli; then
     if [[ -n "$spotify_path" ]]; then
         spicetify &>/dev/null
 
-        # Set write permissions
+        # Spicetify edits Spotify's files. A root-owned install gets group write
+        # for the installing user, not write access for every account.
         if [[ ! -w "$spotify_path" ]] || [[ -d "$spotify_path/Apps" && ! -w "$spotify_path/Apps" ]]; then
             info "Spicetify needs write access to Spotify"
-            sudo chmod a+wr "$spotify_path" 2>/dev/null
-            sudo chmod a+wr -R "$spotify_path/Apps" 2>/dev/null
+            if ! getent group spicetify >/dev/null; then
+                sudo groupadd spicetify || warn "spicetify: failed to create group"
+            fi
+            if ! id -nG "$USER" 2>/dev/null | grep -qw spicetify; then
+                sudo usermod -aG spicetify "$USER" \
+                    && info "added $USER to spicetify" \
+                    || warn "spicetify: failed to add $USER to the group"
+            fi
+            sudo chgrp spicetify "$spotify_path" 2>/dev/null
+            sudo chmod g+w,o-w "$spotify_path" 2>/dev/null
+            if [[ -d "$spotify_path/Apps" ]]; then
+                sudo chgrp -R spicetify "$spotify_path/Apps" 2>/dev/null
+                sudo chmod -R g+w,o-w "$spotify_path/Apps" 2>/dev/null
+            fi
         fi
 
         mkdir -p "$(dirname "$prefs_path")"
@@ -188,7 +201,16 @@ if pkg_installed spicetify-cli; then
         spicetify config current_theme hyprluggage color_scheme base &>/dev/null
         spicetify config inject_css 1 replace_colors 1 &>/dev/null
 
-        if spicetify backup apply &>/dev/null; then
+        # A group added in this run is not on the current shell yet. sg picks it up.
+        apply_ok=false
+        if id -nG | grep -qw spicetify; then
+            spicetify backup apply &>/dev/null && apply_ok=true
+        elif getent group spicetify 2>/dev/null | grep -qw "$USER"; then
+            sg spicetify -c "spicetify backup apply" &>/dev/null && apply_ok=true
+        else
+            spicetify backup apply &>/dev/null && apply_ok=true
+        fi
+        if [[ "$apply_ok" == true ]]; then
             ok "spicetify"
         else
             warn "spicetify: launch Spotify once, then run 'spicetify backup apply'"
