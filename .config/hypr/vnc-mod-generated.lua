@@ -213,8 +213,8 @@ hl.bind("CTRL + ALT + Q", hl.dsp.window.close(), { description = "Close window" 
 -- from: bindd = SUPER, RETURN, Terminal, exec, uwsm-app -- $scrDir/launch-terminal --dir="$($scrDir/cwd-terminal)"
 hl.bind("CTRL + ALT + RETURN", hl.dsp.exec_cmd(string.format("uwsm-app -- %s/launch-terminal --dir=\"$(%s/cwd-terminal)\"", scrDir, scrDir)), { description = "Terminal" })
 
--- from: bindd = SUPER, S, Wiremix, exec, $terminal --class=Wiremix -e wiremix
-hl.bind("CTRL + ALT + S", hl.dsp.exec_cmd(string.format("%s --class=Wiremix -e wiremix", terminal)), { description = "Wiremix" })
+-- from: bindd = SUPER, S, Wiremix, exec, $scrDir/volume-window
+hl.bind("CTRL + ALT + S", hl.dsp.exec_cmd(string.format("%s/volume-window", scrDir)), { description = "Wiremix" })
 
 -- from: bindd = SUPER, T, Todoist, exec, $webapp "https://app.todoist.com"
 hl.bind("CTRL + ALT + T", hl.dsp.exec_cmd(string.format("%s \"https://app.todoist.com\"", webapp)), { description = "Todoist" })

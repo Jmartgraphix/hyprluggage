@@ -1,0 +1,5 @@
+#!/bin/bash
+# Local nmgui with a close button. Upstream's window has no title-bar control.
+dir="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+export PYTHONPATH="$dir/app:$dir/vendor${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 "$dir/app/main.py" "$@"

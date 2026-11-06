@@ -140,7 +140,7 @@
     "tooltip-format-ethernet": "⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
     "tooltip-format-disconnected": "Disconnected",
     "interval": 3,
-    "on-click": "nmgui"
+    "on-click": "~/.config/nmgui/nmgui"
   },
   "battery": {
     "format": "{icon}",
@@ -188,11 +188,11 @@
     "format-disabled": "󰂲",
     "format-connected": "",
     "tooltip-format": "Devices connected: {num_connections}",
-    "on-click": "blueman-manager"
+    "on-click": "~/.config/hypr/scripts/bluetooth-window"
   },
   "pulseaudio": {
     "format": "{icon}",
-    "on-click": "kitty --class=Wiremix -e wiremix",
+    "on-click": "~/.config/hypr/scripts/volume-window",
     "on-click-right": "pamixer -t",
     "tooltip-format": "🎵 {volume}%",
     "scroll-step": 5,

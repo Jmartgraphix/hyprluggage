@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""blueman-manager with a close button beside the power switch."""
+import logging
+import gettext
+import sys
+
+# Keep the Wayland app id the compositor already floats.
+sys.argv[0] = "blueman-manager"
+
+gettext.textdomain("blueman")
+
+import gi
+
+gi.require_version("Gtk", "3.0")
+from gi.repository import GLib, Gtk
+
+GLib.set_prgname("blueman-manager")
+
+from blueman.main.Manager import Blueman
+from blueman.Functions import set_proc_title, create_parser, create_logger
+
+
+def _add_close_button(app: Blueman) -> None:
+    if getattr(app, "_hyprluggage_close", False):
+        return
+    app._hyprluggage_close = True
+    toolbar = app.builder.get_widget("toolbar", Gtk.Toolbar)
+    item = Gtk.ToolItem()
+    item.set_homogeneous(False)
+    item.set_expand(False)
+    button = Gtk.Button()
+    button.set_image(Gtk.Image.new_from_icon_name("window-close-symbolic", Gtk.IconSize.BUTTON))
+    button.set_relief(Gtk.ReliefStyle.NONE)
+    button.set_tooltip_text("Close")
+    button.connect("clicked", lambda *_: app.quit())
+    button.show()
+    item.add(button)
+    item.show()
+    toolbar.insert(item, -1)
+
+
+class HyprluggageBlueman(Blueman):
+    def do_activate(self):
+        first = self.window is None
+        Blueman.do_activate(self)
+        if first:
+            _add_close_button(self)
+
+
+if __name__ == "__main__":
+    parser = create_parser()
+    args = parser.parse_args()
+    level = getattr(logging, args.LEVEL.upper(), logging.WARNING)
+    create_logger(level, "blueman-manager", syslog=args.syslog)
+    app = HyprluggageBlueman()
+    set_proc_title()
+    app.run()

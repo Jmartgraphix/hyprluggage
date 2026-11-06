@@ -24,7 +24,7 @@ hl.bind("ALT + slash", hl.dsp.exec_cmd(string.format("%s -e btop", terminal)), {
 hl.bind("ALT + M", hl.dsp.exec_cmd(string.format("%s -e rmpc", terminal)), { description = "Music" })
 hl.bind("ALT + Q", hl.dsp.exec_cmd(string.format("%s -e yazi", terminal)), { description = "yazi" })
 hl.bind("ALT + N", hl.dsp.exec_cmd(string.format("%s -e nvim", terminal)), { description = "Neovim" })
-hl.bind("SUPER + S", hl.dsp.exec_cmd(string.format("%s --class=Wiremix -e wiremix", terminal)), { description = "Wiremix" })
+hl.bind("SUPER + S", hl.dsp.exec_cmd(string.format("%s/volume-window", scrDir)), { description = "Wiremix" })
 hl.bind("SUPER + ALT + M", hl.dsp.exec_cmd("easyeffects"), { description = "easyeffects" })
 hl.bind("SUPER + CTRL + F12", hl.dsp.exec_cmd("pkill sunshine && sunshine &"), { description = "Restart Sunshine" })
 hl.bind("SUPER + A", hl.dsp.exec_cmd(string.format("%s \"https://perplexity.ai\"", webapp)), { description = "Perplexity" })

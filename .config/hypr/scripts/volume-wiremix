@@ -1,0 +1,9 @@
+#!/bin/bash
+# q quits wiremix. Close the popup too, so the header does not fill the window.
+wiremix "$@"
+status=$?
+listen="${KITTY_LISTEN_ON:-}"
+if [[ -n "$listen" ]]; then
+	kitty @ --to "$listen" close-window --match all >/dev/null 2>&1
+fi
+exit "$status"

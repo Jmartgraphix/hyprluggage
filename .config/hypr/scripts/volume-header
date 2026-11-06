@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""One-line header for the volume window. The X closes kitty."""
+import os
+import select
+import signal
+import subprocess
+import sys
+import termios
+import time
+import tty
+
+TITLE = "Volume"
+CLOSE = "[X]"
+
+
+def draw() -> None:
+    size = os.get_terminal_size()
+    row = max(1, (size.lines + 1) // 2)
+    gap = max(1, size.columns - len(TITLE) - len(CLOSE))
+    sys.stdout.write(
+        f"\x1b[?25l\x1b[2J\x1b[{row};1H" + TITLE + (" " * gap) + "\x1b[1m" + CLOSE + "\x1b[22m"
+    )
+    sys.stdout.write("\x1b[?1000h\x1b[?1006h")
+    sys.stdout.flush()
+
+
+def close_window() -> None:
+    listen = os.environ.get("KITTY_LISTEN_ON", "")
+    if listen:
+        subprocess.run(
+            ["kitty", "@", "--to", listen, "close-window", "--match", "all"],
+            check=False,
+        )
+    else:
+        os.kill(os.getppid(), signal.SIGTERM)
+    raise SystemExit
+
+
+def tighten_padding() -> None:
+    listen = os.environ.get("KITTY_LISTEN_ON", "")
+    if not listen:
+        return
+    remote = ["kitty", "@", "--to", listen]
+    for _ in range(30):
+        focused = subprocess.run(
+            [*remote, "focus-window", "--match", "title:^wiremix$"],
+            check=False,
+        )
+        if focused.returncode == 0:
+            break
+        time.sleep(0.05)
+    subprocess.run([*remote, "set-spacing", "padding=0", "--self"], check=False)
+    subprocess.run(
+        [*remote, "resize-window", "--self", "--axis", "vertical", "--increment", "-12"],
+        check=False,
+    )
+    subprocess.run([*remote, "set-os-window-title", "Volume"], check=False)
+
+
+def clicks(fd: int):
+    buf = ""
+    while True:
+        chunk = os.read(fd, 64)
+        if not chunk:
+            return
+        buf += chunk.decode("latin1")
+        while buf:
+            if buf.startswith("\x1b[<"):
+                end = buf.find("M", 3)
+                end_rel = buf.find("m", 3)
+                if end < 0 and end_rel < 0:
+                    break
+                if end < 0 or (end_rel >= 0 and end_rel < end):
+                    end = end_rel
+                body = buf[3:end]
+                buf = buf[end + 1 :]
+                try:
+                    btn, x, _y = body.split(";")
+                except ValueError:
+                    continue
+                cols = os.get_terminal_size().columns
+                if int(btn) == 0 and int(x) >= cols - len(CLOSE) + 1:
+                    close_window()
+                continue
+            if buf.startswith("\x1b"):
+                if len(buf) == 1 and select.select([fd], [], [], 0.05)[0]:
+                    break
+                close_window()
+            ch = buf[0]
+            buf = buf[1:]
+            if ch in ("q", "Q"):
+                close_window()
+
+
+def main() -> None:
+    signal.signal(signal.SIGWINCH, lambda *_: draw())
+    tighten_padding()
+    draw()
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    tty.setraw(fd)
+    try:
+        clicks(fd)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        sys.stdout.write("\x1b[?1000l\x1b[?1006l\x1b[?25h")
+        sys.stdout.flush()
+
+
+if __name__ == "__main__":
+    main()

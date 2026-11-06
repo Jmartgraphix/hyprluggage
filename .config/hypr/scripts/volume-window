@@ -1,0 +1,18 @@
+#!/bin/bash
+# Volume mixer with a close button in a one-line header above wiremix.
+dir="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+sock="${XDG_RUNTIME_DIR:-/tmp}/hyprluggage-volume-$$.sock"
+rm -f "$sock"
+kitty_conf="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty.conf"
+exec kitty \
+	--class Wiremix \
+	--config "$kitty_conf" \
+	--config "${dir}/volume-kitty.conf" \
+	--listen-on "unix:${sock}" \
+	--override allow_remote_control=yes \
+	--override tab_bar_min_tabs=2 \
+	--override confirm_os_window_close=0 \
+	--session - <<EOF
+launch --title header ${dir}/volume-header
+launch --title wiremix --location=vsplit --bias=94 ${dir}/volume-wiremix
+EOF
