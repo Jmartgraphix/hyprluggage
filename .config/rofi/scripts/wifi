@@ -1,9 +1,49 @@
 #!/bin/bash
 # wifi network selector using rofi and nmcli
+# The password is masked in rofi and given to nmcli through a mode-600 file,
+# so it never appears on a command line.
 
 notify-send "Wi-Fi Scanning..."
 
-wifi_list=$(nmcli --fields "SECURITY,SSID" device wifi list | sed 1d | sed 's/  */ /g' | sed -E "s/WPA*.?\S/ /g" | sed "s/^--/ /g" | sed "s/  //g" | sed "/--/d")
+secret_file=""
+cleanup() {
+	[[ -n "$secret_file" ]] && rm -f "$secret_file"
+}
+trap cleanup EXIT
+
+# Split one nmcli -t row on unescaped colons.
+split_row() {
+	local line=$1
+	local -n _parts=$2
+	local cur="" c i
+	_parts=()
+	for ((i = 0; i < ${#line}; i++)); do
+		c=${line:i:1}
+		if [[ $c == '\' ]]; then
+			i=$((i + 1))
+			cur+=${line:i:1}
+		elif [[ $c == ':' ]]; then
+			_parts+=("$cur")
+			cur=""
+		else
+			cur+="$c"
+		fi
+	done
+	_parts+=("$cur")
+}
+
+wifi_saved() {
+	local ssid=$1 row name type
+	local -a parts
+	while IFS= read -r row; do
+		[[ -z "$row" ]] && continue
+		split_row "$row" parts
+		name=${parts[0]:-}
+		type=${parts[1]:-}
+		[[ $type == "802-11-wireless" && $name == "$ssid" ]] && return 0
+	done < <(nmcli -t -f NAME,TYPE connection show)
+	return 1
+}
 
 if nmcli -fields WIFI g | grep -q "enabled"; then
 	toggle="󰖪  Disable Wi-Fi"
@@ -11,7 +51,42 @@ else
 	toggle="󰖩  Enable Wi-Fi"
 fi
 
-chosen=$(echo -e "$toggle\n$wifi_list" | uniq -u | rofi -dmenu -i -selected-row 1 -p "Wi-Fi SSID:")
+declare -A ssid_security ssid_active
+ssid_order=()
+
+while IFS= read -r row; do
+	[[ -z "$row" ]] && continue
+	split_row "$row" parts
+	in_use=${parts[0]:-}
+	security=${parts[1]:-}
+	ssid=${parts[2]:-}
+	[[ -z "$ssid" ]] && continue
+	if [[ -z ${ssid_security[$ssid]+x} ]]; then
+		ssid_order+=("$ssid")
+	fi
+	# Prefer the row that is already connected when the same name is scanned twice.
+	if [[ -z ${ssid_security[$ssid]+x} || $in_use == "*" ]]; then
+		ssid_security[$ssid]=$security
+		ssid_active[$ssid]=$in_use
+	fi
+done < <(nmcli -t -f IN-USE,SECURITY,SSID device wifi list)
+
+declare -A ssid_of security_of
+menu_lines=("$toggle")
+for ssid in "${ssid_order[@]}"; do
+	security=${ssid_security[$ssid]}
+	if [[ -z $security || $security == "--" ]]; then
+		label="󰤨  $ssid"
+	else
+		label="󰤪  $ssid"
+	fi
+	[[ ${ssid_active[$ssid]} == "*" ]] && label="$label  (connected)"
+	ssid_of[$label]=$ssid
+	security_of[$label]=$security
+	menu_lines+=("$label")
+done
+
+chosen=$(printf '%s\n' "${menu_lines[@]}" | rofi -dmenu -i -selected-row 1 -p "Wi-Fi SSID:") || exit 0
 [[ -z "$chosen" ]] && exit 0
 
 case "$chosen" in
@@ -22,19 +97,43 @@ case "$chosen" in
 	nmcli radio wifi off
 	;;
 *)
-	# extract ssid (skip icon)
-	ssid="${chosen:3}"
+	ssid=${ssid_of[$chosen]:-}
+	security=${security_of[$chosen]:-}
+	[[ -z "$ssid" ]] && exit 1
 
-	# check if already saved
-	if nmcli -g NAME connection | grep -qw "$ssid"; then
+	if wifi_saved "$ssid"; then
 		nmcli connection up id "$ssid" && notify-send "Wi-Fi" "Connected to $ssid"
+		exit $?
+	fi
+
+	if [[ -z $security || $security == "--" ]]; then
+		nmcli device wifi connect "$ssid" && notify-send "Wi-Fi" "Connected to $ssid"
+		exit $?
+	fi
+
+	if [[ $security == *802.1X* ]]; then
+		notify-send "Wi-Fi" "This menu only joins open and WPA networks."
+		exit 1
+	fi
+
+	pass=$(rofi -dmenu -password -p "Password:") || exit 0
+	[[ -z "$pass" ]] && exit 0
+
+	secret_file=$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/wifi-psk.XXXXXX")
+	chmod 600 "$secret_file"
+	printf '802-11-wireless-security.psk:%s\n' "$pass" >"$secret_file"
+	unset pass
+
+	if ! nmcli connection add type wifi con-name "$ssid" ssid "$ssid" wifi-sec.key-mgmt wpa-psk; then
+		notify-send "Wi-Fi" "Could not add $ssid"
+		exit 1
+	fi
+	if nmcli connection up id "$ssid" passwd-file "$secret_file"; then
+		notify-send "Wi-Fi" "Connected to $ssid"
 	else
-		# secured network needs password
-		if [[ "$chosen" =~ "" ]]; then
-			pass=$(rofi -dmenu -p "Password:")
-			[[ -z "$pass" ]] && exit 0
-		fi
-		nmcli device wifi connect "$ssid" password "$pass" && notify-send "Wi-Fi" "Connected to $ssid"
+		nmcli connection delete id "$ssid" >/dev/null 2>&1 || true
+		notify-send "Wi-Fi" "Failed to connect to $ssid"
+		exit 1
 	fi
 	;;
 esac
