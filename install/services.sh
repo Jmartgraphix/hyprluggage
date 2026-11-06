@@ -404,8 +404,57 @@ else
 fi
 
 # ── SSH ──────────────────────────────────────────────────────────────────────
+# Opt-in. A yes writes the keys-only drop-in and enables sshd. A no on a
+# terminal disables it. A non-interactive run leaves the service alone.
 if pkg_installed openssh; then
-    sudo systemctl enable --now sshd &>/dev/null && ok "sshd" || warn "sshd failed"
+    want_sshd=no
+    if [[ -t 0 && -t 1 ]]; then
+        if confirm_default "Enable SSH? Password login will be turned off. Use an SSH key." no; then
+            want_sshd=yes
+        fi
+    fi
+
+    if [[ -n "${DOTFILES:-}" ]]; then
+        DOTFILES_ROOT="$DOTFILES"
+    else
+        DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    fi
+
+    if [[ "$want_sshd" == yes ]]; then
+        SSHD_SRC="$DOTFILES_ROOT/install/sshd-hyprluggage.conf"
+        SSHD_DST="/etc/ssh/sshd_config.d/hyprluggage.conf"
+        if [[ -f "$SSHD_SRC" ]]; then
+            sudo mkdir -p /etc/ssh/sshd_config.d
+            if sudo cp "$SSHD_SRC" "$SSHD_DST"; then
+                sudo chmod 644 "$SSHD_DST" || true
+                ok "sshd: keys only"
+            else
+                warn "sshd: failed to install drop-in"
+            fi
+        else
+            warn "sshd: drop-in missing at $SSHD_SRC"
+        fi
+        if sudo sshd -t; then
+            if sudo systemctl enable --now sshd &>/dev/null; then
+                sudo systemctl reload sshd &>/dev/null || true
+                ok "sshd"
+            else
+                warn "sshd failed"
+            fi
+        else
+            warn "sshd: config test failed; service left unchanged"
+        fi
+    elif [[ -t 0 && -t 1 ]]; then
+        if systemctl is-enabled --quiet sshd; then
+            sudo systemctl disable --now sshd &>/dev/null \
+                && ok "sshd: disabled" \
+                || warn "sshd: disable failed"
+        else
+            ok "sshd: not enabled"
+        fi
+    else
+        info "sshd: not asked; leaving the service as it is"
+    fi
 fi
 
 # ── Firewall (ufw) ───────────────────────────────────────────────────────────

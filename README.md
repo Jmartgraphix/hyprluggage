@@ -223,7 +223,7 @@ The installer will:
    - MPD (music daemon)
    - Greetd (display manager; session via `hyprluggage-session`, which runs hw-ensure then Hyprland). The installer asks about autologin; desktop defaults to yes, laptop to the greeter. Autologin stores keyring secrets unencrypted. A password login unlocks an encrypted keyring with that password. Idle lock stays off.
    - wayvnc + clipboard bridge, and sunshine-mod-bridge when Sunshine is installed (user units)
-   - sshd (enabled)
+   - sshd, only if you say yes. Password login is then turned off; use an SSH key. A non-interactive install leaves the service as it is.
    - ufw allow rules for SSH, and for LocalSend, KDE Connect, and Steam Remote Play from the connected LAN. Port 5900 is left to a source-limited Gatwy rule.
      - **Laptop:** UFW is enabled
      - **Desktop:** UFW stays inactive unless it was already active
@@ -525,7 +525,7 @@ Hyprluggage includes **wayvnc**, **Sunshine**, and **Ctrl+Alt** Super-key twins 
 - Some Space-family theme chords are remapped under Ctrl+Alt (documented in VNC.md).
 - Fresh install enables `wayvnc` and `wayvnc-clipboard-bridge` user units via `install/services.sh`.
 - If Sunshine is installed, a fresh install enables `sunshine-mod-bridge` so Moonlight streams get the same twins. Existing installs: `systemctl --user enable --now sunshine-mod-bridge`.
-- Fresh install enables `sshd` and allows SSH (`22/tcp`). LocalSend (`53317` TCP/UDP), KDE Connect (TCP/UDP `1714–1764`), and Steam Remote Play (TCP `27036–27037`, UDP `27031–27036`) are allowed from the connected IPv4 LAN only. The installer does not open VNC (`5900`); keep that as a source-limited rule for Gatwy. On **laptop** profile, UFW is enabled; on **desktop**, UFW stays inactive unless it was already active.
+- Fresh install asks before enabling `sshd`. Saying yes installs `sshd_config.d/hyprluggage.conf` so password login is off. The firewall still allows SSH (`22/tcp`). LocalSend (`53317` TCP/UDP), KDE Connect (TCP/UDP `1714–1764`), and Steam Remote Play (TCP `27036–27037`, UDP `27031–27036`) are allowed from the connected IPv4 LAN only. The installer does not open VNC (`5900`); keep that as a source-limited rule for Gatwy. On **laptop** profile, UFW is enabled; on **desktop**, UFW stays inactive unless it was already active.
 
 See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for setup, remaps, and files.
 
