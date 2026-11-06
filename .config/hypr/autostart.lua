@@ -24,6 +24,3 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("mako")
 	hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/first-run")
 end)
-
--- Runs on every config reload (old `exec =`)
-hl.exec_cmd("nextcloud")

@@ -85,7 +85,7 @@ applications=(
 	obsidian bitwarden code visual-studio-code-bin
 	vesktop-bin discord keychain zed opencode herdr-bin
 	mpv yt-dlp steam lutris gamemode mangohud typora
-	lazydocker easyeffects nextcloud-client
+	lazydocker easyeffects
 )
 
 # ╭───────────────────────────────────────────────────────────────────────╮
