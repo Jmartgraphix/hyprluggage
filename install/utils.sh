@@ -132,6 +132,29 @@ confirm() {
     fi
 }
 
+# confirm_default "Prompt" yes|no
+# Enter accepts the default. gum --default selects Yes.
+confirm_default() {
+    local msg="${1:-Continue?}"
+    local default="${2:-no}"
+    if [[ $HAS_GUM -eq 1 ]]; then
+        if [[ "$default" == yes ]]; then
+            gum confirm --default "$msg" && return 0 || return 1
+        fi
+        gum confirm "$msg" && return 0 || return 1
+    else
+        local hint="[y/N]"
+        [[ "$default" == yes ]] && hint="[Y/n]"
+        local ans
+        read -rp "  $msg $hint " ans
+        if [[ -z "$ans" ]]; then
+            [[ "$default" == yes ]]
+            return
+        fi
+        [[ "$ans" =~ ^[Yy]$ ]]
+    fi
+}
+
 # choose "Prompt" "opt1" "opt2" ...  → prints selected option
 # Works without gum (numbered menu). Used before packages install gum.
 choose() {

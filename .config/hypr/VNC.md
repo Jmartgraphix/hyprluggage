@@ -29,7 +29,7 @@ Space-family Super chords collide under Ctrl+Alt, so several theme binds are **r
 At the physical keyboard, Super is unchanged.
 
 ## Fresh install
-Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units). Sunshine's Ctrl+Alt twins are enabled when `sunshine` is installed. Install also adds `ufw allow 5900/tcp` (UFW is enabled only if it was already active). Units are `WantedBy=graphical-session.target` so they start with Hyprland, not at boot — binding them to `default.target` pulled in an empty graphical session and made UWSM/greetd refuse to start.
+Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units). Sunshine's Ctrl+Alt twins are enabled when `sunshine` is installed. The installer does not add a world-open `ufw allow 5900/tcp`; wayvnc has no RFB auth and Gatwy cannot complete wayvnc's TLS auth, so allow 5900 only from the Gatwy host. Units are `WantedBy=graphical-session.target` so they start with Hyprland, not at boot — binding them to `default.target` pulled in an empty graphical session and made UWSM/greetd refuse to start.
 
 Manual:
 ```bash
@@ -56,7 +56,7 @@ hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
 
 `install/services.sh` runs `hypr-vnc-mod ensure` so the active stub exists before Hyprland sources it.
 
-Install adds `ufw allow 5900/tcp`. On the **laptop** install profile, UFW is enabled; on **desktop**, the installer only turns UFW on if it was already active (`sudo ufw enable` otherwise).
+The installer does not open port 5900. On the **laptop** install profile, UFW is enabled; on **desktop**, the installer only turns UFW on if it was already active (`sudo ufw enable` otherwise).
 
 ## Virtual machines
 

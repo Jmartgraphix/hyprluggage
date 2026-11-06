@@ -201,7 +201,7 @@ The installer will:
    - Desktop components (Waybar, Rofi, Mako, awww, swayosd)
    - Browser (Brave)
    - Remote desktop (wayvnc) and SSH (openssh)
-   - Firewall (ufw) with allow rules for SSH, VNC, LocalSend, and KDE Connect
+   - Firewall (ufw) with SSH, plus LocalSend, KDE Connect, and Steam Remote Play from the LAN. VNC is not opened.
    - Terminal emulators (Kitty, Ghostty, Alacritty; Kitty is the default Super+Return terminal)
    - Shell and tools (Fish, Starship, tmux)
    - File managers (Thunar, Yazi)
@@ -219,10 +219,10 @@ The installer will:
 
 3. **Set up system services:**
    - MPD (music daemon)
-   - Greetd (display manager; session via `hyprluggage-session`, which runs hw-ensure then Hyprland)
+   - Greetd (display manager; session via `hyprluggage-session`, which runs hw-ensure then Hyprland). The installer asks about autologin; desktop defaults to yes, laptop to the greeter. Idle lock stays off.
    - wayvnc + clipboard bridge, and sunshine-mod-bridge when Sunshine is installed (user units)
    - sshd (enabled)
-   - ufw allow rules for SSH, VNC, LocalSend, and KDE Connect
+   - ufw allow rules for SSH, and for LocalSend, KDE Connect, and Steam Remote Play from the connected LAN. Port 5900 is left to a source-limited Gatwy rule.
      - **Laptop:** UFW is enabled
      - **Desktop:** UFW stays inactive unless it was already active
    - **Laptop only:** logind lid ignore drop-in, `video` group, `power-profiles-daemon`, hypridle + battery notifications, hybrid lid close (suspend undocked / clamshell when docked)
@@ -513,7 +513,7 @@ Hyprluggage includes **wayvnc**, **Sunshine**, and **Ctrl+Alt** Super-key twins 
 - Some Space-family theme chords are remapped under Ctrl+Alt (documented in VNC.md).
 - Fresh install enables `wayvnc` and `wayvnc-clipboard-bridge` user units via `install/services.sh`.
 - If Sunshine is installed, a fresh install enables `sunshine-mod-bridge` so Moonlight streams get the same twins. Existing installs: `systemctl --user enable --now sunshine-mod-bridge`.
-- Fresh install also enables `sshd` and adds ufw allow rules for SSH (`22/tcp`), VNC (`5900/tcp`), LocalSend (`53317` TCP/UDP), and KDE Connect (`1714–1764` TCP/UDP). On **laptop** profile, UFW is enabled; on **desktop**, UFW stays inactive unless it was already active.
+- Fresh install enables `sshd` and allows SSH (`22/tcp`). LocalSend (`53317` TCP/UDP), KDE Connect (TCP/UDP `1714–1764`), and Steam Remote Play (TCP `27036–27037`, UDP `27031–27036`) are allowed from the connected IPv4 LAN only. The installer does not open VNC (`5900`); keep that as a source-limited rule for Gatwy. On **laptop** profile, UFW is enabled; on **desktop**, UFW stays inactive unless it was already active.
 
 See [`.config/hypr/VNC.md`](.config/hypr/VNC.md) for setup, remaps, and files.
 

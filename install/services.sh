@@ -257,9 +257,39 @@ if pkg_installed greetd; then
         # Create greetd config directory (don't fail if it already exists)
         sudo mkdir -p /etc/greetd || true
         
-        # Render template for the user running the installer
-        # Use || true to prevent set -e from killing the script if sudo fails
-        if sed "s/{{USER}}/$USER/g" "$GREETD_TEMPLATE" | sudo tee "$GREETD_CONFIG" >/dev/null; then
+        # Desktop (streaming box) defaults to autologin. Laptop defaults to the greeter.
+        # Idle lock is unchanged either way.
+        want_autologin=no
+        [[ "${HYPRLUGGAGE_PROFILE:-desktop}" != "laptop" ]] && want_autologin=yes
+        if [[ -t 0 && -t 1 ]]; then
+            autologin_prompt="Log in automatically at boot?"
+            [[ "$want_autologin" == yes ]] && autologin_prompt="$autologin_prompt Recommended for a streaming box."
+            if confirm_default "$autologin_prompt" "$want_autologin"; then
+                want_autologin=yes
+            else
+                want_autologin=no
+            fi
+        fi
+        mkdir -p "$STATE_DIR"
+        printf '%s\n' "$want_autologin" >"$STATE_DIR/autologin"
+
+        # Render template for the user running the installer.
+        # Drop [initial_session] when autologin is declined so tuigreet shows.
+        greetd_rendered="$(sed "s/{{USER}}/$USER/g" "$GREETD_TEMPLATE")"
+        if [[ "$want_autologin" != yes ]]; then
+            greetd_rendered="$(printf '%s\n' "$greetd_rendered" | awk '
+                /^\[initial_session\]/ { skip=1; next }
+                /^\[/ { skip=0 }
+                skip { next }
+                { print }
+            ')"
+        fi
+        if printf '%s\n' "$greetd_rendered" | sudo tee "$GREETD_CONFIG" >/dev/null; then
+            if [[ "$want_autologin" == yes ]]; then
+                ok "greetd: autologin"
+            else
+                ok "greetd: tuigreet login"
+            fi
             sudo chown root:root "$GREETD_CONFIG" || warn "greetd: failed to set ownership"
             sudo chmod 644 "$GREETD_CONFIG" || warn "greetd: failed to set permissions"
             
@@ -329,27 +359,34 @@ if pkg_installed openssh; then
     sudo systemctl enable --now sshd &>/dev/null && ok "sshd" || warn "sshd failed"
 fi
 
-# ── Firewall (ufw): allow app ports; enable on laptop, keep desktop inactive ──
+# ── Firewall (ufw) ───────────────────────────────────────────────────────────
+# Do not add an unrestricted 5900 allow. wayvnc has no RFB auth, and Gatwy/noVNC
+# cannot complete wayvnc's TLS auth, so VNC stays limited to explicit source rules.
+# LocalSend, KDE Connect, and Steam Remote Play are added for the connected IPv4 LAN only.
 if pkg_installed ufw && command -v ufw &>/dev/null; then
     ufw_was_active=false
     if sudo ufw status 2>/dev/null | grep -qi "Status: active"; then
         ufw_was_active=true
     fi
+    lan_cidr="$(ip -4 route show scope link 2>/dev/null | awk '/proto kernel/ {print $1; exit}')"
+    [[ -n "$lan_cidr" ]] || lan_cidr="192.168.0.0/16"
     sudo ufw allow 22/tcp &>/dev/null || true
-    sudo ufw allow 5900/tcp &>/dev/null || true
-    sudo ufw allow 53317/tcp &>/dev/null || true
-    sudo ufw allow 53317/udp &>/dev/null || true
-    sudo ufw allow 1714:1764/tcp &>/dev/null || true
-    sudo ufw allow 1714:1764/udp &>/dev/null || true
+    sudo ufw allow from "$lan_cidr" to any port 53317 proto tcp comment "localsend lan" &>/dev/null || true
+    sudo ufw allow from "$lan_cidr" to any port 53317 proto udp comment "localsend lan" &>/dev/null || true
+    sudo ufw allow from "$lan_cidr" to any port 27036:27037 proto tcp comment "steam remote play lan" &>/dev/null || true
+    sudo ufw allow from "$lan_cidr" to any port 27031:27036 proto udp comment "steam remote play lan" &>/dev/null || true
+    sudo ufw allow from "$lan_cidr" to any port 1714:1764 proto tcp comment "kdeconnect lan" &>/dev/null || true
+    sudo ufw allow from "$lan_cidr" to any port 1714:1764 proto udp comment "kdeconnect lan" &>/dev/null || true
     if [[ "$HYPRLUGGAGE_PROFILE" == "laptop" ]]; then
         sudo ufw --force enable &>/dev/null \
-            && ok "ufw: enabled (ssh, vnc, localsend, kdeconnect allowed)" \
+            && ok "ufw: enabled (ssh; localsend, kdeconnect, and steam remote play from $lan_cidr)" \
             || warn "ufw: enable failed"
     elif [[ "$ufw_was_active" == true ]]; then
         sudo ufw --force enable &>/dev/null \
-            && ok "ufw: allowed ssh, vnc, localsend, kdeconnect (kept enabled)" \
+            && ok "ufw: localsend, kdeconnect, and steam remote play from $lan_cidr (kept enabled)" \
             || warn "ufw: rules may not have applied"
     else
-        ok "ufw: allowed ssh, vnc, localsend, kdeconnect (left inactive)"
+        ok "ufw: localsend, kdeconnect, and steam remote play from $lan_cidr (left inactive)"
     fi
+    info "wayvnc port 5900 is not opened by the installer; add a source-limited allow for Gatwy"
 fi
