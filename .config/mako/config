@@ -36,6 +36,7 @@ border-color=#89b4fa
 [mode=do-not-disturb]
 invisible=1
 on-notify=none
+default-timeout=0
 
 [mode=silent]
 on-notify=none

@@ -43,6 +43,7 @@ hl.bind("SUPER + SHIFT + RETURN", hl.dsp.exec_cmd(string.format("%s/launch-termi
 hl.bind("SUPER + ALT + RETURN", hl.dsp.exec_cmd(string.format("%s/launch-terminal -e tmux new -As main", scrDir)), { description = "New tmux session" })
 hl.bind("SUPER + SHIFT + N", hl.dsp.exec_cmd(string.format("%s/wifi", rofiDir)), { description = "Wifi Menu" })
 hl.bind("SUPER + N", hl.dsp.exec_cmd("makoctl dismiss -a"), { description = "Dismiss Notifications" })
+hl.bind("SUPER + ALT + N", hl.dsp.exec_cmd(string.format("%s/toggle-dnd", scrDir)), { description = "Do Not Disturb" })
 hl.bind("SUPER + SHIFT + I", hl.dsp.exec_cmd(string.format("kitty --title webapp-install -e %s/webapp-install", scrDir)), { description = "Web App Install" })
 hl.bind("SUPER + Q", hl.dsp.window.close(), { description = "Close window" })
 hl.bind("ALT + comma", hl.dsp.exec_cmd(string.format("%s/clipboard", rofiDir)), { description = "clipboard" })

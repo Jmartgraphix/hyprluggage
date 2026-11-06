@@ -1,0 +1,4 @@
+#!/bin/bash
+# Hide new notifications until this is pressed again. Waybar shows an icon only while it is on.
+makoctl mode -t do-not-disturb
+pkill -RTMIN+11 waybar

@@ -115,6 +115,10 @@ window#waybar {
   color: #e0af68;
 }
 
+#custom-dnd-indicator {
+  color: #e0af68;
+}
+
 #battery.warning {
   color: #e0af68;
 }

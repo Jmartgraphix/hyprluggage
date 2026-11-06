@@ -21,6 +21,7 @@
     "disk",
     "custom/screenrecording-indicator",
     "custom/idle-indicator",
+    "custom/dnd-indicator",
     "network",
     "bluetooth",
     "custom/theme",
@@ -60,6 +61,12 @@
     "on-click": "~/.config/hypr/scripts/toggle-idle",
     "exec": "~/.config/waybar/scripts/indicator-idle",
     "signal": 9,
+    "return-type": "json"
+  },
+  "custom/dnd-indicator": {
+    "on-click": "~/.config/hypr/scripts/toggle-dnd",
+    "exec": "~/.config/waybar/scripts/indicator-dnd",
+    "signal": 11,
     "return-type": "json"
   },
   "custom/weather": {
