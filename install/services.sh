@@ -144,35 +144,8 @@ if pkg_installed mpdscribble; then
     fi
 fi
 
-# ── GNOME Keyring ─────────────────────────────────────────────────────────────
-# Prevents browser logout after suspend by creating an auto-unlock keyring
-if pkg_installed gnome-keyring; then
-    keyring_dir="$HOME/.local/share/keyrings"
-    keyring_file="$keyring_dir/Default_keyring.keyring"
-
-    if [[ ! -f "$keyring_file" ]]; then
-        mkdir -p "$keyring_dir"
-
-        cat > "$keyring_file" << EOF
-[keyring]
-display-name=Default keyring
-ctime=$(date +%s)
-mtime=0
-lock-on-idle=false
-lock-after=false
-EOF
-
-        echo "Default_keyring" > "$keyring_dir/default"
-
-        chmod 700 "$keyring_dir"
-        chmod 600 "$keyring_file"
-        chmod 644 "$keyring_dir/default"
-
-        ok "gnome-keyring"
-    else
-        ok "gnome-keyring (already configured)"
-    fi
-fi
+# Keyring follows the greetd autologin choice below.
+# Autologin gets an unlocked plaintext keyring. A password login unlocks an encrypted one.
 
 # ── Spotify ───────────────────────────────────────────────────────────────────
 # Configures spicetify for Hyprluggage theming
@@ -225,6 +198,54 @@ if pkg_installed spicetify-cli; then
     fi
 fi
 
+# Unlock the login keyring with the greetd password. Does not rewrite an existing keyring file.
+enable_gnome_keyring_pam() {
+    local pam="/etc/pam.d/greetd"
+    local tmp
+    if [[ -f "$pam" ]] && ! grep -q 'pam_gnome_keyring\.so' "$pam"; then
+        tmp="$(mktemp)"
+        awk '
+            { print }
+            $1 == "auth" && $2 == "include" && $3 == "system-local-login" {
+                print "auth       optional     pam_gnome_keyring.so"
+            }
+            $1 == "session" && $2 == "include" && $3 == "system-local-login" {
+                print "session    optional     pam_gnome_keyring.so auto_start"
+            }
+        ' "$pam" >"$tmp"
+        if grep -q 'pam_gnome_keyring\.so' "$tmp"; then
+            sudo cp "$tmp" "$pam"
+            sudo chmod 644 "$pam"
+            ok "keyring: unlocks with the login password"
+        else
+            warn "greetd: could not add pam_gnome_keyring"
+        fi
+        rm -f "$tmp"
+    elif [[ -f "$pam" ]]; then
+        ok "keyring: unlocks with the login password"
+    fi
+
+    pam="/etc/pam.d/passwd"
+    if [[ -f "$pam" ]] && ! grep -q 'pam_gnome_keyring\.so' "$pam"; then
+        tmp="$(mktemp)"
+        awk '
+            { print }
+            $1 == "password" && $2 == "include" && $3 == "system-auth" {
+                print "password\toptional\tpam_gnome_keyring.so"
+            }
+        ' "$pam" >"$tmp"
+        if grep -q 'pam_gnome_keyring\.so' "$tmp"; then
+            sudo cp "$tmp" "$pam"
+            sudo chmod 644 "$pam"
+        fi
+        rm -f "$tmp"
+    fi
+
+    if [[ -f "$HOME/.local/share/keyrings/Default_keyring.keyring" ]]; then
+        info "Leaving the existing keyring file in place."
+    fi
+}
+
 # ── Greetd (Display Manager) ───────────────────────────────────────────────
 if pkg_installed greetd; then
     # Resolve repo root (use $DOTFILES from install.sh if available, otherwise resolve from script location)
@@ -264,6 +285,7 @@ if pkg_installed greetd; then
         if [[ -t 0 && -t 1 ]]; then
             autologin_prompt="Log in automatically at boot?"
             [[ "$want_autologin" == yes ]] && autologin_prompt="$autologin_prompt Recommended for a streaming box."
+            autologin_prompt="$autologin_prompt Saved passwords will sit unencrypted."
             if confirm_default "$autologin_prompt" "$want_autologin"; then
                 want_autologin=yes
             else
@@ -272,6 +294,33 @@ if pkg_installed greetd; then
         fi
         mkdir -p "$STATE_DIR"
         printf '%s\n' "$want_autologin" >"$STATE_DIR/autologin"
+
+        if pkg_installed gnome-keyring; then
+            if [[ "$want_autologin" == yes ]]; then
+                keyring_dir="$HOME/.local/share/keyrings"
+                keyring_file="$keyring_dir/Default_keyring.keyring"
+                if [[ ! -f "$keyring_file" ]]; then
+                    mkdir -p "$keyring_dir"
+                    cat > "$keyring_file" << EOF
+[keyring]
+display-name=Default keyring
+ctime=$(date +%s)
+mtime=0
+lock-on-idle=false
+lock-after=false
+EOF
+                    echo "Default_keyring" > "$keyring_dir/default"
+                    chmod 700 "$keyring_dir"
+                    chmod 600 "$keyring_file"
+                    chmod 644 "$keyring_dir/default"
+                    ok "keyring: unencrypted (autologin)"
+                else
+                    ok "keyring: unencrypted (already present)"
+                fi
+            else
+                enable_gnome_keyring_pam
+            fi
+        fi
 
         # Render template for the user running the installer.
         # Drop [initial_session] when autologin is declined so tuigreet shows.

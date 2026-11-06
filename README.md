@@ -221,7 +221,7 @@ The installer will:
 
 3. **Set up system services:**
    - MPD (music daemon)
-   - Greetd (display manager; session via `hyprluggage-session`, which runs hw-ensure then Hyprland). The installer asks about autologin; desktop defaults to yes, laptop to the greeter. Idle lock stays off.
+   - Greetd (display manager; session via `hyprluggage-session`, which runs hw-ensure then Hyprland). The installer asks about autologin; desktop defaults to yes, laptop to the greeter. Autologin stores keyring secrets unencrypted. A password login unlocks an encrypted keyring with that password. Idle lock stays off.
    - wayvnc + clipboard bridge, and sunshine-mod-bridge when Sunshine is installed (user units)
    - sshd (enabled)
    - ufw allow rules for SSH, and for LocalSend, KDE Connect, and Steam Remote Play from the connected LAN. Port 5900 is left to a source-limited Gatwy rule.
