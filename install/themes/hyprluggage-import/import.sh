@@ -144,6 +144,7 @@ build_theme() {
     else
         copy_overrides "$src" "$dest"
     fi
+    write_theme_format "$dest"
 }
 
 run_import() {

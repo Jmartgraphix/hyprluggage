@@ -50,6 +50,38 @@ theme_exists() {
 	[[ -d "$THEMES_DIR/$1" ]]
 }
 
+# Keep in sync with THEME_FORMAT in hyprluggage-import/init.sh
+THEME_FORMAT=1
+
+theme_format_of() {
+	local dest="$1"
+	local file="$dest/theme.toml"
+	[[ -f "$file" ]] || { echo ""; return 0; }
+	awk -F'=' '
+		/^[[:space:]]*format[[:space:]]*=/ {
+			gsub(/[[:space:]]/, "", $2)
+			print $2
+			exit
+		}
+	' "$file"
+}
+
+require_theme_format() {
+	local theme="$1"
+	local dest="$THEMES_DIR/$theme"
+	local got
+	got=$(theme_format_of "$dest")
+	if [[ -z "$got" ]]; then
+		err "theme \"$theme\" has no theme.toml (expected format = $THEME_FORMAT)"
+		return 1
+	fi
+	if [[ "$got" != "$THEME_FORMAT" ]]; then
+		err "theme \"$theme\" uses format $got; this Hyprluggage only understands format $THEME_FORMAT"
+		return 1
+	fi
+	return 0
+}
+
 list_themes() {
 	echo "dynamic"
 	for dir in "$THEMES_DIR"/*/; do
@@ -122,6 +154,7 @@ cmd_switch() {
 		err "Theme not found: $theme"
 		exit 1
 	}
+	require_theme_format "$theme" || exit 1
 
 	info "Switching to $theme..."
 	hyprctl keyword misc:disable_autoreload 1 &>/dev/null || true
@@ -148,6 +181,11 @@ cmd_switch() {
 cmd_reload() {
 	local theme
 	theme=$(current_theme)
+	theme_exists "$theme" || {
+		err "Theme not found: $theme"
+		exit 1
+	}
+	require_theme_format "$theme" || exit 1
 	info "Reloading $theme..."
 
 	mkdir -p "$HYPRLUGGAGE_DIR"

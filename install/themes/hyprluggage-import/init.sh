@@ -6,6 +6,44 @@ ok()   { echo -e "${GREEN}[OK]${RESET} $1"; }
 err()  { echo -e "${RED}[ERROR]${RESET} $1" >&2; }
 info() { echo -e "${BLUE}[INFO]${RESET} $1"; }
 
+# Hyprluggage theme folder shape. Bump when import writers change layout.
+THEME_FORMAT=1
+
+write_theme_format() {
+    local dest="$1"
+    printf 'format = %s\n' "$THEME_FORMAT" >"$dest/theme.toml"
+}
+
+# Refuse themes this importer / switcher does not understand.
+theme_format_of() {
+    local dest="$1"
+    local file="$dest/theme.toml"
+    [[ -f "$file" ]] || { echo ""; return 0; }
+    awk -F'=' '
+        /^[[:space:]]*format[[:space:]]*=/ {
+            gsub(/[[:space:]]/, "", $2)
+            print $2
+            exit
+        }
+    ' "$file"
+}
+
+require_theme_format() {
+    local dest="$1"
+    local name="${2:-$(basename "$dest")}"
+    local got
+    got=$(theme_format_of "$dest")
+    if [[ -z "$got" ]]; then
+        err "theme \"$name\" has no theme.toml (expected format = $THEME_FORMAT)"
+        return 1
+    fi
+    if [[ "$got" != "$THEME_FORMAT" ]]; then
+        err "theme \"$name\" uses format $got; this Hyprluggage only understands format $THEME_FORMAT"
+        return 1
+    fi
+    return 0
+}
+
 hex() { echo "${1#\#}"; }
 
 luminance() {
