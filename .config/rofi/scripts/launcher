@@ -24,6 +24,7 @@ FOCUS = HOME / ".config/hypr/scripts/focus"
 COMMANDS = (
     ("theme", "Theme", "themePicker", "preferences-desktop-theme"),
     ("wallpaper", "Wallpaper", "wallPicker", "preferences-desktop-wallpaper"),
+    ("lock", "Lock", "lock", "system-lock-screen"),
     ("power", "Power", "powermenu", "system-shutdown"),
     ("wifi", "Wifi", "wifi", "network-wireless"),
     ("keyhints", "Keyhints", "keyhints", "preferences-desktop-keyboard"),

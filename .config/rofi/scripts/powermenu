@@ -2,11 +2,14 @@
 
 scrDir="$HOME/.config/hypr/scripts"
 
-options="Shutdown\nReboot\nSuspend\nLogout"
+options="Lock\nShutdown\nReboot\nSuspend\nLogout"
 
 choice=$(echo -e "$options" | rofi -dmenu -p "" -config "$HOME/.config/rofi/custom-rofi/config-powermenu.rasi")
 
 case "$choice" in
+"Lock")
+	"$scrDir/lock-screen"
+	;;
 "Shutdown")
 	"$scrDir/graceful-shutdown"
 	;;
