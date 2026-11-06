@@ -9,11 +9,18 @@ mon="$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused == true).n
 pct=""
 [[ -f "$cache_dir/brightness-$mon" ]] && pct="$(<"$cache_dir/brightness-$mon")"
 
+night_temp="$(hyprctl hyprsunset temperature 2>/dev/null | grep -oE '[0-9]+' | head -1)"
+if [[ "$night_temp" =~ ^[0-9]+$ && "$night_temp" -lt 6000 ]]; then
+	night="Nightlight on. Right-click to toggle."
+else
+	night="Nightlight off. Right-click to toggle."
+fi
+
 icons=("󰃜" "󰃝" "󰃞" "󰃟" "󰃠")
 if [[ ! "$pct" =~ ^[0-9]+$ ]]; then
-	printf '%s\n' "{\"text\": \"${icons[2]}\", \"tooltip\": \"Brightness unavailable\"}"
+	printf '%s\n' "{\"text\": \"${icons[2]}\", \"tooltip\": \"Brightness unavailable. $night\"}"
 	exit 0
 fi
 ((pct > 100)) && pct=100
 idx=$((pct * 4 / 100))
-printf '%s\n' "{\"text\": \"${icons[$idx]}\", \"tooltip\": \"$mon ${pct}%. Scroll to change.\"}"
+printf '%s\n' "{\"text\": \"${icons[$idx]}\", \"tooltip\": \"$mon ${pct}%. Scroll to change. $night\"}"

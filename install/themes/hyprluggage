@@ -270,7 +270,7 @@ Keybindings:
 
 Tip:
   Waybar palette icon: left-click opens the theme switcher, right-click picks a wallpaper, middle-click applies a random wallpaper
-  Waybar brightness icon: scroll to change the focused monitor
+  Waybar brightness icon: scroll to change the focused monitor, right-click to toggle nightlight
 
 Examples:
   hyprluggage switch

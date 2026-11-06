@@ -99,6 +99,7 @@
     "return-type": "json",
     "interval": "once",
     "signal": 10,
+    "on-click-right": "~/.config/hypr/scripts/nightlight",
     "on-scroll-up": "~/.config/hypr/scripts/ddc-brightness +",
     "on-scroll-down": "~/.config/hypr/scripts/ddc-brightness -"
   },
