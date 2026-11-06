@@ -1,0 +1,17 @@
+#!/bin/bash
+# Battery line for hyprlock. Desktop profiles print nothing.
+state="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage/profile"
+[[ -f "$state" ]] || exit 0
+grep -qx laptop "$state" || exit 0
+
+for bat in /sys/class/power_supply/BAT*; do
+	[[ -r "$bat/capacity" ]] || continue
+	cap=$(<"$bat/capacity")
+	status=$(<"$bat/status")
+	if [[ "$status" == Charging ]]; then
+		printf '%s%% charging\n' "$cap"
+	else
+		printf '%s%%\n' "$cap"
+	fi
+	exit 0
+done
