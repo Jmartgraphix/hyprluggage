@@ -17,6 +17,7 @@ case "$choice" in
 	systemctl suspend
 	;;
 "Logout")
+	"$scrDir/power-confirm" logout "Log out" || exit 0
 	if pgrep -x uwsm >/dev/null; then
 		uwsm stop
 	else

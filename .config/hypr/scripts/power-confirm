@@ -1,0 +1,36 @@
+#!/bin/bash
+# power-confirm <id> <yes-label>
+# Exit 0 to proceed. A second call with the same id within 2 seconds skips the prompt.
+
+set -euo pipefail
+
+action="${1:?action id required}"
+yes_label="${2:?yes label required}"
+runtime="${XDG_RUNTIME_DIR:-/tmp}"
+stamp="$runtime/hyprluggage-power-$action"
+now=$(date +%s)
+
+if [[ -f "$stamp" ]]; then
+	prev=$(<"$stamp")
+	if [[ "$prev" =~ ^[0-9]+$ ]] && (( now - prev <= 2 )); then
+		rm -f "$stamp"
+		exit 0
+	fi
+fi
+
+printf '%s\n' "$now" >"$stamp"
+
+choice=$(printf 'Cancel\n%s\n' "$yes_label" | rofi -dmenu -p "" \
+	-config "$HOME/.config/rofi/custom-rofi/config-powermenu.rasi" \
+	-theme-str 'listview { lines: 2; }') || {
+	rm -f "$stamp"
+	exit 1
+}
+
+if [[ "$choice" == "$yes_label" ]]; then
+	rm -f "$stamp"
+	exit 0
+fi
+
+rm -f "$stamp"
+exit 1

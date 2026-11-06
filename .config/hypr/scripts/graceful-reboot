@@ -2,6 +2,10 @@
 
 # Graceful reboot - closes all windows before rebooting
 # This allows apps like Chrome/browsers to save state properly
+# Confirm first. A second press within 2 seconds skips the prompt.
+
+scrDir="$(cd "$(dirname "$0")" && pwd)"
+"$scrDir/power-confirm" reboot "Reboot" || exit 0
 
 # Close all Hyprland windows gracefully
 close_all_windows() {

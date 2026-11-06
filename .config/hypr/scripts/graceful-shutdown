@@ -2,6 +2,10 @@
 
 # Graceful shutdown - closes all windows before powering off
 # This allows apps like Chrome/browsers to save state properly
+# Confirm first. A second call within 2 seconds skips the prompt.
+
+scrDir="$(cd "$(dirname "$0")" && pwd)"
+"$scrDir/power-confirm" shutdown "Shut down" || exit 0
 
 # Close all Hyprland windows gracefully
 close_all_windows() {
