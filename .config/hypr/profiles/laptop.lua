@@ -14,6 +14,13 @@ hl.config({
 			tap = true,
 		},
 	},
+	-- Lighter blur than the shared look. Desktop keeps size 7 / 4 passes.
+	decoration = {
+		blur = {
+			size = 8,
+			passes = 2,
+		},
+	},
 })
 
 -- Hybrid lid: suspend if no external monitor; clamshell if docked
