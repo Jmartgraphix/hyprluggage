@@ -269,7 +269,8 @@ Keybindings:
   SUPER+K                     Show all keybindings
 
 Tip:
-  Waybar brightness icon: left-click for Random wallpaper picker, right-click to apply random wallpaper
+  Waybar palette icon: left-click opens the theme switcher, right-click picks a wallpaper, middle-click applies a random wallpaper
+  Waybar brightness icon: scroll to change the focused monitor
 
 Examples:
   hyprluggage switch

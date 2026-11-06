@@ -93,6 +93,8 @@ cur="$(awk '{print $4}' <<<"$terse")"
 max="$(awk '{print $5}' <<<"$terse")"
 if [[ "$cur" =~ ^[0-9]+$ && "$max" =~ ^[0-9]+$ && "$max" -gt 0 ]]; then
 	pct=$((cur * 100 / max))
+	printf '%s\n' "$pct" >"$cache_dir/brightness-$monitor"
+	pkill -RTMIN+10 waybar >/dev/null 2>&1 || true
 	osd "${pct}%" "$(awk -v c="$cur" -v m="$max" 'BEGIN { printf "%.3f", c / m }')"
 else
 	osd "Brightness ${dir}"
