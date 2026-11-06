@@ -254,12 +254,13 @@ Commands:
   reload             Re-apply current theme
   fix                Fix broken symlinks
   remove <theme>     Delete a theme
-  uninstall          Remove Hyprluggage
+  uninstall          Delete themes, or remove theme config
   help               This help
   version            Version info
 
 Keybindings:
-  SUPER+SHIFT+I               Hyprluggage TUI
+  SUPER+I                     Hyprluggage TUI
+  SUPER+SHIFT+I               Web app install
   SUPER+CTRL+SHIFT+SPACE      Theme switcher
   SUPER+CTRL+SPACE            Matugen theme from wallpaper
   SUPER+ALT+SPACE             Wallpaper picker

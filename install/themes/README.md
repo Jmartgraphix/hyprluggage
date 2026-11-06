@@ -6,10 +6,12 @@ cd ~/hyprluggage/install/themes
 ./install.sh
 ```
 
-Uninstall:
+Uninstall themes (this does not remove the dotfiles install):
 ```bash
 ./uninstall.sh
 ```
+
+The full install uninstall is `~/hyprluggage/uninstall.sh`.
 
 ## Themes
 

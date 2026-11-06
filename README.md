@@ -289,7 +289,7 @@ hyprluggage browse          # browse & import Omarchy themes
 hyprluggage import <url>    # import theme from GitHub
 hyprluggage tui             # interactive theme browser
 hyprluggage remove <theme>  # delete a theme
-hyprluggage uninstall       # remove Hyprluggage
+hyprluggage uninstall       # delete themes, or remove theme config
 hyprluggage help            # show help
 ```
 
@@ -577,7 +577,7 @@ If it still loops, check:
 
 ## Uninstallation
 
-To remove HyprLuggage:
+To remove the whole install (symlinks, restored backups, shell PATH, desktop entries, and optionally packages):
 
 ```bash
 cd ~/hyprluggage && ./uninstall.sh
@@ -591,6 +591,12 @@ The uninstaller will:
 - Remove desktop entries
 
 **Note:** Your custom edits in `~/.config/` will be preserved if they weren't symlinks. Backups are created during installation in `~/dotfiles-backup*`.
+
+To delete themes, or remove only the theme config in `~/.config/hyprluggage`:
+
+```bash
+hyprluggage uninstall
+```
 
 ---
 
