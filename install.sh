@@ -126,6 +126,11 @@ fi
 # Install packages
 source "$DOTFILES/install/packages.sh"
 
+# Cursor is the official AppImage, not an Arch package.
+if confirm_default "Install or update Cursor from the official AppImage?" no; then
+    sudo -- "$DOTFILES/.local/bin/update-cursor"
+fi
+
 # Symlink dotfiles
 source "$DOTFILES/install/stow.sh"
 

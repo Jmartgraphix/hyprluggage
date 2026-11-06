@@ -1,0 +1,232 @@
+#!/bin/bash
+set -euo pipefail
+
+APP_DIR="/opt"
+APP_IMAGE="$APP_DIR/cursor.AppImage"
+# The in-app updater follows releaseTrack=latest (currently 3.16.29). The
+# "stable" track can lag (it still served 3.16.17 after latest had moved on).
+DOWNLOAD_API="https://www.cursor.com/api/download?platform=linux-x64"
+
+# Hyprland is not a Chromium-recognized desktop, so Cursor cannot auto-detect a
+# keyring. Always pin gnome-libsecret (not "basic") and keep cursor:// handlers
+# registered so GitHub/browser OAuth can return to the IDE.
+if [[ $EUID -ne 0 ]]; then
+    exec sudo -- "$(readlink -f "$0")" "$@"
+fi
+
+CLEANUP_ONLY=0
+DOWNLOAD_VERSION=""
+if [[ "${1:-}" == "--cleanup-only" ]]; then
+    CLEANUP_ONLY=1
+elif [[ $# -gt 0 ]]; then
+    echo "Usage: sudo $0 [--cleanup-only]"
+    exit 1
+fi
+
+REAL_USER="${SUDO_USER:-}"
+if [[ -z "$REAL_USER" || "$REAL_USER" == "root" ]]; then
+    echo "Run as: sudo -u <youruser> isn't enough; use: sudo $0"
+    echo "SUDO_USER must be your desktop user so argv.json and .desktop files stay unowned by root."
+    exit 1
+fi
+
+REAL_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
+REAL_GROUP=$(id -gn "$REAL_USER")
+ARGV_JSON="$REAL_HOME/.cursor/argv.json"
+USER_APPS="$REAL_HOME/.local/share/applications"
+MIMEAPPS="$REAL_HOME/.config/mimeapps.list"
+
+mkdir -p "$APP_DIR"
+
+if [[ "$CLEANUP_ONLY" -eq 0 ]]; then
+    DOWNLOAD_META=$(python3 - "$DOWNLOAD_API" << 'PY'
+import json
+import sys
+import urllib.request
+
+api = sys.argv[1]
+
+def fetch(track):
+    url = f"{api}&releaseTrack={track}"
+    with urllib.request.urlopen(url, timeout=30) as r:
+        data = json.load(r)
+    ver = data.get("version") or ""
+    dl = data.get("downloadUrl") or ""
+    if not ver or not dl:
+        raise SystemExit(f"Failed to retrieve download URL for track={track}")
+    return ver, dl, data.get("commitSha") or ""
+
+def ver_tuple(v):
+    parts = []
+    for p in v.split("."):
+        try:
+            parts.append(int(p))
+        except ValueError:
+            parts.append(0)
+    return tuple(parts)
+
+stable_ver, stable_url, stable_sha = fetch("stable")
+latest_ver, latest_url, latest_sha = fetch("latest")
+print(f"stable track: {stable_ver}", file=sys.stderr)
+print(f"latest track: {latest_ver}", file=sys.stderr)
+if ver_tuple(latest_ver) > ver_tuple(stable_ver):
+    ver, url, sha = latest_ver, latest_url, latest_sha
+    track = "latest"
+else:
+    ver, url, sha = stable_ver, stable_url, stable_sha
+    track = "stable"
+print(f"installing {ver} from {track} track ({sha[:12] if sha else 'no-sha'})", file=sys.stderr)
+print(json.dumps({"version": ver, "downloadUrl": url, "track": track}))
+PY
+    )
+    DOWNLOAD_URL=$(printf '%s\n' "$DOWNLOAD_META" | jq -r '.downloadUrl')
+    DOWNLOAD_VERSION=$(printf '%s\n' "$DOWNLOAD_META" | jq -r '.version')
+    DOWNLOAD_TRACK=$(printf '%s\n' "$DOWNLOAD_META" | jq -r '.track')
+    if [[ -z "$DOWNLOAD_URL" || "$DOWNLOAD_URL" == "null" ]]; then
+        echo "Failed to retrieve download URL."
+        exit 1
+    fi
+
+    echo "Downloading Cursor $DOWNLOAD_VERSION..."
+    curl -L -o "$APP_IMAGE.tmp" "$DOWNLOAD_URL"
+    mv "$APP_IMAGE.tmp" "$APP_IMAGE"
+else
+    if [[ ! -x "$APP_IMAGE" ]]; then
+        echo "No $APP_IMAGE to clean up against. Run without --cleanup-only first."
+        exit 1
+    fi
+    echo "Skipping download; applying leftover cleanup and launchers for $APP_IMAGE"
+fi
+chmod 755 "$APP_IMAGE"
+chown root:root "$APP_IMAGE"
+
+# Older installers left versioned AppImages and a /usr/local/bin/cursor symlink
+# that kept launching them. Point PATH at the current binary and drop leftovers.
+ln -sfn "$APP_IMAGE" /usr/local/bin/cursor
+shopt -s nullglob
+for leftover in "$APP_DIR"/Cursor-*.AppImage "$APP_DIR"/cursor-*.AppImage; do
+    [[ "$(realpath "$leftover" 2>/dev/null || true)" == "$(realpath "$APP_IMAGE")" ]] && continue
+    echo "Removing leftover $leftover"
+    rm -f "$leftover"
+done
+shopt -u nullglob
+
+install_desktop() {
+    local dest="$1"
+    cat > "$dest"
+}
+
+install_desktop /usr/share/applications/cursor.desktop << EOF
+[Desktop Entry]
+Name=Cursor
+Exec=$APP_IMAGE %U
+Icon=cursor
+Type=Application
+Categories=Development;IDE;
+StartupNotify=true
+Terminal=false
+StartupWMClass=cursor
+EOF
+
+install_desktop /usr/share/applications/cursor-url-handler.desktop << EOF
+[Desktop Entry]
+Name=Cursor URL Handler
+Exec=$APP_IMAGE --open-url %U
+Icon=cursor
+Type=Application
+NoDisplay=true
+StartupNotify=true
+MimeType=x-scheme-handler/cursor;x-scheme-handler/vscode;
+EOF
+
+mkdir -p "$USER_APPS"
+install_desktop "$USER_APPS/cursor.desktop" << EOF
+[Desktop Entry]
+Name=Cursor
+Exec=$APP_IMAGE %U
+Icon=cursor
+Type=Application
+Categories=Development;IDE;
+StartupNotify=true
+Terminal=false
+StartupWMClass=cursor
+EOF
+
+install_desktop "$USER_APPS/cursor-url-handler.desktop" << EOF
+[Desktop Entry]
+Name=Cursor URL Handler
+Exec=$APP_IMAGE --open-url %U
+Icon=cursor
+Type=Application
+NoDisplay=true
+StartupNotify=true
+MimeType=x-scheme-handler/cursor;x-scheme-handler/vscode;
+EOF
+chown "$REAL_USER:$REAL_GROUP" "$USER_APPS/cursor.desktop" "$USER_APPS/cursor-url-handler.desktop"
+
+python3 - "$ARGV_JSON" "$REAL_USER" "$REAL_GROUP" << 'PY'
+import grp
+import os
+import pwd
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+owner, group = sys.argv[2], sys.argv[3]
+path.parent.mkdir(parents=True, exist_ok=True)
+text = path.read_text() if path.exists() else "{\n}\n"
+if re.search(r'"password-store"\s*:', text):
+    text = re.sub(r'"password-store"\s*:\s*"[^"]*"', '"password-store": "gnome-libsecret"', text)
+else:
+    replaced, n = re.subn(
+        r'(["\d]|true|false|null)\s*\n\}',
+        r'\1,\n\t"password-store": "gnome-libsecret"\n}',
+        text,
+        count=1,
+    )
+    text = replaced if n else re.sub(r"\}\s*$", '\t"password-store": "gnome-libsecret"\n}\n', text, count=1)
+path.write_text(text)
+os.chown(path, pwd.getpwnam(owner).pw_uid, grp.getgrnam(group).gr_gid)
+print(f"Set password-store=gnome-libsecret in {path} (owner {owner})")
+PY
+
+ensure_mime_default() {
+    local file="$1"
+    local scheme="$2"
+    local desktop="$3"
+    mkdir -p "$(dirname "$file")"
+    if [[ ! -f "$file" ]]; then
+        printf '%s\n' "[Default Applications]" > "$file"
+    fi
+    if grep -q "^\[Default Applications\]" "$file"; then
+        if grep -q "^${scheme}=" "$file"; then
+            sed -i "s|^${scheme}=.*|${scheme}=${desktop}|" "$file"
+        else
+            sed -i "/^\[Default Applications\]/a ${scheme}=${desktop}" "$file"
+        fi
+    else
+        printf '%s\n' "[Default Applications]" "${scheme}=${desktop}" >> "$file"
+    fi
+}
+
+ensure_mime_default "$MIMEAPPS" "x-scheme-handler/cursor" "cursor-url-handler.desktop"
+ensure_mime_default "$MIMEAPPS" "x-scheme-handler/vscode" "cursor-url-handler.desktop"
+chown "$REAL_USER:$REAL_GROUP" "$MIMEAPPS"
+
+sudo -u "$REAL_USER" env HOME="$REAL_HOME" XDG_DATA_HOME="$REAL_HOME/.local/share" \
+    xdg-mime default cursor-url-handler.desktop x-scheme-handler/cursor
+sudo -u "$REAL_USER" env HOME="$REAL_HOME" XDG_DATA_HOME="$REAL_HOME/.local/share" \
+    xdg-mime default cursor-url-handler.desktop x-scheme-handler/vscode
+sudo -u "$REAL_USER" env HOME="$REAL_HOME" update-desktop-database "$USER_APPS" >/dev/null 2>&1 || true
+update-desktop-database /usr/share/applications >/dev/null 2>&1 || true
+
+if [[ -n "$DOWNLOAD_VERSION" ]]; then
+    echo
+    echo "Installed Cursor $DOWNLOAD_VERSION (${DOWNLOAD_TRACK:-unknown} track) to $APP_IMAGE"
+    echo "After a full quit (File → Exit) and Super+C, Help → About should show $DOWNLOAD_VERSION."
+else
+    echo
+    echo "Launchers refreshed for $APP_IMAGE (no new download)."
+fi
+echo "Keyring: gnome-libsecret. URL handler: cursor:// and vscode:// -> $APP_IMAGE --open-url"

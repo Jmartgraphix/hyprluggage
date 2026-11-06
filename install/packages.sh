@@ -33,7 +33,7 @@ packages=(
 	neovim lazygit
 
 	# Screenshot & Recording
-	grim slurp satty wl-clipboard gpu-screen-recorder ffmpeg v4l-utils
+	grim slurp satty wayfreeze wl-clipboard gpu-screen-recorder ffmpeg v4l-utils
 
 	# Clipboard
 	cliphist wl-clip-persist
@@ -57,7 +57,7 @@ packages=(
 	gnome-keyring libsecret xorg-xhost libappindicator
 
 	# Theming
-	matugen-bin nwg-look adw-gtk-theme bibata-cursor-theme-bin imagemagick
+	matugen-bin nwg-look adw-gtk-theme kvantum bibata-cursor-theme-bin imagemagick
 	aether
 
 	# Rofi Extras
@@ -85,6 +85,7 @@ applications=(
 	obsidian bitwarden code visual-studio-code-bin
 	vesktop-bin discord keychain zed opencode herdr-bin
 	mpv yt-dlp steam lutris gamemode mangohud typora
+	lazydocker easyeffects nextcloud-client
 )
 
 # ╭───────────────────────────────────────────────────────────────────────╮

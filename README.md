@@ -30,6 +30,7 @@
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Usage](#usage)
+- [Updating Cursor](#updating-cursor)
 - [Keybindings](#keybindings)
 - [Components](#components)
 - [Customization](#customization)
@@ -216,6 +217,7 @@ The installer will:
    - Communication (Discord, Vesktop)
    - Coding agents (OpenCode, Herdr)
    - And other productivity apps
+   - Cursor, if you say yes, from the official AppImage. Later updates are [Updating Cursor](#updating-cursor)
 
 3. **Set up system services:**
    - MPD (music daemon)
@@ -294,6 +296,16 @@ hyprluggage help            # show help
 ```
 
 Or press `Super + Ctrl + Shift + Space` for the theme picker.
+
+### Updating Cursor
+
+The installer can download Cursor's official AppImage. It is not an Arch package. When Cursor asks you to update, quit it completely (File → Exit), then run:
+
+```bash
+update-cursor
+```
+
+That asks for your password, replaces `/opt/cursor.AppImage`, and refreshes the desktop entry. Open it again with `Super+C`.
 
 ### Making a theme with Aether
 
