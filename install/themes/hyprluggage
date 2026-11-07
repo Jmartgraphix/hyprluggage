@@ -452,10 +452,16 @@ cmd_doctor() {
 		if [[ -n "$latest_tag" ]]; then
 			head_sha=$(git -C "$repo" rev-parse HEAD 2>/dev/null || true)
 			latest_sha=$(git -C "$repo" rev-parse "$latest_tag^{commit}" 2>/dev/null || true)
-			if [[ -n "$head_sha" && -n "$latest_sha" && "$head_sha" != "$latest_sha" ]]; then
-				doctor_warn "not on latest tag $latest_tag (run: hyprluggage update)"
-			else
+			if [[ -z "$head_sha" || -z "$latest_sha" ]]; then
+				doctor_warn "could not compare HEAD to $latest_tag"
+			elif [[ "$head_sha" == "$latest_sha" ]]; then
 				doctor_ok "on latest tag $latest_tag"
+			elif git -C "$repo" merge-base --is-ancestor "$head_sha" "$latest_sha" 2>/dev/null; then
+				doctor_warn "behind latest tag $latest_tag (run: hyprluggage update)"
+			elif git -C "$repo" merge-base --is-ancestor "$latest_sha" "$head_sha" 2>/dev/null; then
+				doctor_ok "ahead of latest tag $latest_tag (development)"
+			else
+				doctor_warn "HEAD diverged from latest tag $latest_tag"
 			fi
 		else
 			doctor_warn "no v* release tags found"
@@ -580,8 +586,11 @@ cmd_update() {
 	info "Updating $old_desc → $target"
 	write_state_ref previous-ref "$head_sha"
 	checkout_ref "$repo" "$target"
-	run_refresh "$repo"
 	write_state_ref current-ref "$target"
+	if ! run_refresh "$repo"; then
+		err "checked out $target but refresh failed; fix packages/stow and re-run: hyprluggage update $target"
+		exit 1
+	fi
 	ok "updated to $target"
 	info "Rollback with: hyprluggage rollback"
 }
@@ -621,8 +630,11 @@ cmd_rollback() {
 	# Swap so a second rollback can move forward again.
 	write_state_ref previous-ref "$head_sha"
 	checkout_ref "$repo" "$prev"
-	run_refresh "$repo"
 	write_state_ref current-ref "$prev"
+	if ! run_refresh "$repo"; then
+		err "checked out $prev but refresh failed; fix packages/stow and re-run: hyprluggage rollback"
+		exit 1
+	fi
 	ok "rolled back to $prev"
 }
 
