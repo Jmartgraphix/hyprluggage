@@ -47,14 +47,15 @@ restore_backups() {
     step "Restoring backups"
 
     # Find most recent backup directory (dotfiles-backup, dotfiles-backup-2, etc.)
-    local latest=$(ls -d "$HOME"/dotfiles-backup* 2>/dev/null | sort -V | tail -1)
+    local latest
+    latest=$(find "$HOME" -maxdepth 1 -type d -name 'dotfiles-backup*' 2>/dev/null | sort -V | tail -1)
     [[ -z "$latest" || ! -d "$latest" ]] && { info "No backups found"; return 0; }
 
     info "Restoring from: $latest"
 
     # Restore preserving directory structure
     while IFS= read -r file; do
-        local dest="$HOME/${file#$latest/}"
+        local dest="$HOME/${file#"$latest"/}"
         mkdir -p "$(dirname "$dest")"
         cp "$file" "$dest"
     done < <(find "$latest" -type f)
@@ -83,10 +84,12 @@ ask_packages() {
     warn "Removing: $selected"
     gum confirm "Sure?" || return 0
 
+    local -a pkgs=()
+    mapfile -t pkgs <<< "$selected"
     if aur_installed; then
-        $(get_aur_helper) -Rns --noconfirm $selected 2>/dev/null || true
+        $(get_aur_helper) -Rns --noconfirm "${pkgs[@]}" 2>/dev/null || true
     else
-        sudo pacman -Rns --noconfirm $selected 2>/dev/null || true
+        sudo pacman -Rns --noconfirm "${pkgs[@]}" 2>/dev/null || true
     fi
     ok "Done"
     return 0
@@ -116,13 +119,15 @@ clean_desktop_entries() {
     # Web apps from dotfiles
     for file in "$apps_dir"/*.desktop; do
         [[ -f "$file" ]] || continue
-        local name=$(basename "$file")
+        local name
+        name=$(basename "$file")
         [[ -f "$target_dir/$name" ]] && entries+=("$name")
     done
     
     # Hidden app overrides (created by hide-apps script, contain NoDisplay=true)
     while IFS= read -r -d '' file; do
-        local name=$(basename "$file")
+        local name
+        name=$(basename "$file")
         grep -q "NoDisplay=true" "$file" 2>/dev/null && entries+=("$name")
     done < <(find "$target_dir" -maxdepth 1 -name "*.desktop" -print0 2>/dev/null)
     

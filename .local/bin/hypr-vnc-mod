@@ -43,7 +43,8 @@ INNER
 ensure_hypr_env() {
   if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
     local inst
-    inst="$(ls -1 "$XDG_RUNTIME_DIR/hypr" 2>/dev/null | head -n1 || true)"
+    # Hyprland instance dirs are simple signatures; pick the first.
+    inst="$(find "${XDG_RUNTIME_DIR}/hypr" -mindepth 1 -maxdepth 1 -printf '%f\n' 2>/dev/null | head -n1 || true)"
     if [[ -n "$inst" ]]; then
       export HYPRLAND_INSTANCE_SIGNATURE="$inst"
     fi

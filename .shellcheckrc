@@ -1,0 +1,4 @@
+# Intentional ok/warn chains: cmd && ok "…" || warn "…"
+disable=SC2015
+# Relative/dynamic sources; -x follows when paths resolve
+disable=SC1091

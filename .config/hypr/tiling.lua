@@ -1,15 +1,4 @@
 -- Tiling / workspaces / window moves
-local home = os.getenv("HOME")
-local terminal = "kitty"
-local browser = home .. "/.config/hypr/scripts/launch-browser"
-local browser2 = "zen-browser"
-local webapp = home .. "/.config/hypr/scripts/launch-webapp"
-local focus = home .. "/.config/hypr/scripts/focus"
-local osdclient = "swayosd-client --monitor \"$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')\""
-local rofiDir = home .. "/.config/rofi/scripts"
-local scrDir = home .. "/.config/hypr/scripts"
-
-
 hl.bind("SUPER + F", hl.dsp.window.fullscreen(), { description = "Fullscreen" })
 -- Hyprland Lua bind parser does not accept conf-style code:N; use keysyms.
 hl.bind("SUPER + 1", hl.dsp.focus({ workspace = 1 }), { description = "Switch to workspace 1" })

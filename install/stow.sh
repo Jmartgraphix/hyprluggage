@@ -11,7 +11,7 @@ BACKUP_DIR="$HOME/dotfiles-backup"
 i=2; while [[ -d "$BACKUP_DIR" ]]; do BACKUP_DIR="$HOME/dotfiles-backup-$i"; ((i++)); done
 
 step "Linking hyprluggage"
-cd "$DOTFILES"
+cd "$DOTFILES" || exit 1
 
 # Clean stale symlinks from older installs
 for f in "$HOME"/*; do
@@ -40,7 +40,8 @@ backup_if_exists() {
     
     for item in "$source_dir"/*; do
         [[ -e "$item" ]] || continue
-        local name=$(basename "$item")
+        local name
+        name=$(basename "$item")
         local target="$target_dir/$name"
         [[ -e "$target" && ! -L "$target" ]] || continue
         mkdir -p "$BACKUP_DIR/$1"

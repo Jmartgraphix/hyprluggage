@@ -1,15 +1,4 @@
 -- Monitors
-local home = os.getenv("HOME")
-local terminal = "kitty"
-local browser = home .. "/.config/hypr/scripts/launch-browser"
-local browser2 = "zen-browser"
-local webapp = home .. "/.config/hypr/scripts/launch-webapp"
-local focus = home .. "/.config/hypr/scripts/focus"
-local osdclient = "swayosd-client --monitor \"$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')\""
-local rofiDir = home .. "/.config/rofi/scripts"
-local scrDir = home .. "/.config/hypr/scripts"
-
-
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 hl.monitor({ output = "DP-1", mode = "preferred", position = "auto-left", scale = 1.6 })
 hl.monitor({ output = "DP-3", mode = "preferred", position = "auto-right", scale = 1.6 })

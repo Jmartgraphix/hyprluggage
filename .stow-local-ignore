@@ -30,6 +30,8 @@ branding
 themes
 install
 \.github
+^\.luacheckrc$
+^\.shellcheckrc$
 ^install\.sh$
 ^boot\.sh$
 ^uninstall\.sh$

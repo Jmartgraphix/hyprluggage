@@ -139,9 +139,7 @@ get_colors() {
         read_alacritty_colors "$file" && return
     done
 
-    for file in "$src/colors.toml"; do
-        [[ -f "$file" ]] || continue
-        read_colors_toml "$file" && return
-    done
+    file="$src/colors.toml"
+    [[ -f "$file" ]] && read_colors_toml "$file" && return
     return 1
 }

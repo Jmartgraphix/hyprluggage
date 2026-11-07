@@ -1,8 +1,9 @@
 #!/bin/bash
 
 gen_vesktop() {
-    local accent_hover=$(darken "$accent" 50)
-    local accent_click=$(darken "$accent" 25)
+    local accent_hover accent_click
+    accent_hover=$(darken "$accent" 50)
+    accent_click=$(darken "$accent" 25)
     cat > "$dest/.config/vesktop/themes/hyprluggage-discord.css" <<EOF
 /* ╭─ ♪ Hyprluggage ─╮
    │  Generated   │

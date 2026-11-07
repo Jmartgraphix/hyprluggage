@@ -143,7 +143,8 @@ count_themes() {
     local n=0
     for d in "$THEMES_DIR"/*/; do
         [[ -d "$d" ]] || continue
-        local name=$(basename "$d")
+        local name
+        name=$(basename "$d")
         [[ "$name" != "Wallpapers" && "$name" != ".git" ]] && ((n++)) || true
     done
     echo "$n"
@@ -257,7 +258,8 @@ page_one() {
     # Phase 4: Organizing the Themes
     heading "Organizing the Themes"
     
-    local theme_count=$(count_themes)
+    local theme_count
+    theme_count=$(count_themes)
     spin "Cataloging contents" 0.3
     check_mark "$theme_count themes found"
     echo

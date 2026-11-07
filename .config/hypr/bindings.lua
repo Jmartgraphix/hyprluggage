@@ -3,7 +3,6 @@
 local home = os.getenv("HOME")
 local terminal = "kitty"
 local browser = home .. "/.config/hypr/scripts/launch-browser"
-local browser2 = "zen-browser"
 local webapp = home .. "/.config/hypr/scripts/launch-webapp"
 local focus = home .. "/.config/hypr/scripts/focus"
 local rofiDir = home .. "/.config/rofi/scripts"

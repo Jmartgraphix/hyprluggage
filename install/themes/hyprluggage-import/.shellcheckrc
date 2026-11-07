@@ -1,0 +1,6 @@
+# Nearest .shellcheckrc replaces parent; keep shared disables here.
+disable=SC2015
+disable=SC1091
+# Color/name vars are injected by parent import.sh when these generators are sourced.
+disable=SC2154
+disable=SC2034

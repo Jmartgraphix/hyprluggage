@@ -1,11 +1,8 @@
 -- Environment + xwayland
 -- hl.env only applies at compositor launch, not on reload.
 
-local uid = "1000"
-do
-	local xrd = os.getenv("XDG_RUNTIME_DIR") or ""
-	uid = xrd:match("/run/user/(%d+)") or os.getenv("UID") or "1000"
-end
+local xrd = os.getenv("XDG_RUNTIME_DIR") or ""
+local uid = xrd:match("/run/user/(%d+)") or os.getenv("UID") or "1000"
 
 hl.env("MPD_HOST", "/run/user/" .. uid .. "/mpd/socket")
 hl.env("EDITOR", "nvim")

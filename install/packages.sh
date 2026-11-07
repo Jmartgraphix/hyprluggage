@@ -107,7 +107,8 @@ setup_aur() {
 	fi
 	
 	info "Installing yay..."
-	local tmp=$(mktemp -d)
+	local tmp
+	tmp=$(mktemp -d)
 	
 	# Use yay (source) instead of yay-bin for better compatibility
 	if ! git clone https://aur.archlinux.org/yay.git "$tmp/yay" --depth 1; then
@@ -136,7 +137,8 @@ setup_aur() {
 }
 
 do_install() {
-	local aur=$(get_aur_helper)
+	local aur
+	aur=$(get_aur_helper)
 	local official=() from_aur=()
 
 	for pkg in "$@"; do
@@ -179,7 +181,9 @@ ask_applications() {
 	[[ -z "$selected" ]] && return 0
 
 	step "Installing applications"
-	do_install $selected
+	local -a pkgs=()
+	mapfile -t pkgs <<< "$selected"
+	do_install "${pkgs[@]}"
 	return 0
 }
 

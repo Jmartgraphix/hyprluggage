@@ -7,6 +7,8 @@
 # Bail if not running in bash
 if [ -z "$BASH_VERSION" ]; then
     echo "Error: Run the installer with: ./install.sh"
+    # return when sourced; exit when executed
+    # shellcheck disable=SC2317
     return 1 2>/dev/null || exit 1
 fi
 
@@ -17,9 +19,7 @@ fi
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
 DIM='\033[2m'
 BOLD='\033[1m'
 RESET='\033[0m'
@@ -76,8 +76,10 @@ trap catch_error ERR INT
 # ╰───────────────────────────────────────────────────────────────────────╯
 
 HAS_GUM=$(command -v gum &>/dev/null && echo 1 || echo 0)
+# Consumed by theme installer and other scripts that source this file.
 HAS_TTE=$(command -v tte &>/dev/null && echo 1 || echo 0)
 DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export HAS_TTE DOTFILES_ROOT
 
 # ╭───────────────────────────────────────────────────────────────────────╮
 # │ Section Headers                                                       │

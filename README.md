@@ -188,6 +188,10 @@ cd ~/hyprluggage && ./install.sh
 
 Want just the themes without the full setup? See [install/themes/README.md](install/themes/README.md)
 
+### CI
+
+PRs and pushes to `master` run **shellcheck**, **luacheck** (top-level Hyprland Lua), and a dry-run `stow -n` against a fake HOME.
+
 ### What Gets Installed
 
 The installer will:
