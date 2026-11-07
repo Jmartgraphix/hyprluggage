@@ -1,0 +1,18 @@
+[Unit]
+Description=Hyprluggage graphical session daemons
+Documentation=file:%h/hyprluggage/README.md
+PartOf=graphical-session.target
+After=graphical-session.target
+# Distro units (waybar/mako/cliphist) + hyprluggage-shipped units below.
+Wants=waybar.service
+Wants=mako.service
+Wants=cliphist.service
+Wants=wl-clip-persist.service
+Wants=awww.service
+Wants=swayosd.service
+Wants=polkit-gnome-agent.service
+Wants=kdeconnectd.service
+Wants=kdeconnect-indicator.service
+
+[Install]
+WantedBy=graphical-session.target

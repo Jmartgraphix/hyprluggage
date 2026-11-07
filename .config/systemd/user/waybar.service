@@ -1,0 +1,17 @@
+[Unit]
+Description=Waybar status bar
+Documentation=https://github.com/Alexays/Waybar/wiki/
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# No ExecStartPre sleep — that made Super+Shift+Space feel laggy.
+# After=graphical-session.target is enough for login ordering.
+ExecStart=/usr/bin/waybar
+ExecReload=/bin/kill -SIGUSR2 $MAINPID
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=hyprluggage-session.target

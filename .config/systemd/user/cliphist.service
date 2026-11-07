@@ -1,0 +1,14 @@
+[Unit]
+Description=cliphist clipboard watcher (wl-paste --watch)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# Leave unwrapped so CLIPBOARD_STATE=sensitive reaches cliphist (password managers).
+ExecStart=/usr/bin/wl-paste --watch cliphist store
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=hyprluggage-session.target

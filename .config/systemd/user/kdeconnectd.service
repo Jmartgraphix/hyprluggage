@@ -1,0 +1,14 @@
+[Unit]
+Description=KDE Connect daemon
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.kde.kdeconnect
+ExecStart=/usr/bin/kdeconnectd
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=hyprluggage-session.target

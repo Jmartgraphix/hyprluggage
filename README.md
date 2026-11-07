@@ -222,6 +222,7 @@ The installer will:
 3. **Set up system services:**
    - MPD (music daemon)
    - Greetd (display manager; session via `hyprluggage-session`, which runs hw-ensure then Hyprland). The installer asks about autologin; desktop defaults to yes, laptop to the greeter. Autologin stores keyring secrets unencrypted. A password login unlocks an encrypted keyring with that password. Idle lock stays off.
+   - `hyprluggage-session.target` — Waybar, Mako, swayosd, awww, clipboard helpers, polkit agent, KDE Connect (restart on crash; `WantedBy=graphical-session.target`)
    - wayvnc + clipboard bridge, and sunshine-mod-bridge when Sunshine is installed (user units)
    - sshd, only if you say yes. Password login is then turned off; use an SSH key. A non-interactive install leaves the service as it is.
    - ufw allow rules for SSH, and for LocalSend, KDE Connect, and Steam Remote Play from the connected LAN. Port 5900 is left to a source-limited Gatwy rule.
@@ -229,7 +230,6 @@ The installer will:
      - **Desktop:** UFW stays inactive unless it was already active
    - **Laptop only:** logind lid ignore drop-in, `video` group, `power-profiles-daemon`, hypridle + battery notifications, hybrid lid close (suspend undocked / clamshell when docked)
    - **NVIDIA + laptop:** enable nvidia suspend/resume/hibernate units when present
-   - User services for autostart
 
 4. **Deploy dotfiles:**
    - Symlink all configs to `~/.config/`

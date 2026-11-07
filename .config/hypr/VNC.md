@@ -5,8 +5,8 @@ Super/Win is often swallowed by the local OS, browser, or Moonlight client. Hypr
 ## How it works
 1. **wayvnc** shares the Hyprland session (systemd user: `wayvnc.service`).
 2. **Ctrl+Alt twins stay loaded** for the whole session (`hypr-vnc-mod ensure` at login sources `vnc-mod-generated.lua`). Reloading Hyprland on each Gatwy connect was breaking wayvnc’s virtual keyboard.
-3. On a real VNC client connect, **wayvnc-clipboard-bridge** pauses `cliphist` / `wl-clip-persist` and marks a VNC holder (no compositor reload).
-4. On VNC disconnect: restores clipboard helpers. Twins stay loaded.
+3. On a real VNC client connect, **wayvnc-clipboard-bridge** pauses the `cliphist` / `wl-clip-persist` **user units** and marks a VNC holder (no compositor reload).
+4. On VNC disconnect: starts those clipboard units again. Twins stay loaded.
 5. **Sunshine** (Moonlight): `sunshine-mod-bridge` marks/clears a Sunshine holder the same way. Same Ctrl+Alt chords.
 
 ## Keys (remote)

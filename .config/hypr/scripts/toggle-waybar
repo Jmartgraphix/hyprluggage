@@ -1,7 +1,9 @@
 #!/bin/bash
+set -euo pipefail
 
-if pgrep -x waybar >/dev/null; then
-  pkill -x waybar
+# --no-block so the keybind returns immediately (matches old pkill/uwsm feel).
+if systemctl --user is-active --quiet waybar.service; then
+  systemctl --user stop --no-block waybar.service
 else
-  uwsm-app -- waybar >/dev/null 2>&1 &
+  systemctl --user start --no-block waybar.service
 fi

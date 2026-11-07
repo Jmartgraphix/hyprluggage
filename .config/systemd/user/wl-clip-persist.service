@@ -1,0 +1,13 @@
+[Unit]
+Description=Persist Wayland clipboard across app closes (wl-clip-persist)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/wl-clip-persist --clipboard regular
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=hyprluggage-session.target

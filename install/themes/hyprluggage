@@ -381,6 +381,20 @@ cmd_doctor() {
 		check_user_unit sunshine-mod-bridge.service
 	fi
 
+	# Session daemons bundle (waybar/mako/awww/…); warn if Hyprland is up but target is down.
+	local session_unit=hyprluggage-session.target
+	if systemctl --user is-enabled --quiet "$session_unit" 2>/dev/null; then
+		if systemctl --user is-active --quiet "$session_unit" 2>/dev/null; then
+			doctor_ok "unit $session_unit"
+		elif pgrep -x Hyprland >/dev/null 2>&1; then
+			doctor_warn "unit $session_unit enabled but inactive while Hyprland is running"
+		else
+			doctor_warn "unit $session_unit enabled but inactive"
+		fi
+	else
+		doctor_warn "unit $session_unit not enabled"
+	fi
+
 	# ── wayvnc config ────────────────────────────────────────────────────
 	local wayvnc_cfg="${XDG_CONFIG_HOME:-$HOME/.config}/wayvnc/config"
 	if [[ -f "$wayvnc_cfg" ]]; then

@@ -1,0 +1,14 @@
+[Unit]
+Description=KDE Connect indicator
+After=graphical-session.target kdeconnectd.service
+Wants=kdeconnectd.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kdeconnect-indicator
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=hyprluggage-session.target

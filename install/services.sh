@@ -104,7 +104,7 @@ fi
 # Disable blueman/nm-applet (waybar handles these). Hide CachyOS Hello from
 # /etc/skel autostart so a fresh ISO user does not get it on every login.
 mkdir -p ~/.config/autostart
-for app in blueman nm-applet cachyos-hello; do
+for app in blueman nm-applet cachyos-hello org.kde.kdeconnect.daemon org.kde.kdeconnect.nonplasma org.kde.kdeconnect.app; do
     if [[ -f "/etc/xdg/autostart/${app}.desktop" || -f "$HOME/.config/autostart/${app}.desktop" || -f "/etc/skel/.config/autostart/${app}.desktop" ]]; then
         printf '[Desktop Entry]\nHidden=true\n' >"$HOME/.config/autostart/${app}.desktop"
         ok "Disabled ${app} autostart"
@@ -378,6 +378,58 @@ EOF
         # Still try to enable greetd if it's installed
         sudo systemctl enable --now greetd &>/dev/null && ok "greetd (no config)" || warn "greetd failed"
     fi
+fi
+
+# ── Session daemons (waybar, mako, swayosd, awww, clipboard, polkit, KDE Connect)
+# WantedBy=graphical-session.target only — never default.target (breaks UWSM/greetd).
+SESSION_UNIT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+SESSION_UNIT_SRC="${DOTFILES:-}/.config/systemd/user"
+if [[ -z "${DOTFILES:-}" ]]; then
+    SESSION_UNIT_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.config/systemd/user"
+fi
+if [[ -d "$SESSION_UNIT_SRC" ]]; then
+    mkdir -p "$SESSION_UNIT_DIR"
+    for f in hyprluggage-session.target waybar.service mako.service cliphist.service \
+        wl-clip-persist.service awww.service swayosd.service polkit-gnome-agent.service \
+        kdeconnectd.service kdeconnect-indicator.service; do
+        if [[ -f "$SESSION_UNIT_SRC/$f" ]]; then
+            ln -sfn "$SESSION_UNIT_SRC/$f" "$SESSION_UNIT_DIR/$f"
+        fi
+    done
+fi
+if systemctl --user daemon-reload &>/dev/null; then
+    session_units=(
+        hyprluggage-session.target
+        waybar.service
+        mako.service
+        cliphist.service
+        wl-clip-persist.service
+        awww.service
+        swayosd.service
+        polkit-gnome-agent.service
+        kdeconnectd.service
+        kdeconnect-indicator.service
+    )
+    # Drop distro WantedBy=graphical-session links (disable may delete our unit
+    # symlinks — restore them before enable).
+    systemctl --user disable waybar.service mako.service cliphist.service &>/dev/null || true
+    for f in waybar.service mako.service cliphist.service; do
+        [[ -f "$SESSION_UNIT_SRC/$f" ]] && ln -sfn "$SESSION_UNIT_SRC/$f" "$SESSION_UNIT_DIR/$f"
+    done
+    systemctl --user daemon-reload &>/dev/null || true
+    systemctl --user enable "${session_units[@]}" &>/dev/null \
+        && ok "hyprluggage-session (graphical session daemons)" \
+        || warn "hyprluggage-session: enable failed (after login: systemctl --user enable hyprluggage-session.target)"
+    if systemctl --user is-active -q graphical-session.target || pgrep -x Hyprland >/dev/null 2>&1; then
+        # Drop exec-once leftovers so units own the processes
+        /usr/bin/killall -q waybar mako swayosd-server awww-daemon wl-clip-persist \
+            polkit-gnome-authentication-agent-1 kdeconnectd kdeconnect-indicator 2>/dev/null || true
+        /usr/bin/pkill -f 'wl-paste --watch cliphist store' 2>/dev/null || true
+        sleep 0.4
+        systemctl --user start hyprluggage-session.target &>/dev/null || true
+    fi
+else
+    warn "hyprluggage-session: systemd --user not available yet (enable after first graphical login)"
 fi
 
 # ── wayvnc + VNC Hyprland mod (browser remote / Gatwy) ─────────────────

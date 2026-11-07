@@ -1,0 +1,13 @@
+[Unit]
+Description=SwayOSD server (volume/brightness OSD)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swayosd-server
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=hyprluggage-session.target
