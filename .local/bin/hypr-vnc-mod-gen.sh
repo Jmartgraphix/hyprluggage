@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
-# Unique Ctrl+Alt (+Shift) twin for every SUPER bind (Gatwy/noVNC).
+# Unique Ctrl+Alt (+Shift) twin for every SUPER hl.bind (Gatwy/noVNC).
+# Reads Lua sources; emits only vnc-mod-generated.lua.
 set -euo pipefail
-OUT="${1:-$HOME/.config/hypr/vnc-mod-generated.conf}"
+OUT="${1:-$HOME/.config/hypr/vnc-mod-generated.lua}"
 SOURCES=(
-  "$HOME/.config/hypr/bindings.conf"
-  "$HOME/.config/hypr/tiling.conf"
-  "$HOME/.config/hypr/media.conf"
-  "$HOME/.config/hypr/monitors.conf"
+  "$HOME/.config/hypr/bindings.lua"
+  "$HOME/.config/hypr/tiling.lua"
+  "$HOME/.config/hypr/media.lua"
+  "$HOME/.config/hypr/monitors.lua"
 )
 python3 - "$OUT" "${SOURCES[@]}" << 'PY'
 import re, sys
 from pathlib import Path
+from collections import defaultdict
 
 out_path = Path(sys.argv[1])
+if out_path.suffix != ".lua":
+    out_path = out_path.with_suffix(".lua")
 sources = [Path(p) for p in sys.argv[2:]]
 
 def norm_tok(t: str) -> str:
@@ -22,16 +26,6 @@ def norm_tok(t: str) -> str:
     if u in ("SUPER", "ALT", "SHIFT"):
         return u
     return u
-
-def parse_bind_line(line: str):
-    m = re.match(r"^(\s*)(bind[a-z]*)\s*=\s*([^,]*),(.*)$", line.rstrip("\n"), re.I)
-    if not m:
-        return None
-    indent, kw, mods_raw, rest = m.groups()
-    tokens = [t for t in re.split(r"\s+", mods_raw.strip()) if t]
-    if not any(norm_tok(t) == "SUPER" for t in tokens):
-        return None
-    return indent, kw, tokens, rest
 
 def orig_mod_key(tokens) -> str:
     n = {norm_tok(t) for t in tokens}
@@ -57,9 +51,6 @@ def super_priority(tokens) -> int:
         return 30
     return 10
 
-def key_token(rest: str) -> str:
-    return rest.split(",")[0].strip()
-
 def preferred_vnc(tokens):
     extras = {norm_tok(t) for t in tokens} - {"SUPER"}
     mods = ["CTRL", "ALT"]
@@ -67,18 +58,188 @@ def preferred_vnc(tokens):
         mods.append("SHIFT")
     return mods
 
+def parse_chord(chord: str):
+    """Split 'SUPER + SHIFT + LEFT' into mod tokens + key."""
+    parts = [p.strip() for p in chord.split("+")]
+    parts = [p for p in parts if p]
+    if not parts:
+        return None
+    mods_known = {"SUPER", "CTRL", "CONTROL", "ALT", "SHIFT"}
+    tokens = []
+    key = None
+    for i, p in enumerate(parts):
+        if norm_tok(p) in ("SUPER", "CTRL", "ALT", "SHIFT") and i < len(parts) - 1:
+            tokens.append(p)
+        else:
+            key = "+".join(parts[i:]).strip()  # allow code:10 etc as single key
+            break
+    if key is None:
+        return None
+    if not any(norm_tok(t) == "SUPER" for t in tokens):
+        return None
+    return tokens, key
+
+def find_hl_binds(text: str):
+    """Yield (chord, dispatch_expr, opts_expr|None, src_snippet) for each hl.bind call."""
+    i = 0
+    n = len(text)
+    while True:
+        j = text.find("hl.bind(", i)
+        if j < 0:
+            break
+        # skip comments
+        line_start = text.rfind("\n", 0, j) + 1
+        if text[line_start:j].lstrip().startswith("--"):
+            i = j + 8
+            continue
+        k = j + len("hl.bind(")
+        # first arg must be a string
+        while k < n and text[k] in " \t\n":
+            k += 1
+        if k >= n or text[k] != '"':
+            i = j + 8
+            continue
+        k += 1
+        chord_chars = []
+        while k < n:
+            c = text[k]
+            if c == "\\" and k + 1 < n:
+                chord_chars.append(text[k + 1])
+                k += 2
+                continue
+            if c == '"':
+                k += 1
+                break
+            chord_chars.append(c)
+            k += 1
+        chord = "".join(chord_chars)
+        while k < n and text[k] in " \t\n":
+            k += 1
+        if k >= n or text[k] != ",":
+            i = j + 8
+            continue
+        k += 1
+        while k < n and text[k] in " \t\n":
+            k += 1
+        # parse dispatch expression with nested parens/braces/brackets/strings
+        start_disp = k
+        depth_paren = 0
+        depth_brace = 0
+        depth_brack = 0
+        in_str = None
+        while k < n:
+            c = text[k]
+            if in_str:
+                if c == "\\" and k + 1 < n:
+                    k += 2
+                    continue
+                if c == in_str:
+                    in_str = None
+                k += 1
+                continue
+            if c in ('"', "'"):
+                in_str = c
+                k += 1
+                continue
+            if c == "(":
+                depth_paren += 1
+            elif c == ")":
+                if depth_paren == 0 and depth_brace == 0 and depth_brack == 0:
+                    break
+                depth_paren -= 1
+            elif c == "{":
+                depth_brace += 1
+            elif c == "}":
+                depth_brace -= 1
+            elif c == "[":
+                depth_brack += 1
+            elif c == "]":
+                depth_brack -= 1
+            elif c == "," and depth_paren == 0 and depth_brace == 0 and depth_brack == 0:
+                break
+            k += 1
+        dispatch = text[start_disp:k].strip()
+        opts = None
+        while k < n and text[k] in " \t\n":
+            k += 1
+        if k < n and text[k] == ",":
+            k += 1
+            while k < n and text[k] in " \t\n":
+                k += 1
+            start_opts = k
+            depth_paren = depth_brace = depth_brack = 0
+            in_str = None
+            while k < n:
+                c = text[k]
+                if in_str:
+                    if c == "\\" and k + 1 < n:
+                        k += 2
+                        continue
+                    if c == in_str:
+                        in_str = None
+                    k += 1
+                    continue
+                if c in ('"', "'"):
+                    in_str = c
+                    k += 1
+                    continue
+                if c == "(":
+                    depth_paren += 1
+                elif c == ")":
+                    if depth_paren == 0 and depth_brace == 0 and depth_brack == 0:
+                        break
+                    depth_paren -= 1
+                elif c == "{":
+                    depth_brace += 1
+                elif c == "}":
+                    depth_brace -= 1
+                elif c == "[":
+                    depth_brack += 1
+                elif c == "]":
+                    depth_brack -= 1
+                k += 1
+            opts = text[start_opts:k].strip()
+        # consume closing )
+        while k < n and text[k] in " \t\n":
+            k += 1
+        end = k + 1 if k < n and text[k] == ")" else k
+        snippet = text[j:end].strip()
+        # collapse whitespace for comment
+        src = re.sub(r"\s+", " ", snippet)
+        yield chord, dispatch, opts, src
+        i = end
+
+def set_description(opts: str | None, force_desc: str | None) -> str | None:
+    if force_desc is None:
+        return opts
+    lit = '"' + force_desc.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    if not opts:
+        return "{ description = %s }" % lit
+    # replace existing description = "..." or insert into table
+    if re.search(r"description\s*=", opts):
+        return re.sub(
+            r'description\s*=\s*(?:"(?:\\.|[^"])*"|\'(?:\\.|[^\'])*\')',
+            f"description = {lit}",
+            opts,
+            count=1,
+        )
+    inner = opts.strip()
+    if inner.startswith("{") and inner.endswith("}"):
+        body = inner[1:-1].strip()
+        if body:
+            return "{ description = %s, %s }" % (lit, body)
+        return "{ description = %s }" % lit
+    return "{ description = %s }" % lit
+
 # (orig_mod_key, KEY.upper()) -> (mods, new_key|None, description|None)
-# new_key None = keep original key token
 EXPLICIT = {
-    # Space family — remapped; descriptions keep Super origin for keyhints search
-    ("SUPER", "SPACE"): (["CTRL", "ALT"], None, None),  # launcher
+    ("SUPER", "SPACE"): (["CTRL", "ALT"], None, None),
     ("SUPER SHIFT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "W", "Toggle waybar (Super+Shift+Space)"),
     ("SUPER CTRL", "SPACE"): (["CTRL", "ALT", "SHIFT"], "T", "Theme Matugen apply (Super+Ctrl+Space)"),
     ("SUPER ALT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "SPACE", "Theme wallpaper picker (Super+Alt+Space)"),
     ("SUPER CTRL SHIFT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "Y", "Theme switcher (Super+Ctrl+Shift+Space)"),
     ("SUPER CTRL ALT", "SPACE"): (["CTRL", "ALT", "SHIFT"], "G", "Theme random wallpaper (Super+Ctrl+Alt+Space)"),
 
-    # Apps / collide with Super-only or Super+Shift
     ("SUPER CTRL", "A"): (["CTRL", "ALT", "SHIFT"], "F6", "Gemini (VNC)"),
     ("SUPER CTRL", "B"): (["CTRL", "ALT", "SHIFT"], "B", "Power Profiles (VNC)"),
     ("SUPER ALT", "M"): (["CTRL", "ALT", "SHIFT"], "E", "EasyEffects (VNC)"),
@@ -90,23 +251,19 @@ EXPLICIT = {
     ("SUPER CTRL", "I"): (["CTRL", "ALT", "SHIFT"], "O", "Toggle Idle/Lock (VNC)"),
     ("SUPER CTRL", "N"): (["CTRL", "ALT", "SHIFT"], "F5", "Nightlight (VNC)"),
 
-    # Share
     ("SUPER SHIFT", "S"): (["CTRL", "ALT", "SHIFT"], "S", "Share clipboard (VNC)"),
     ("SUPER ALT", "S"): (["CTRL", "ALT", "SHIFT"], "F", "Share file (VNC)"),
     ("SUPER CTRL", "S"): (["CTRL", "ALT", "SHIFT"], "D", "Share folder (VNC)"),
 
-    # Wallpaper arrows
     ("SUPER ALT", "LEFT"): (["CTRL", "ALT", "SHIFT"], "left", "Theme previous wallpaper (Super+Alt+Left)"),
     ("SUPER ALT", "RIGHT"): (["CTRL", "ALT", "SHIFT"], "right", "Theme next wallpaper (Super+Alt+Right)"),
     ("SUPER ALT", "UP"): (["CTRL", "ALT", "SHIFT"], "up", "Theme wallpapers cycle (Super+Alt+Up)"),
 
-    # Move Super+Shift+arrows → vim keys on Shift tier
     ("SUPER SHIFT", "LEFT"): (["CTRL", "ALT", "SHIFT"], "H", "Move window left (VNC)"),
     ("SUPER SHIFT", "RIGHT"): (["CTRL", "ALT", "SHIFT"], "L", "Move window right (VNC)"),
     ("SUPER SHIFT", "UP"): (["CTRL", "ALT", "SHIFT"], "K", "Move window up (VNC)"),
     ("SUPER SHIFT", "DOWN"): (["CTRL", "ALT", "SHIFT"], "J", "Move window down (VNC)"),
 
-    # Workspace Super+Ctrl+arrows
     ("SUPER CTRL", "LEFT"): (["CTRL", "ALT", "SHIFT"], "comma", "Previous workspace (VNC)"),
     ("SUPER CTRL", "RIGHT"): (["CTRL", "ALT", "SHIFT"], "period", "Next workspace (VNC)"),
     ("SUPER CONTROL", "LEFT"): (["CTRL", "ALT", "SHIFT"], "comma", "Previous workspace (VNC)"),
@@ -114,71 +271,57 @@ EXPLICIT = {
 
     ("SUPER CTRL", "UP"): (["CTRL", "ALT", "SHIFT"], "Escape", "Reboot (VNC)"),
 
-    # Monitors / lock
     ("SUPER ALT", "H"): (["CTRL", "ALT", "SHIFT"], "F1", "Laptop screen off (VNC)"),
     ("SUPER ALT", "L"): (["CTRL", "ALT", "SHIFT"], "F2", "Laptop screen on (VNC)"),
     ("SUPER SHIFT", "L"): (["CTRL", "ALT", "SHIFT"], "F3", "Lock screen (VNC)"),
 
-    # Record / screen recording
     ("SUPER", "R"): (["CTRL", "ALT"], None, "Screen recording"),
     ("SUPER SHIFT", "R"): (["CTRL", "ALT", "SHIFT"], "R", "Screen recording + mic (VNC)"),
     ("SUPER ALT", "R"): (["CTRL", "ALT", "SHIFT"], "V", "Screen recording + mic + webcam (VNC)"),
 
-    # Tmux
     ("SUPER SHIFT", "RETURN"): (["CTRL", "ALT", "SHIFT"], "RETURN", "Attach tmux (VNC)"),
     ("SUPER ALT", "RETURN"): (["CTRL", "ALT", "SHIFT"], "apostrophe", "New tmux session (VNC)"),
-
-    # Volume-knob brightness is an ignore_mods handler in media.lua — do not
-    # twin Super/Super+Alt XF86Audio raise/lower (those chords double-fired).
 }
 
 candidates = []
 for src in sources:
     if not src.is_file():
         continue
-    for line in src.read_text(encoding="utf-8", errors="replace").splitlines():
-        parsed = parse_bind_line(line)
+    text = src.read_text(encoding="utf-8", errors="replace")
+    for chord, dispatch, opts, src_line in find_hl_binds(text):
+        parsed = parse_chord(chord)
         if not parsed:
             continue
-        indent, kw, tokens, rest = parsed
-        key = key_token(rest)
+        tokens, key = parsed
         if key.upper() in ("XF86AUDIORAISEVOLUME", "XF86AUDIOLOWERVOLUME"):
             continue
+        # skip multiline function() volume ignore_mods handlers (no Super chord twin needed)
+        if dispatch.lstrip().startswith("function"):
+            continue
         candidates.append({
-            "indent": indent, "kw": kw, "tokens": tokens, "rest": rest, "key": key,
-            "prio": super_priority(tokens), "src_line": line.strip(), "file": src.name,
+            "tokens": tokens,
+            "key": key,
+            "dispatch": dispatch,
+            "opts": opts,
+            "prio": super_priority(tokens),
+            "src_line": src_line,
+            "file": src.name,
             "orig_mod": orig_mod_key(tokens),
         })
 
 def chord_id(mods, key):
     return (tuple(mods), (key or "").upper())
 
-def apply_desc(kw, rest, new_key, force_desc):
-    parts = [p.strip() for p in rest.split(",")]
-    if not parts:
-        return rest
-    parts[0] = new_key if new_key is not None else parts[0]
-    if force_desc and kw.lower().startswith("bindd"):
-        dispatchers = {
-            "exec", "workspace", "movetoworkspace", "movefocus", "movewindow",
-            "swapwindow", "togglefloating", "fullscreen", "pseudo", "killactive",
-            "exit", "resizeactive", "bringactivetotop", "focusmonitor",
-        }
-        if len(parts) >= 2:
-            first = parts[1].split()[0].lower() if parts[1] else ""
-            if first in dispatchers:
-                parts.insert(1, force_desc)
-            else:
-                parts[1] = force_desc
-        else:
-            parts.append(force_desc)
-    return ", ".join(parts)
+def emit_keys(mods, key):
+    return " + ".join(list(mods) + [key])
+
+def L(s: str) -> str:
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 used = {}
 output = []
 failed = []
 
-# Pass 1: EXPLICIT first (reserve chords)
 explicit_items = []
 auto_items = []
 for c in candidates:
@@ -195,15 +338,16 @@ for c, (mods, key_ov, force_desc) in explicit_items:
         failed.append((c, f"explicit chord taken by {used[cid]}"))
         continue
     used[cid] = c["src_line"]
-    new_rest = apply_desc(c["kw"], c["rest"], new_key, force_desc)
+    opts = set_description(c["opts"], force_desc)
     output.append({
-        "line": f"{c['indent']}{c['kw']} = {' '.join(mods)}, {new_rest}",
+        "mods": mods,
+        "key": new_key,
+        "dispatch": c["dispatch"],
+        "opts": opts,
         "comment": c["src_line"],
         "note": f"{c['orig_mod']} + {c['key']} → {' '.join(mods)} + {new_key}",
-        "explicit": True,
     })
 
-# Pass 2: remaining by priority
 auto_items.sort(key=lambda c: (-c["prio"], c["file"], c["src_line"]))
 POOL = list("QZXPVMN1234567890")
 
@@ -212,7 +356,6 @@ for c in auto_items:
     new_key = c["key"]
     cid = chord_id(mods, new_key)
     if cid in used:
-        # try SHIFT tier same key
         mods2 = ["CTRL", "ALT", "SHIFT"]
         cid2 = chord_id(mods2, new_key)
         if cid2 not in used:
@@ -231,130 +374,24 @@ for c in auto_items:
                 failed.append((c, "no free chord"))
                 continue
     used[cid] = c["src_line"]
-    new_rest = apply_desc(c["kw"], c["rest"], new_key, None)
     note = None
     if new_key.upper() != c["key"].upper() or mods != preferred_vnc(c["tokens"]):
         note = f"{c['orig_mod']} + {c['key']} → {' '.join(mods)} + {new_key}"
     output.append({
-        "line": f"{c['indent']}{c['kw']} = {' '.join(mods)}, {new_rest}",
+        "mods": mods,
+        "key": new_key,
+        "dispatch": c["dispatch"],
+        "opts": c["opts"],
         "comment": c["src_line"],
         "note": note,
-        "explicit": False,
     })
 
-lines = [
-    "# AUTO-GENERATED by hypr-vnc-mod-gen.sh — do not edit",
-    f"# {len(output)} unique VNC binds | failed: {len(failed)}",
-    "# Super-only → Ctrl+Alt; Super+… → Ctrl+Alt+Shift or explicit remap (see notes).",
-    "# During VNC: Super+K / Ctrl+Alt+K shows only these (keyhints).",
-    "",
-]
-for o in output:
-    lines.append(f"# from: {o['comment']}")
-    if o.get("note"):
-        lines.append(f"# VNC: {o['note']}")
-    lines.append(o["line"])
-    lines.append("")
-
-if failed:
-    lines.append("# --- FAILED ---")
-    for c, why in failed:
-        lines.append(f"# FAIL ({why}): {c['src_line'] if isinstance(c, dict) else c}")
-
-out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-print(f"wrote {out_path}: {len(output)} binds, {len(failed)} failed")
-for c, why in failed:
-    print(" FAIL", why, c.get("src_line") if isinstance(c, dict) else c)
-
-# Also emit Lua for Hyprland 0.55+ (hyprland.lua loads vnc-mod-active.lua)
-lua_path = out_path.with_suffix(".lua")
-DIR = {"l":"left","r":"right","u":"up","d":"down","left":"left","right":"right","up":"up","down":"down"}
-
-def L(s):
-    return '"' + s.replace('\\','\\\\').replace('"','\\"') + '"'
-
-VAR_NAMES = [
-    ("$terminal", "terminal"),
-    ("$browser2", "browser2"),
-    ("$browser", "browser"),
-    ("$webapp", "webapp"),
-    ("$focus", "focus"),
-    ("$osdclient", "osdclient"),
-    ("$rofiDir", "rofiDir"),
-    ("$scrDir", "scrDir"),
-    ("$HOME", "home"),
-]
-
-def exec_cmd(params: str) -> str:
-    params = params.strip().replace("~/", "$HOME/")
-    fmt = params
-    args = []
-    i = 0
-    while i < len(fmt):
-        hit = None
-        for token, var in VAR_NAMES:
-            if fmt.startswith(token, i):
-                hit = (token, var)
-                break
-        if hit:
-            token, var = hit
-            fmt = fmt[:i] + "%s" + fmt[i + len(token):]
-            args.append(var)
-            i += 2
-        else:
-            i += 1
-    if args:
-        return f"hl.dsp.exec_cmd(string.format({L(fmt)}, {', '.join(args)}))"
-    return f"hl.dsp.exec_cmd({L(params)})"
-
-def dsp(name, params):
-    name=name.strip().rstrip(','); params=params.strip().rstrip(',')
-    if name=='exec': return exec_cmd(params)
-    if name=='killactive': return 'hl.dsp.window.close()'
-    if name=='fullscreen': return 'hl.dsp.window.fullscreen()'
-    if name=='togglefloating': return 'hl.dsp.window.float()'
-    if name=='pseudo': return 'hl.dsp.window.pseudo()'
-    if name=='cyclenext': return 'hl.dsp.window.cycle_next()'
-    if name=='bringactivetotop': return 'hl.dsp.window.alter_zorder({ mode = "top" })'
-    if name=='movefocus':
-        return f'hl.dsp.focus({{ direction = {L(DIR.get(params.lower(), params))} }})'
-    if name=='swapwindow':
-        return f'hl.dsp.window.swap({{ direction = {L(DIR.get(params.lower(), params))} }})'
-    if name=='workspace':
-        if re.fullmatch(r'-?\d+', params):
-            return f'hl.dsp.focus({{ workspace = {params} }})'
-        return f'hl.dsp.focus({{ workspace = {L(params)} }})'
-    if name=='movetoworkspace':
-        if re.fullmatch(r'-?\d+', params):
-            return f'hl.dsp.window.move({{ workspace = {params} }})'
-        return f'hl.dsp.window.move({{ workspace = {L(params)} }})'
-    if name=='resizeactive':
-        a,b = params.split()[:2]
-        return f'hl.dsp.window.resize({{ x = {a}, y = {b}, relative = true }})'
-    if name=='layoutmsg':
-        return f'hl.dsp.layout({L(params)})'
-    if name=='movewindow':
-        if params.lower() in DIR or params.lower() in ('l','r','u','d'):
-            return f'hl.dsp.window.move({{ direction = {L(DIR.get(params.lower(), params))} }})'
-        return 'hl.dsp.window.drag()'
-    if name=='resizewindow':
-        return 'hl.dsp.window.resize()'
-    if params:
-        return f'hl.dsp.exec_cmd({L("hyprctl dispatch "+name+" "+params)})'
-    return f'hl.dsp.exec_cmd({L("hyprctl dispatch "+name)})'
-
-def flags_from(kw):
-    body=kw.lower()[4:]
-    return {
-        'd': 'd' in body,
-        'repeating': 'e' in body,
-        'locked': 'l' in body,
-        'mouse': 'm' in body,
-    }
-
+# Keep the same locals preamble as hand-written sources expect
 lua_lines = [
     "-- AUTO-GENERATED by hypr-vnc-mod-gen.sh — do not edit",
     f"-- {len(output)} unique VNC binds | failed: {len(failed)}",
+    "-- Super-only → Ctrl+Alt; Super+… → Ctrl+Alt+Shift or explicit remap (see notes).",
+    "-- During VNC: Super+K / Ctrl+Alt+K shows only these (keyhints).",
     "",
     'local home = os.getenv("HOME")',
     'local terminal = "kitty"',
@@ -367,76 +404,47 @@ lua_lines = [
     'local scrDir = home .. "/.config/hypr/scripts"',
     "",
 ]
+
 for o in output:
-    line = o["line"]
-    m = re.match(r"^(\s*)(bind[a-z]*)\s*=\s*([^,]*),\s*(.*)$", line, re.I)
-    if not m:
-        continue
-    indent, kw, mods_raw, rest = m.groups()
-    parts = [p.strip() for p in rest.split(",")]
-    f = flags_from(kw)
-    if f['d']:
-        key, desc, disp = parts[0], parts[1], parts[2]
-        params = ",".join(parts[3:]).strip()
-    else:
-        key, desc, disp = parts[0], None, parts[1]
-        params = ",".join(parts[2:]).strip()
-    toks = []
-    for t in mods_raw.split():
-        u = t.upper()
-        if u in ("CONTROL", "CTRL"):
-            toks.append("CTRL")
-        elif u in ("SUPER", "ALT", "SHIFT"):
-            toks.append(u)
-        else:
-            toks.append(t)
-    keys = " + ".join(toks + [key]) if toks else key
-    d = dsp(disp, params)
-    flags = []
-    if desc is not None:
-        flags.append(f"description = {L(desc)}")
-    if f['repeating']:
-        flags.append("repeating = true")
-    if f['locked']:
-        flags.append("locked = true")
-    if f['mouse']:
-        flags.append("mouse = true")
-    if o.get("comment"):
-        lua_lines.append(f"-- from: {o['comment']}")
+    keys = emit_keys(o["mods"], o["key"])
+    lua_lines.append(f"-- from: {o['comment']}")
     if o.get("note"):
         lua_lines.append(f"-- VNC: {o['note']}")
-    if flags:
-        lua_lines.append(f"hl.bind({L(keys)}, {d}, {{ {', '.join(flags)} }})")
+    if o["opts"]:
+        lua_lines.append(f"hl.bind({L(keys)}, {o['dispatch']}, {o['opts']})")
     else:
-        lua_lines.append(f"hl.bind({L(keys)}, {d})")
+        lua_lines.append(f"hl.bind({L(keys)}, {o['dispatch']})")
     lua_lines.append("")
 
-lua_path.write_text("\n".join(lua_lines) + "\n", encoding="utf-8")
-print(f"wrote {lua_path}: {sum(1 for l in lua_lines if l.startswith('hl.bind'))} lua binds")
+if failed:
+    lua_lines.append("-- --- FAILED ---")
+    for c, why in failed:
+        lua_lines.append(f"-- FAIL ({why}): {c['src_line']}")
 
-# verify no collisions + important chords
-from collections import defaultdict
+out_path.write_text("\n".join(lua_lines) + "\n", encoding="utf-8")
+print(f"wrote {out_path}: {len(output)} binds, {len(failed)} failed")
+for c, why in failed:
+    print(" FAIL", why, c.get("src_line") if isinstance(c, dict) else c)
+
 by = defaultdict(list)
-text = out_path.read_text()
-for line in text.splitlines():
-    m = re.match(r"\s*bind[a-z]*\s*=\s*([^,]+),\s*([^,]+),(.*)$", line, re.I)
-    if m:
-        by[(m.group(1).strip().upper(), m.group(2).strip().upper())].append(line.strip()[:100])
+for o in output:
+    by[chord_id(o["mods"], o["key"])].append(emit_keys(o["mods"], o["key"]))
 cols = {k: v for k, v in by.items() if len(v) > 1}
 print(f"collisions: {len(cols)}")
 for k, v in cols.items():
     print(k, v)
 
+text = out_path.read_text()
 print("\nKey map:")
 for label, pat in [
-    ("Launcher", r"CTRL ALT, SPACE,"),
-    ("Browser", r"CTRL ALT, B,"),
+    ("Launcher", r'CTRL \+ ALT \+ SPACE'),
+    ("Browser", r'CTRL \+ ALT \+ B"'),
     ("Theme switcher", r"Theme switcher"),
     ("Matugen", r"Theme Matugen"),
     ("Wall picker", r"Theme wallpaper picker"),
     ("Random wallpaper", r"Theme random wallpaper"),
     ("Theme browse", r"Theme browse"),
-    ("Waybar", r"Toggle waybar|toggle-waybar"),
+    ("Waybar", r"Toggle waybar"),
     ("Gemini", r"Gemini \(VNC\)"),
     ("EasyEffects", r"EasyEffects \(VNC\)"),
     ("Wall prev", r"Theme previous wallpaper"),
@@ -444,6 +452,9 @@ for label, pat in [
     ("Lock", r"Lock screen \(VNC\)"),
     ("Reboot", r"Reboot \(VNC\)"),
 ]:
-    hits = [ln.strip() for ln in text.splitlines() if re.search(pat, ln, re.I) and not ln.strip().startswith("#")]
+    hits = [ln.strip() for ln in text.splitlines() if re.search(pat, ln) and ln.strip().startswith("hl.bind")]
+    # also match description lines via previous comment or inline
+    if not hits:
+        hits = [ln.strip() for ln in text.splitlines() if re.search(pat, ln) and not ln.strip().startswith("-- ---")]
     print(f"  {label}: {hits[0][:95] if hits else 'MISSING'}")
 PY

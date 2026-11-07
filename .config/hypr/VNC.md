@@ -6,7 +6,7 @@ Super/Win is often swallowed by the local OS, browser, or Moonlight client. Hypr
 1. **wayvnc** shares the Hyprland session (systemd user: `wayvnc.service`).
 2. On a real VNC client connect, **wayvnc-clipboard-bridge**:
    - pauses `cliphist` / `wl-clip-persist` (avoids Wayland data-device crashes)
-   - runs `hypr-vnc-mod apply vnc` → loads `vnc-mod-generated.conf` via `vnc-mod-active.conf`
+   - runs `hypr-vnc-mod apply vnc` → loads `vnc-mod-generated.lua` via `vnc-mod-active.lua`
 3. On VNC disconnect: restores clipboard helpers and drops the VNC hold. Hyprland reloads only if Sunshine is also idle.
 4. **Sunshine** (Moonlight): `sunshine-mod-bridge` watches GameStream `/serverinfo` and runs `hypr-vnc-mod apply sunshine` while a stream is busy, then `clear sunshine` when it goes free. Same Ctrl+Alt twins as VNC.
 
@@ -40,7 +40,7 @@ systemctl --user enable --now sunshine-mod-bridge   # if Sunshine/Moonlight is i
 
 After changing Super binds:
 ```bash
-hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
+hypr-vnc-mod generate   # refresh vnc-mod-generated.lua from bindings/tiling/media/monitors.lua
 # next VNC or Sunshine apply will also regenerate
 ```
 
@@ -48,10 +48,10 @@ hypr-vnc-mod generate   # refresh vnc-mod-generated.conf
 | Path | Role |
 |------|------|
 | `~/.local/bin/hypr-vnc-mod` | apply / clear / generate / ensure (`vnc` or `sunshine` holders) |
-| `~/.local/bin/hypr-vnc-mod-gen.sh` | generator |
+| `~/.local/bin/hypr-vnc-mod-gen.sh` | generator (reads Lua Super binds) |
 | `~/.local/bin/sunshine-mod-bridge.sh` | load twins while a Moonlight stream is busy |
-| `~/.config/hypr/vnc-mod-generated.conf` | committed seed map |
-| `~/.local/state/hyprluggage/vnc-mod-active.conf` | runtime toggle (created by `ensure` / apply / clear; outside stow so git stays clean) |
+| `~/.config/hypr/vnc-mod-generated.lua` | committed seed map |
+| `~/.local/state/hyprluggage/vnc-mod-active.lua` | runtime toggle (created by `ensure` / apply / clear; outside stow so git stays clean) |
 | `~/.config/wayvnc/config` | listen `0.0.0.0:5900` |
 
 `install/services.sh` runs `hypr-vnc-mod ensure` so the active stub exists before Hyprland sources it.

@@ -20,11 +20,9 @@ fi
 
 HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
 GENERATED="$HYPR_DIR/vnc-mod-generated.lua"
-GENERATED_CONF="$HYPR_DIR/vnc-mod-generated.conf"
 # Outside the stowed ~/.config/hypr tree so apply/clear never dirties the git repo
 ACTIVE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
 ACTIVE="$ACTIVE_DIR/vnc-mod-active.lua"
-ACTIVE_CONF="$ACTIVE_DIR/vnc-mod-active.conf"
 STATE_DIR="${XDG_RUNTIME_DIR}/wayvnc-vncmod"
 STATE_FILE="$STATE_DIR/active"
 HOLDERS_DIR="$STATE_DIR/holders"
@@ -35,9 +33,6 @@ write_active_empty() {
   cat > "$ACTIVE" << 'INNER'
 -- Managed by hypr-vnc-mod — empty when no remote session (no extra binds)
 INNER
-  cat > "$ACTIVE_CONF" << 'INNER'
-# Managed by hypr-vnc-mod — empty when no remote session (no extra binds)
-INNER
 }
 
 write_active_source() {
@@ -45,10 +40,6 @@ write_active_source() {
   cat > "$ACTIVE" << INNER
 -- Managed by hypr-vnc-mod — loaded while VNC or Sunshine clients are connected
 dofile("$GENERATED")
-INNER
-  cat > "$ACTIVE_CONF" << INNER
-# Managed by hypr-vnc-mod — loaded while VNC or Sunshine clients are connected
-source = $GENERATED_CONF
 INNER
 }
 
@@ -122,8 +113,8 @@ cmd_generate() {
     echo "missing generator: $GEN" >&2
     return 1
   fi
-  # Generator still reads .conf bind sources; emits both .conf seed and .lua for Hyprland
-  "$GEN" "$GENERATED_CONF"
+  # Generator reads Lua Super binds; emits vnc-mod-generated.lua only
+  "$GEN" "$GENERATED"
 }
 
 cmd_apply() {

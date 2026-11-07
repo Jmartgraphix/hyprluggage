@@ -19,6 +19,7 @@ hl.bind("SUPER + D", hl.dsp.exec_cmd("uwsm app -- discord"), { description = "Di
 hl.bind("SUPER + O", hl.dsp.exec_cmd("obsidian # --disable-gpu"), { description = "obsidian" })
 hl.bind("SUPER + slash", hl.dsp.exec_cmd("uwsm app -- bitwarden-desktop"), { description = "Passwords" })
 hl.bind("SUPER + C", hl.dsp.exec_cmd("uwsm app -- cursor.desktop"), { description = "Cursor" })
+hl.bind("SUPER + ALT + C", hl.dsp.exec_cmd("kitty --title hyprluggage-calc -e hyprmath"), { description = "Calculator" })
 hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd(string.format("%s -e lazydocker", terminal)), { description = "Docker" })
 hl.bind("ALT + slash", hl.dsp.exec_cmd(string.format("%s -e btop", terminal)), { description = "Activity" })
 hl.bind("ALT + M", hl.dsp.exec_cmd(string.format("%s -e rmpc", terminal)), { description = "Music" })
