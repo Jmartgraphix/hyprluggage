@@ -41,17 +41,25 @@ sudo pacman -Syu --noconfirm --needed git stow gum
 echo
 if [[ -d "$DEST/.git" ]]; then
     echo -e "${DIM}  Updating hyprluggage...${RESET}"
+    git -C "$DEST" fetch origin --tags
     git -C "$DEST" pull --ff-only || true
 else
     echo -e "${DIM}  Cloning from github.com/${REPO}...${RESET}"
     rm -rf "$DEST"
     git clone "https://github.com/${REPO}.git" "$DEST"
+    git -C "$DEST" fetch origin --tags
 fi
 
-# Switch branch if needed (default remote branch is master)
+# Pin to latest v* tag when present (HYPRLUGGAGE_BRANCH still overrides).
 if [[ "$BRANCH" != "master" ]]; then
     git -C "$DEST" fetch origin "$BRANCH"
     git -C "$DEST" checkout "$BRANCH"
+else
+    latest_tag=$(git -C "$DEST" tag -l 'v*' --sort=-v:refname | head -1 || true)
+    if [[ -n "$latest_tag" ]]; then
+        echo -e "${DIM}  Checking out release $latest_tag...${RESET}"
+        git -C "$DEST" checkout --detach "$latest_tag"
+    fi
 fi
 
 # Verify clone worked

@@ -190,4 +190,7 @@ ask_applications() {
 step "Installing packages"
 setup_aur
 do_install "${packages[@]}"
-ask_applications
+# Update/rollback refresh skips the optional apps prompt.
+if [[ "${HYPRLUGGAGE_REFRESH:-}" != "1" ]]; then
+	ask_applications
+fi

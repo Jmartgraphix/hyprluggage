@@ -288,6 +288,9 @@ hyprluggage reload          # re-apply current
 hyprluggage current         # show current theme
 hyprluggage fix             # fix broken symlinks
 hyprluggage doctor          # health report (read-only)
+hyprluggage update          # move to the latest v* release tag
+hyprluggage update v3.0.0   # move to an explicit tag
+hyprluggage rollback        # undo the last update (one step)
 hyprluggage browse          # browse & import Omarchy themes
 hyprluggage import <url>    # import theme from GitHub
 hyprluggage tui             # interactive theme browser
@@ -297,6 +300,17 @@ hyprluggage help            # show help
 ```
 
 Or press `Super + Ctrl + Shift + Space` for the theme picker.
+
+### Updating Hyprluggage
+
+Releases are git tags (`vMAJOR.MINOR.PATCH`), matching the CLI `VERSION`. `hyprluggage update` fetches tags, checks out the latest (or an explicit tag), records the previous commit for one-step undo, then refreshes core packages and stow — no interactive installer prompts.
+
+```bash
+hyprluggage update          # latest v* tag
+hyprluggage rollback        # back to the previous ref
+```
+
+To cut a release: bump `VERSION` in `install/themes/hyprluggage`, commit, then `git tag -a vX.Y.Z -m "…" && git push origin vX.Y.Z`. Tag before risky tree changes so rollback has a safe landing.
 
 ### Updating Cursor
 

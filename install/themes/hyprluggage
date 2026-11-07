@@ -439,12 +439,191 @@ cmd_doctor() {
 		fi
 	fi
 
+	# ── Git / tags ───────────────────────────────────────────────────────
+	local repo describe latest_tag head_sha latest_sha
+	repo=$(resolve_repo 2>/dev/null || true)
+	if [[ -n "$repo" && -d "$repo/.git" ]]; then
+		describe=$(git -C "$repo" describe --tags --always 2>/dev/null || echo "unknown")
+		doctor_ok "git $describe"
+		if [[ -f "$state_dir/current-ref" ]]; then
+			doctor_ok "current-ref $(tr -d '[:space:]' <"$state_dir/current-ref")"
+		fi
+		latest_tag=$(latest_version_tag "$repo" || true)
+		if [[ -n "$latest_tag" ]]; then
+			head_sha=$(git -C "$repo" rev-parse HEAD 2>/dev/null || true)
+			latest_sha=$(git -C "$repo" rev-parse "$latest_tag^{commit}" 2>/dev/null || true)
+			if [[ -n "$head_sha" && -n "$latest_sha" && "$head_sha" != "$latest_sha" ]]; then
+				doctor_warn "not on latest tag $latest_tag (run: hyprluggage update)"
+			else
+				doctor_ok "on latest tag $latest_tag"
+			fi
+		else
+			doctor_warn "no v* release tags found"
+		fi
+	else
+		doctor_warn "git repo not found for tag checks"
+	fi
+
 	echo ""
 	if [[ "$doctor_errors" -gt 0 ]]; then
 		err "doctor found $doctor_errors problem(s)"
 		exit 1
 	fi
 	ok "doctor found no errors"
+}
+
+# ── Update / rollback ────────────────────────────────────────────────────
+
+resolve_repo() {
+	local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
+	local dir
+	if [[ -f "$state_dir/dir" ]]; then
+		dir=$(tr -d '\n' <"$state_dir/dir")
+		if [[ -d "$dir/.git" ]]; then
+			printf '%s\n' "$dir"
+			return 0
+		fi
+	fi
+	if [[ -d "$DOTFILES/.git" ]]; then
+		printf '%s\n' "$DOTFILES"
+		return 0
+	fi
+	err "cannot find hyprluggage git repo (expected $state_dir/dir or $DOTFILES)"
+	return 1
+}
+
+repo_state_dir() {
+	printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
+}
+
+require_clean_worktree() {
+	local repo="$1"
+	if ! git -C "$repo" diff-index --quiet HEAD -- 2>/dev/null; then
+		err "worktree has tracked changes; commit or stash before update/rollback"
+		return 1
+	fi
+	return 0
+}
+
+latest_version_tag() {
+	local repo="$1"
+	git -C "$repo" tag -l 'v*' --sort=-v:refname | head -1
+}
+
+write_state_ref() {
+	local name="$1"
+	local value="$2"
+	local state_dir
+	state_dir=$(repo_state_dir)
+	mkdir -p "$state_dir"
+	printf '%s\n' "$value" >"$state_dir/$name"
+}
+
+run_refresh() {
+	local repo="$1"
+	if [[ -f "$repo/install/refresh.sh" ]]; then
+		# shellcheck disable=SC1091
+		source "$repo/install/refresh.sh"
+		return $?
+	fi
+	warn "refresh.sh missing at this ref; running packages + stow directly"
+	export HYPRLUGGAGE_REFRESH=1
+	# shellcheck disable=SC1091
+	source "$repo/install/utils.sh"
+	# shellcheck disable=SC1091
+	source "$repo/install/packages.sh"
+	# shellcheck disable=SC1091
+	source "$repo/install/stow.sh"
+}
+
+checkout_ref() {
+	local repo="$1"
+	local ref="$2"
+	# Detached HEAD at the tag/commit keeps master free for development.
+	git -C "$repo" checkout --detach "$ref"
+}
+
+cmd_update() {
+	local repo
+	local target="${1:-}"
+	local head_sha target_sha old_desc
+
+	repo=$(resolve_repo) || exit 1
+	require_clean_worktree "$repo" || exit 1
+
+	info "Fetching tags from origin..."
+	git -C "$repo" fetch origin --tags
+
+	if [[ -z "$target" ]]; then
+		target=$(latest_version_tag "$repo" || true)
+		if [[ -z "$target" ]]; then
+			err "no v* release tags found; tag a release first (e.g. v$VERSION)"
+			exit 1
+		fi
+	fi
+
+	if ! git -C "$repo" rev-parse "$target^{commit}" &>/dev/null; then
+		err "unknown ref: $target"
+		exit 1
+	fi
+
+	head_sha=$(git -C "$repo" rev-parse HEAD)
+	target_sha=$(git -C "$repo" rev-parse "$target^{commit}")
+	old_desc=$(git -C "$repo" describe --tags --always 2>/dev/null || echo "$head_sha")
+
+	if [[ "$head_sha" == "$target_sha" ]]; then
+		ok "already on $target ($old_desc)"
+		write_state_ref current-ref "$target"
+		exit 0
+	fi
+
+	info "Updating $old_desc → $target"
+	write_state_ref previous-ref "$head_sha"
+	checkout_ref "$repo" "$target"
+	run_refresh "$repo"
+	write_state_ref current-ref "$target"
+	ok "updated to $target"
+	info "Rollback with: hyprluggage rollback"
+}
+
+cmd_rollback() {
+	local repo
+	local state_dir
+	local prev head_sha old_desc
+
+	repo=$(resolve_repo) || exit 1
+	require_clean_worktree "$repo" || exit 1
+
+	state_dir=$(repo_state_dir)
+	if [[ ! -f "$state_dir/previous-ref" ]]; then
+		err "no previous-ref recorded; run hyprluggage update first"
+		exit 1
+	fi
+	prev=$(tr -d '[:space:]' <"$state_dir/previous-ref")
+	if [[ -z "$prev" ]]; then
+		err "previous-ref is empty"
+		exit 1
+	fi
+	if ! git -C "$repo" rev-parse "$prev^{commit}" &>/dev/null; then
+		err "previous-ref not found in git: $prev"
+		exit 1
+	fi
+
+	head_sha=$(git -C "$repo" rev-parse HEAD)
+	old_desc=$(git -C "$repo" describe --tags --always 2>/dev/null || echo "$head_sha")
+
+	if [[ "$head_sha" == "$(git -C "$repo" rev-parse "$prev^{commit}")" ]]; then
+		ok "already at previous-ref ($old_desc)"
+		exit 0
+	fi
+
+	info "Rolling back $old_desc → $prev"
+	# Swap so a second rollback can move forward again.
+	write_state_ref previous-ref "$head_sha"
+	checkout_ref "$repo" "$prev"
+	run_refresh "$repo"
+	write_state_ref current-ref "$prev"
+	ok "rolled back to $prev"
 }
 
 # ╭───────────────────────────────────────────────────────────────────────╮
@@ -477,6 +656,8 @@ Commands:
   reload             Re-apply current theme
   fix                Fix broken symlinks
   doctor             Health report (read-only)
+  update [tag]       Update to latest (or given) v* release tag
+  rollback           Restore the previous ref from the last update
   remove <theme>     Delete a theme
   uninstall          Delete themes, or remove theme config
   help               This help
@@ -556,6 +737,11 @@ tui) exec "$SCRIPT_DIR/hyprluggage-tui" ;;
 reload) cmd_reload ;;
 fix) cmd_fix ;;
 doctor) cmd_doctor ;;
+update)
+	shift
+	cmd_update "$@"
+	;;
+rollback) cmd_rollback ;;
 list | ls) cmd_list ;;
 current)
 	echo ""
