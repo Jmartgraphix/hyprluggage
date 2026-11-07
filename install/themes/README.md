@@ -38,6 +38,7 @@ hyprluggage switch monochrome # switch directly
 hyprluggage list            # see all themes
 hyprluggage reload          # re-apply current
 hyprluggage fix             # fix broken symlinks
+hyprluggage doctor          # health report (read-only)
 ```
 
 ## Keybindings

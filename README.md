@@ -287,6 +287,7 @@ hyprluggage list            # show all themes
 hyprluggage reload          # re-apply current
 hyprluggage current         # show current theme
 hyprluggage fix             # fix broken symlinks
+hyprluggage doctor          # health report (read-only)
 hyprluggage browse          # browse & import Omarchy themes
 hyprluggage import <url>    # import theme from GitHub
 hyprluggage tui             # interactive theme browser
