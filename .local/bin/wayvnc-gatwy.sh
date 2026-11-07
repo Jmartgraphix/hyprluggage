@@ -22,9 +22,17 @@ elif grep -q hypervisor /proc/cpuinfo 2>/dev/null; then
   in_vm=1
 fi
 
+# Prefer the focused Hyprland output (falls back to wayvnc's default).
+# Gatwy only shows one monitor; cycle with: wayvncctl output-cycle
+output_args=()
+if command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  focused="$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused==true) | .name' | head -1 || true)"
+  [[ -n "$focused" && "$focused" != "null" ]] && output_args=(-o "$focused")
+fi
+
 # Default no-auth on LAN; put TLS/auth in ~/.config/wayvnc/config if desired
 if [[ "$in_vm" -eq 1 ]]; then
-  exec /usr/bin/wayvnc --log-level info --disable-resizing 0.0.0.0
+  exec /usr/bin/wayvnc --log-level info --disable-resizing "${output_args[@]}" 0.0.0.0
 else
-  exec /usr/bin/wayvnc --gpu --log-level info --disable-resizing 0.0.0.0
+  exec /usr/bin/wayvnc --gpu --log-level info --disable-resizing "${output_args[@]}" 0.0.0.0
 fi

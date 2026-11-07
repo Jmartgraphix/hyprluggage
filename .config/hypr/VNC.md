@@ -4,11 +4,10 @@ Super/Win is often swallowed by the local OS, browser, or Moonlight client. Hypr
 
 ## How it works
 1. **wayvnc** shares the Hyprland session (systemd user: `wayvnc.service`).
-2. On a real VNC client connect, **wayvnc-clipboard-bridge**:
-   - pauses `cliphist` / `wl-clip-persist` (avoids Wayland data-device crashes)
-   - runs `hypr-vnc-mod apply vnc` → loads `vnc-mod-generated.lua` via `vnc-mod-active.lua`
-3. On VNC disconnect: restores clipboard helpers and drops the VNC hold. Hyprland reloads only if Sunshine is also idle.
-4. **Sunshine** (Moonlight): `sunshine-mod-bridge` watches GameStream `/serverinfo` and runs `hypr-vnc-mod apply sunshine` while a stream is busy, then `clear sunshine` when it goes free. Same Ctrl+Alt twins as VNC.
+2. **Ctrl+Alt twins stay loaded** for the whole session (`hypr-vnc-mod ensure` at login sources `vnc-mod-generated.lua`). Reloading Hyprland on each Gatwy connect was breaking wayvnc’s virtual keyboard.
+3. On a real VNC client connect, **wayvnc-clipboard-bridge** pauses `cliphist` / `wl-clip-persist` and marks a VNC holder (no compositor reload).
+4. On VNC disconnect: restores clipboard helpers. Twins stay loaded.
+5. **Sunshine** (Moonlight): `sunshine-mod-bridge` marks/clears a Sunshine holder the same way. Same Ctrl+Alt chords.
 
 ## Keys (remote)
 | Action | Keys |
@@ -27,6 +26,18 @@ Super/Win is often swallowed by the local OS, browser, or Moonlight client. Hypr
 Space-family Super chords collide under Ctrl+Alt, so several theme binds are **remapped** to letter keys. Search **theme** in Ctrl+Alt+K to list them all.
 
 At the physical keyboard, Super is unchanged.
+
+## Multiple monitors
+
+wayvnc shows **one** Hyprland output at a time. If Cursor (or another window) is on a different monitor than Gatwy is capturing, you will not see it remotely.
+
+```bash
+wayvncctl output-list          # which output is captured
+wayvncctl output-set DP-1      # capture a named output
+wayvncctl output-cycle         # next output
+```
+
+On startup, [wayvnc-gatwy.sh](../../.local/bin/wayvnc-gatwy.sh) prefers the **focused** monitor.
 
 ## Fresh install
 Included in `install.sh` via packages (`wayvnc`) + `install/services.sh` (enable units). Sunshine's Ctrl+Alt twins are enabled when `sunshine` is installed. The installer does not add a world-open `ufw allow 5900/tcp`; wayvnc has no RFB auth and Gatwy cannot complete wayvnc's TLS auth, so allow 5900 only from the Gatwy host. Units are `WantedBy=graphical-session.target` so they start with Hyprland, not at boot — binding them to `default.target` pulled in an empty graphical session and made UWSM/greetd refuse to start.

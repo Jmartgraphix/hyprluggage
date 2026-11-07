@@ -13,6 +13,13 @@ hl.config({
 			natural_scroll = false,
 			scroll_factor = 0.4,
 		},
+		-- wayvnc/Gatwy: client disconnect mid-chord leaves mods held on the
+		-- virtual keyboard. Release them on close, and don't merge VKBD key
+		-- state into physical keyboards (avoids seat-wide sticky Super/Ctrl).
+		virtualkeyboard = {
+			release_pressed_on_close = true,
+			share_states = false,
+		},
 	},
 	misc = {
 		key_press_enables_dpms = true,

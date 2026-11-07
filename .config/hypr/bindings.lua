@@ -27,7 +27,7 @@ hl.bind("ALT + Q", hl.dsp.exec_cmd(string.format("%s -e yazi", terminal)), { des
 hl.bind("ALT + N", hl.dsp.exec_cmd(string.format("%s -e nvim", terminal)), { description = "Neovim" })
 hl.bind("SUPER + S", hl.dsp.exec_cmd(string.format("%s/volume-window", scrDir)), { description = "Wiremix" })
 hl.bind("SUPER + ALT + M", hl.dsp.exec_cmd("easyeffects"), { description = "easyeffects" })
-hl.bind("SUPER + CTRL + F12", hl.dsp.exec_cmd("pkill sunshine && sunshine &"), { description = "Restart Sunshine" })
+hl.bind("SUPER + CTRL + F12", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill sunshine; sunshine &'"), { description = "Restart Sunshine" })
 hl.bind("SUPER + A", hl.dsp.exec_cmd(string.format("%s \"https://perplexity.ai\"", webapp)), { description = "Perplexity" })
 hl.bind("SUPER + SHIFT + A", hl.dsp.exec_cmd(string.format("%s \"https://chatgpt.com\"", webapp)), { description = "ChatGPT" })
 hl.bind("SUPER + CTRL + A", hl.dsp.exec_cmd(string.format("%s \"https://gemini.google.com\"", webapp)), { description = "Gemini" })
@@ -51,7 +51,7 @@ hl.bind("ALT + comma", hl.dsp.exec_cmd(string.format("%s/clipboard", rofiDir)), 
 hl.bind("SUPER + SHIFT + M", hl.dsp.exec_cmd(string.format("%s/rofibeats", rofiDir)), { description = "rofibeats" })
 hl.bind("ALT + period", hl.dsp.exec_cmd(string.format("%s/emoji", rofiDir)), { description = "emoji" })
 hl.bind("ALT + SPACE", hl.dsp.exec_cmd(string.format("%s/rofisearch", rofiDir)), { description = "Find" })
-hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("pkill rofi || ~/.config/rofi/scripts/launcher"), { description = "app-launcher" })
+hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill -x rofi || exec \"$HOME/.config/rofi/scripts/launcher\"'"), { description = "app-launcher" })
 hl.bind("SUPER + CTRL + B", hl.dsp.exec_cmd(string.format("%s/power-profiles", rofiDir)), { description = "Power Profiles" })
 hl.bind("SUPER + SHIFT + O", hl.dsp.exec_cmd(string.format("%s/pop-window", scrDir)), { description = "Pop window out (float & pin)" })
 hl.bind("SUPER + SHIFT + SPACE", hl.dsp.exec_cmd(string.format("%s/toggle-waybar", scrDir)), { description = "Toggle waybar" })
@@ -83,7 +83,7 @@ hl.bind("SHIFT + PRINT", hl.dsp.exec_cmd(string.format("%s/screenshot smart clip
 hl.bind("SUPER + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-desktop-audio", scrDir)), { description = "Screen recording" })
 hl.bind("SUPER + SHIFT + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-microphone-audio", scrDir)), { description = "Screen recording + mic" })
 hl.bind("SUPER + ALT + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-desktop-audio --with-microphone-audio --with-webcam", scrDir)), { description = "Screen recording + mic + webcam" })
-hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"), { description = "Color picker" })
+hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill -x hyprpicker || exec hyprpicker -a'"), { description = "Color picker" })
 -- Volume-knob brightness lives in media.lua (one ignore_mods handler so Super+Alt
 -- cannot also fire the volume binds).
 hl.bind("SUPER + F1", hl.dsp.exec_cmd(string.format("%s/toggle-monitor", scrDir)), { description = "Toggle Monitor Power" })

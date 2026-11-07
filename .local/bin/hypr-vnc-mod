@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Apply/clear CTRL+ALT twins of SUPER binds while VNC or Sunshine sessions are active.
+#
+# Twins stay loaded for the whole session (sourced from login via ensure + hyprland.lua).
+# apply/clear only track holders for status/clipboard coordination — they do not
+# hyprctl reload on connect, which was breaking wayvnc's virtual keyboard for Gatwy.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,17 +32,10 @@ STATE_FILE="$STATE_DIR/active"
 HOLDERS_DIR="$STATE_DIR/holders"
 GEN="${SCRIPT_DIR}/hypr-vnc-mod-gen.sh"
 
-write_active_empty() {
-  mkdir -p "$ACTIVE_DIR"
-  cat > "$ACTIVE" << 'INNER'
--- Managed by hypr-vnc-mod — empty when no remote session (no extra binds)
-INNER
-}
-
 write_active_source() {
   mkdir -p "$ACTIVE_DIR"
   cat > "$ACTIVE" << INNER
--- Managed by hypr-vnc-mod — loaded while VNC or Sunshine clients are connected
+-- Managed by hypr-vnc-mod — Ctrl+Alt Super twins (always loaded for Gatwy/Moonlight)
 dofile("$GENERATED")
 INNER
 }
@@ -104,8 +101,8 @@ migrate_legacy_state() {
   fi
 }
 
-binds_are_loaded() {
-  [[ -f "$STATE_FILE" ]] && grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null
+twins_sourced() {
+  [[ -f "$ACTIVE" ]] && grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null
 }
 
 cmd_generate() {
@@ -113,7 +110,6 @@ cmd_generate() {
     echo "missing generator: $GEN" >&2
     return 1
   fi
-  # Generator reads Lua Super binds; emits vnc-mod-generated.lua only
   "$GEN" "$GENERATED"
 }
 
@@ -122,23 +118,21 @@ cmd_apply() {
   reason="$(normalize_reason "${1:-vnc}")" || return 1
   migrate_legacy_state
   mkdir -p "$HOLDERS_DIR" "$STATE_DIR" "$HYPR_DIR"
-  if binds_are_loaded; then
-    touch "$HOLDERS_DIR/$reason"
-    logger -t wayvnc-vncmod "holder added: $reason (binds already loaded)"
-    echo "vnc-mod: applied ($reason; already loaded)"
-    return 0
+
+  # Ensure the map exists and the active stub points at it (no reload on connect).
+  if [[ ! -f "$GENERATED" ]]; then
+    cmd_generate || true
   fi
-  cmd_generate
-  write_active_source
-  if hypr_reload; then
-    touch "$STATE_FILE"
-    touch "$HOLDERS_DIR/$reason"
-    logger -t wayvnc-vncmod "applied CTRL+ALT remote binds ($reason)"
-    echo "vnc-mod: applied ($reason; $(grep -cE '^\s*hl\.bind' "$GENERATED" 2>/dev/null || echo 0) binds)"
-  else
-    echo "vnc-mod: generated but hyprctl reload failed" >&2
-    return 1
+  if ! twins_sourced; then
+    write_active_source
+    # First time this session: load twins. Prefer not to reload if already live.
+    hypr_reload || true
   fi
+
+  touch "$STATE_FILE"
+  touch "$HOLDERS_DIR/$reason"
+  logger -t wayvnc-vncmod "holder added: $reason (Ctrl+Alt twins ready)"
+  echo "vnc-mod: applied ($reason; $(grep -cE '^\s*hl\.bind' "$GENERATED" 2>/dev/null || echo 0) binds)"
 }
 
 cmd_clear() {
@@ -151,38 +145,30 @@ cmd_clear() {
     echo "vnc-mod: $reason cleared (still held by $(holder_list))"
     return 0
   fi
-  write_active_empty
+  # Keep Ctrl+Alt twins loaded — unloading required a reload that broke Gatwy input.
   rm -f "$STATE_FILE"
-  if hypr_reload 2>/dev/null; then
-    logger -t wayvnc-vncmod "cleared remote mod binds (hyprctl reload)"
-    echo "vnc-mod: cleared"
-  else
-    echo "vnc-mod: active file cleared (hyprctl reload skipped/failed)"
-  fi
+  logger -t wayvnc-vncmod "cleared holders (twins stay loaded)"
+  echo "vnc-mod: cleared holders (Ctrl+Alt twins stay loaded)"
 }
 
 cmd_status() {
   migrate_legacy_state
   local holders
   holders="$(holder_list)"
-  if [[ -f "$STATE_FILE" ]]; then
-    if [[ -n "$holders" ]]; then
-      echo "state: active (Ctrl+Alt binds loaded; holders: $holders)"
-    else
-      echo "state: active (Ctrl+Alt binds loaded)"
-    fi
+  if twins_sourced; then
+    echo "twins: loaded ($(grep -cE '^\s*hl\.bind' "$GENERATED" 2>/dev/null || echo 0) binds)"
   else
-    echo "state: inactive (desktop Super-only)"
+    echo "twins: not sourced (run: hypr-vnc-mod ensure)"
+  fi
+  if [[ -f "$STATE_FILE" ]] || [[ -n "$holders" ]]; then
+    echo "holders: ${holders:-none} (remote session marker)"
+  else
+    echo "holders: none"
   fi
   if [[ -f "$GENERATED" ]]; then
-    echo "generated: $(grep -cE '^\s*hl\.bind' "$GENERATED" 2>/dev/null || echo 0) binds in $GENERATED"
+    echo "generated: $GENERATED"
   else
     echo "generated: missing (run: hypr-vnc-mod generate)"
-  fi
-  if [[ -f "$ACTIVE" ]] && grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null; then
-    echo "active-file: dofile generated lua"
-  else
-    echo "active-file: empty/not sourcing"
   fi
   ensure_hypr_env
   echo "hyprland: ${HYPRLAND_INSTANCE_SIGNATURE:-not detected}"
@@ -190,21 +176,12 @@ cmd_status() {
 }
 
 cmd_ensure() {
-  # Fresh install / login: ensure stubs exist without enabling remote binds
+  # Session start / install: generate map and always source it (no empty stub).
   mkdir -p "$HYPR_DIR" "$STATE_DIR" "$HOLDERS_DIR" "$ACTIVE_DIR"
-  if [[ ! -f "$ACTIVE" ]]; then
-    write_active_empty
-  fi
-  if [[ ! -f "$GENERATED" ]]; then
-    cmd_generate || true
-  fi
+  cmd_generate || true
+  write_active_source
   migrate_legacy_state
-  # Never leave remote mode on after ensure unless a holder is live
-  if grep -q 'vnc-mod-generated' "$ACTIVE" 2>/dev/null && [[ ! -f "$STATE_FILE" ]] && [[ "$(holder_count)" -eq 0 ]]; then
-    write_active_empty || true
-    hypr_reload 2>/dev/null || true
-  fi
-  echo "vnc-mod: ensure ok ($ACTIVE)"
+  echo "vnc-mod: ensure ok (twins sourced from $GENERATED)"
 }
 
 case "${1:-}" in
@@ -215,7 +192,7 @@ case "${1:-}" in
   ensure) cmd_ensure ;;
   *)
     echo "Usage: $0 {generate|apply|clear|status|ensure} [vnc|sunshine]" >&2
-    echo "  Super stays Super locally; during VNC or Sunshine, CTRL+ALT mirrors Super binds." >&2
+    echo "  Ctrl+Alt twins stay loaded; apply/clear track remote holders only." >&2
     exit 1
     ;;
 esac

@@ -58,6 +58,19 @@ def preferred_vnc(tokens):
         mods.append("SHIFT")
     return mods
 
+# Hyprland Lua does not parse conf-style code:N; map to keysyms for twins.
+CODE_TO_KEY = {
+    "10": "1", "11": "2", "12": "3", "13": "4", "14": "5",
+    "15": "6", "16": "7", "17": "8", "18": "9", "19": "0",
+    "20": "minus", "21": "equal",
+}
+
+def normalize_key(key: str) -> str:
+    m = re.fullmatch(r"code:(\d+)", key.strip(), flags=re.IGNORECASE)
+    if m and m.group(1) in CODE_TO_KEY:
+        return CODE_TO_KEY[m.group(1)]
+    return key
+
 def parse_chord(chord: str):
     """Split 'SUPER + SHIFT + LEFT' into mod tokens + key."""
     parts = [p.strip() for p in chord.split("+")]
@@ -71,13 +84,13 @@ def parse_chord(chord: str):
         if norm_tok(p) in ("SUPER", "CTRL", "ALT", "SHIFT") and i < len(parts) - 1:
             tokens.append(p)
         else:
-            key = "+".join(parts[i:]).strip()  # allow code:10 etc as single key
+            key = "+".join(parts[i:]).strip()
             break
     if key is None:
         return None
     if not any(norm_tok(t) == "SUPER" for t in tokens):
         return None
-    return tokens, key
+    return tokens, normalize_key(key)
 
 def find_hl_binds(text: str):
     """Yield (chord, dispatch_expr, opts_expr|None, src_snippet) for each hl.bind call."""
@@ -277,10 +290,22 @@ EXPLICIT = {
 
     ("SUPER", "R"): (["CTRL", "ALT"], None, "Screen recording"),
     ("SUPER SHIFT", "R"): (["CTRL", "ALT", "SHIFT"], "R", "Screen recording + mic (VNC)"),
-    ("SUPER ALT", "R"): (["CTRL", "ALT", "SHIFT"], "V", "Screen recording + mic + webcam (VNC)"),
+    # F9: free V/C/N for floating / calculator / DND
+    ("SUPER ALT", "R"): (["CTRL", "ALT", "SHIFT"], "F9", "Screen recording + mic + webcam (VNC)"),
 
     ("SUPER SHIFT", "RETURN"): (["CTRL", "ALT", "SHIFT"], "RETURN", "Attach tmux (VNC)"),
     ("SUPER ALT", "RETURN"): (["CTRL", "ALT", "SHIFT"], "apostrophe", "New tmux session (VNC)"),
+
+    # Keep Ctrl+Alt(+Shift)+0-9 free for workspace switch/move (never steal digits).
+    ("SUPER SHIFT", "P"): (["CTRL", "ALT", "SHIFT"], "F7", "Color picker (VNC)"),
+    ("SUPER SHIFT", "O"): (["CTRL", "ALT", "SHIFT"], "F8", "Pop window out (VNC)"),
+
+    # Prefer mnemonic remotes for common actions; displace prior occupants.
+    ("SUPER SHIFT", "V"): (["CTRL", "ALT", "SHIFT"], "V", "Toggle floating"),
+    ("SUPER ALT", "C"): (["CTRL", "ALT", "SHIFT"], "C", "Calculator"),
+    ("SUPER ALT", "N"): (["CTRL", "ALT", "SHIFT"], "N", "Do Not Disturb"),
+    ("SUPER SHIFT", "C"): (["CTRL", "ALT", "SHIFT"], "F10", "Cava visualizer (VNC)"),
+    ("SUPER SHIFT", "N"): (["CTRL", "ALT", "SHIFT"], "F11", "Wifi Menu (VNC)"),
 }
 
 candidates = []
@@ -348,10 +373,37 @@ for c, (mods, key_ov, force_desc) in explicit_items:
         "note": f"{c['orig_mod']} + {c['key']} → {' '.join(mods)} + {new_key}",
     })
 
-auto_items.sort(key=lambda c: (-c["prio"], c["file"], c["src_line"]))
-POOL = list("QZXPVMN1234567890")
+# Digits 0-9 are reserved for workspace switch (Ctrl+Alt+N) and move
+# (Ctrl+Alt+Shift+N). Place those first; never remap them off the digit;
+# never use digits as fallback remaps for other binds.
+DIGIT_KEYS = set("0123456789")
+POOL = list("QZXYUWFEABCDGHJKLM")  # letters only — no 0-9
 
-for c in auto_items:
+def append_bind(c, mods, new_key, note=None):
+    used[chord_id(mods, new_key)] = c["src_line"]
+    output.append({
+        "mods": mods,
+        "key": new_key,
+        "dispatch": c["dispatch"],
+        "opts": c["opts"],
+        "comment": c["src_line"],
+        "note": note,
+    })
+
+def place_digit(c):
+    """Keep Super(+Shift)+N → Ctrl+Alt(+Shift)+N exactly."""
+    mods = preferred_vnc(c["tokens"])
+    new_key = c["key"]
+    cid = chord_id(mods, new_key)
+    if cid in used:
+        failed.append((c, f"digit chord taken by {used[cid]}"))
+        return
+    note = None
+    if mods != preferred_vnc(c["tokens"]):
+        note = f"{c['orig_mod']} + {c['key']} → {' '.join(mods)} + {new_key}"
+    append_bind(c, mods, new_key, note)
+
+def place_auto(c):
     mods = preferred_vnc(c["tokens"])
     new_key = c["key"]
     cid = chord_id(mods, new_key)
@@ -372,19 +424,23 @@ for c in auto_items:
                     break
             if not placed:
                 failed.append((c, "no free chord"))
-                continue
-    used[cid] = c["src_line"]
+                return
     note = None
     if new_key.upper() != c["key"].upper() or mods != preferred_vnc(c["tokens"]):
         note = f"{c['orig_mod']} + {c['key']} → {' '.join(mods)} + {new_key}"
-    output.append({
-        "mods": mods,
-        "key": new_key,
-        "dispatch": c["dispatch"],
-        "opts": c["opts"],
-        "comment": c["src_line"],
-        "note": note,
-    })
+    append_bind(c, mods, new_key, note)
+
+digit_items = [c for c in auto_items if c["key"] in DIGIT_KEYS]
+other_items = [c for c in auto_items if c["key"] not in DIGIT_KEYS]
+digit_items.sort(key=lambda c: (-c["prio"], c["key"], c["file"], c["src_line"]))
+other_items.sort(key=lambda c: (-c["prio"], c["file"], c["src_line"]))
+
+# Claim workspace digit chords before letter remaps can touch them.
+# (Explicit remaps above must not use 0-9.)
+for c in digit_items:
+    place_digit(c)
+for c in other_items:
+    place_auto(c)
 
 # Keep the same locals preamble as hand-written sources expect
 lua_lines = [

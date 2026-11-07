@@ -13,13 +13,21 @@ local osdclient = "swayosd-client --monitor \"$(hyprctl monitors -j | jq -r '.[]
 local rofiDir = home .. "/.config/rofi/scripts"
 local scrDir = home .. "/.config/hypr/scripts"
 
+-- from: hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd(string.format("%s/.config/hypr/scripts/cava-launcher toggle", home)), { description = "Cava visualizer" })
+-- VNC: SUPER SHIFT + C → CTRL ALT SHIFT + F10
+hl.bind("CTRL + ALT + SHIFT + F10", hl.dsp.exec_cmd(string.format("%s/.config/hypr/scripts/cava-launcher toggle", home)), { description = "Cava visualizer (VNC)" })
+
+-- from: hl.bind("SUPER + ALT + C", hl.dsp.exec_cmd("kitty --title hyprluggage-calc -e hyprmath"), { description = "Calculator" })
+-- VNC: SUPER ALT + C → CTRL ALT SHIFT + C
+hl.bind("CTRL + ALT + SHIFT + C", hl.dsp.exec_cmd("kitty --title hyprluggage-calc -e hyprmath"), { description = "Calculator" })
+
 -- from: hl.bind("SUPER + ALT + M", hl.dsp.exec_cmd("easyeffects"), { description = "easyeffects" })
 -- VNC: SUPER ALT + M → CTRL ALT SHIFT + E
 hl.bind("CTRL + ALT + SHIFT + E", hl.dsp.exec_cmd("easyeffects"), { description = "EasyEffects (VNC)" })
 
--- from: hl.bind("SUPER + CTRL + F12", hl.dsp.exec_cmd("pkill sunshine && sunshine &"), { description = "Restart Sunshine" })
+-- from: hl.bind("SUPER + CTRL + F12", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill sunshine; sunshine &'"), { description = "Restart Sunshine" })
 -- VNC: SUPER CTRL + F12 → CTRL ALT SHIFT + F12
-hl.bind("CTRL + ALT + SHIFT + F12", hl.dsp.exec_cmd("pkill sunshine && sunshine &"), { description = "Restart Sunshine (VNC)" })
+hl.bind("CTRL + ALT + SHIFT + F12", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill sunshine; sunshine &'"), { description = "Restart Sunshine (VNC)" })
 
 -- from: hl.bind("SUPER + CTRL + A", hl.dsp.exec_cmd(string.format("%s \"https://gemini.google.com\"", webapp)), { description = "Gemini" })
 -- VNC: SUPER CTRL + A → CTRL ALT SHIFT + F6
@@ -33,17 +41,29 @@ hl.bind("CTRL + ALT + SHIFT + RETURN", hl.dsp.exec_cmd(string.format("%s/launch-
 -- VNC: SUPER ALT + RETURN → CTRL ALT SHIFT + apostrophe
 hl.bind("CTRL + ALT + SHIFT + apostrophe", hl.dsp.exec_cmd(string.format("%s/launch-terminal -e tmux new -As main", scrDir)), { description = "New tmux session (VNC)" })
 
+-- from: hl.bind("SUPER + SHIFT + N", hl.dsp.exec_cmd(string.format("%s/wifi", rofiDir)), { description = "Wifi Menu" })
+-- VNC: SUPER SHIFT + N → CTRL ALT SHIFT + F11
+hl.bind("CTRL + ALT + SHIFT + F11", hl.dsp.exec_cmd(string.format("%s/wifi", rofiDir)), { description = "Wifi Menu (VNC)" })
+
+-- from: hl.bind("SUPER + ALT + N", hl.dsp.exec_cmd(string.format("%s/toggle-dnd", scrDir)), { description = "Do Not Disturb" })
+-- VNC: SUPER ALT + N → CTRL ALT SHIFT + N
+hl.bind("CTRL + ALT + SHIFT + N", hl.dsp.exec_cmd(string.format("%s/toggle-dnd", scrDir)), { description = "Do Not Disturb" })
+
 -- from: hl.bind("SUPER + SHIFT + I", hl.dsp.exec_cmd(string.format("kitty --title webapp-install -e %s/webapp-install", scrDir)), { description = "Web App Install" })
 -- VNC: SUPER SHIFT + I → CTRL ALT SHIFT + I
 hl.bind("CTRL + ALT + SHIFT + I", hl.dsp.exec_cmd(string.format("kitty --title webapp-install -e %s/webapp-install", scrDir)), { description = "Web App Install (VNC)" })
 
--- from: hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("pkill rofi || ~/.config/rofi/scripts/launcher"), { description = "app-launcher" })
+-- from: hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill -x rofi || exec \"$HOME/.config/rofi/scripts/launcher\"'"), { description = "app-launcher" })
 -- VNC: SUPER + SPACE → CTRL ALT + SPACE
-hl.bind("CTRL + ALT + SPACE", hl.dsp.exec_cmd("pkill rofi || ~/.config/rofi/scripts/launcher"), { description = "app-launcher" })
+hl.bind("CTRL + ALT + SPACE", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill -x rofi || exec \"$HOME/.config/rofi/scripts/launcher\"'"), { description = "app-launcher" })
 
 -- from: hl.bind("SUPER + CTRL + B", hl.dsp.exec_cmd(string.format("%s/power-profiles", rofiDir)), { description = "Power Profiles" })
 -- VNC: SUPER CTRL + B → CTRL ALT SHIFT + B
 hl.bind("CTRL + ALT + SHIFT + B", hl.dsp.exec_cmd(string.format("%s/power-profiles", rofiDir)), { description = "Power Profiles (VNC)" })
+
+-- from: hl.bind("SUPER + SHIFT + O", hl.dsp.exec_cmd(string.format("%s/pop-window", scrDir)), { description = "Pop window out (float & pin)" })
+-- VNC: SUPER SHIFT + O → CTRL ALT SHIFT + F8
+hl.bind("CTRL + ALT + SHIFT + F8", hl.dsp.exec_cmd(string.format("%s/pop-window", scrDir)), { description = "Pop window out (VNC)" })
 
 -- from: hl.bind("SUPER + SHIFT + SPACE", hl.dsp.exec_cmd(string.format("%s/toggle-waybar", scrDir)), { description = "Toggle waybar" })
 -- VNC: SUPER SHIFT + SPACE → CTRL ALT SHIFT + W
@@ -126,8 +146,12 @@ hl.bind("CTRL + ALT + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-
 hl.bind("CTRL + ALT + SHIFT + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-microphone-audio", scrDir)), { description = "Screen recording + mic (VNC)" })
 
 -- from: hl.bind("SUPER + ALT + R", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-desktop-audio --with-microphone-audio --with-webcam", scrDir)), { description = "Screen recording + mic + webcam" })
--- VNC: SUPER ALT + R → CTRL ALT SHIFT + V
-hl.bind("CTRL + ALT + SHIFT + V", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-desktop-audio --with-microphone-audio --with-webcam", scrDir)), { description = "Screen recording + mic + webcam (VNC)" })
+-- VNC: SUPER ALT + R → CTRL ALT SHIFT + F9
+hl.bind("CTRL + ALT + SHIFT + F9", hl.dsp.exec_cmd(string.format("%s/screenrecord --with-desktop-audio --with-microphone-audio --with-webcam", scrDir)), { description = "Screen recording + mic + webcam (VNC)" })
+
+-- from: hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill -x hyprpicker || exec hyprpicker -a'"), { description = "Color picker" })
+-- VNC: SUPER SHIFT + P → CTRL ALT SHIFT + F7
+hl.bind("CTRL + ALT + SHIFT + F7", hl.dsp.exec_cmd("sh -c '/usr/bin/pkill -x hyprpicker || exec hyprpicker -a'"), { description = "Color picker (VNC)" })
 
 -- from: hl.bind("SUPER + SHIFT + LEFT", hl.dsp.window.move({ direction = "left" }), { description = "Move window to the left" })
 -- VNC: SUPER SHIFT + LEFT → CTRL ALT SHIFT + H
@@ -145,6 +169,10 @@ hl.bind("CTRL + ALT + SHIFT + K", hl.dsp.window.move({ direction = "up" }), { de
 -- VNC: SUPER SHIFT + DOWN → CTRL ALT SHIFT + J
 hl.bind("CTRL + ALT + SHIFT + J", hl.dsp.window.move({ direction = "down" }), { description = "Move window down (VNC)" })
 
+-- from: hl.bind("SUPER + SHIFT + V", hl.dsp.window.float(), { description = "Toggle floating" })
+-- VNC: SUPER SHIFT + V → CTRL ALT SHIFT + V
+hl.bind("CTRL + ALT + SHIFT + V", hl.dsp.window.float(), { description = "Toggle floating" })
+
 -- from: hl.bind("SUPER + CTRL + LEFT", hl.dsp.focus({ workspace = "e-1" }), { description = "Previous workspace" })
 -- VNC: SUPER CTRL + LEFT → CTRL ALT SHIFT + comma
 hl.bind("CTRL + ALT + SHIFT + comma", hl.dsp.focus({ workspace = "e-1" }), { description = "Previous workspace (VNC)" })
@@ -160,6 +188,66 @@ hl.bind("CTRL + ALT + SHIFT + F1", hl.dsp.exec_cmd("hyprctl keyword monitor \"eD
 -- from: hl.bind("SUPER + ALT + l", hl.dsp.exec_cmd("hyprctl keyword monitor \"eDP-1,preferred,0x0,1\""), { description = "Laptop screen on" })
 -- VNC: SUPER ALT + l → CTRL ALT SHIFT + F2
 hl.bind("CTRL + ALT + SHIFT + F2", hl.dsp.exec_cmd("hyprctl keyword monitor \"eDP-1,preferred,0x0,1\""), { description = "Laptop screen on (VNC)" })
+
+-- from: hl.bind("SUPER + 0", hl.dsp.focus({ workspace = 10 }), { description = "Switch to workspace 10" })
+hl.bind("CTRL + ALT + 0", hl.dsp.focus({ workspace = 10 }), { description = "Switch to workspace 10" })
+
+-- from: hl.bind("SUPER + 1", hl.dsp.focus({ workspace = 1 }), { description = "Switch to workspace 1" })
+hl.bind("CTRL + ALT + 1", hl.dsp.focus({ workspace = 1 }), { description = "Switch to workspace 1" })
+
+-- from: hl.bind("SUPER + 2", hl.dsp.focus({ workspace = 2 }), { description = "Switch to workspace 2" })
+hl.bind("CTRL + ALT + 2", hl.dsp.focus({ workspace = 2 }), { description = "Switch to workspace 2" })
+
+-- from: hl.bind("SUPER + 3", hl.dsp.focus({ workspace = 3 }), { description = "Switch to workspace 3" })
+hl.bind("CTRL + ALT + 3", hl.dsp.focus({ workspace = 3 }), { description = "Switch to workspace 3" })
+
+-- from: hl.bind("SUPER + 4", hl.dsp.focus({ workspace = 4 }), { description = "Switch to workspace 4" })
+hl.bind("CTRL + ALT + 4", hl.dsp.focus({ workspace = 4 }), { description = "Switch to workspace 4" })
+
+-- from: hl.bind("SUPER + 5", hl.dsp.focus({ workspace = 5 }), { description = "Switch to workspace 5" })
+hl.bind("CTRL + ALT + 5", hl.dsp.focus({ workspace = 5 }), { description = "Switch to workspace 5" })
+
+-- from: hl.bind("SUPER + 6", hl.dsp.focus({ workspace = 6 }), { description = "Switch to workspace 6" })
+hl.bind("CTRL + ALT + 6", hl.dsp.focus({ workspace = 6 }), { description = "Switch to workspace 6" })
+
+-- from: hl.bind("SUPER + 7", hl.dsp.focus({ workspace = 7 }), { description = "Switch to workspace 7" })
+hl.bind("CTRL + ALT + 7", hl.dsp.focus({ workspace = 7 }), { description = "Switch to workspace 7" })
+
+-- from: hl.bind("SUPER + 8", hl.dsp.focus({ workspace = 8 }), { description = "Switch to workspace 8" })
+hl.bind("CTRL + ALT + 8", hl.dsp.focus({ workspace = 8 }), { description = "Switch to workspace 8" })
+
+-- from: hl.bind("SUPER + 9", hl.dsp.focus({ workspace = 9 }), { description = "Switch to workspace 9" })
+hl.bind("CTRL + ALT + 9", hl.dsp.focus({ workspace = 9 }), { description = "Switch to workspace 9" })
+
+-- from: hl.bind("SUPER + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }), { description = "Move window to workspace 10" })
+hl.bind("CTRL + ALT + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }), { description = "Move window to workspace 10" })
+
+-- from: hl.bind("SUPER + SHIFT + 1", hl.dsp.window.move({ workspace = 1 }), { description = "Move window to workspace 1" })
+hl.bind("CTRL + ALT + SHIFT + 1", hl.dsp.window.move({ workspace = 1 }), { description = "Move window to workspace 1" })
+
+-- from: hl.bind("SUPER + SHIFT + 2", hl.dsp.window.move({ workspace = 2 }), { description = "Move window to workspace 2" })
+hl.bind("CTRL + ALT + SHIFT + 2", hl.dsp.window.move({ workspace = 2 }), { description = "Move window to workspace 2" })
+
+-- from: hl.bind("SUPER + SHIFT + 3", hl.dsp.window.move({ workspace = 3 }), { description = "Move window to workspace 3" })
+hl.bind("CTRL + ALT + SHIFT + 3", hl.dsp.window.move({ workspace = 3 }), { description = "Move window to workspace 3" })
+
+-- from: hl.bind("SUPER + SHIFT + 4", hl.dsp.window.move({ workspace = 4 }), { description = "Move window to workspace 4" })
+hl.bind("CTRL + ALT + SHIFT + 4", hl.dsp.window.move({ workspace = 4 }), { description = "Move window to workspace 4" })
+
+-- from: hl.bind("SUPER + SHIFT + 5", hl.dsp.window.move({ workspace = 5 }), { description = "Move window to workspace 5" })
+hl.bind("CTRL + ALT + SHIFT + 5", hl.dsp.window.move({ workspace = 5 }), { description = "Move window to workspace 5" })
+
+-- from: hl.bind("SUPER + SHIFT + 6", hl.dsp.window.move({ workspace = 6 }), { description = "Move window to workspace 6" })
+hl.bind("CTRL + ALT + SHIFT + 6", hl.dsp.window.move({ workspace = 6 }), { description = "Move window to workspace 6" })
+
+-- from: hl.bind("SUPER + SHIFT + 7", hl.dsp.window.move({ workspace = 7 }), { description = "Move window to workspace 7" })
+hl.bind("CTRL + ALT + SHIFT + 7", hl.dsp.window.move({ workspace = 7 }), { description = "Move window to workspace 7" })
+
+-- from: hl.bind("SUPER + SHIFT + 8", hl.dsp.window.move({ workspace = 8 }), { description = "Move window to workspace 8" })
+hl.bind("CTRL + ALT + SHIFT + 8", hl.dsp.window.move({ workspace = 8 }), { description = "Move window to workspace 8" })
+
+-- from: hl.bind("SUPER + SHIFT + 9", hl.dsp.window.move({ workspace = 9 }), { description = "Move window to workspace 9" })
+hl.bind("CTRL + ALT + SHIFT + 9", hl.dsp.window.move({ workspace = 9 }), { description = "Move window to workspace 9" })
 
 -- from: hl.bind("SUPER + A", hl.dsp.exec_cmd(string.format("%s \"https://perplexity.ai\"", webapp)), { description = "Perplexity" })
 hl.bind("CTRL + ALT + A", hl.dsp.exec_cmd(string.format("%s \"https://perplexity.ai\"", webapp)), { description = "Perplexity" })
@@ -278,41 +366,11 @@ hl.bind("CTRL + ALT + UP", hl.dsp.focus({ direction = "up" }), { description = "
 -- from: hl.bind("SUPER + V", hl.dsp.window.pseudo(), { description = "Pseudo window" })
 hl.bind("CTRL + ALT + V", hl.dsp.window.pseudo(), { description = "Pseudo window" })
 
--- from: hl.bind("SUPER + code:10", hl.dsp.focus({ workspace = 1 }), { description = "Switch to workspace 1" })
-hl.bind("CTRL + ALT + code:10", hl.dsp.focus({ workspace = 1 }), { description = "Switch to workspace 1" })
+-- from: hl.bind("SUPER + equal", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), { description = "Shrink window left" })
+hl.bind("CTRL + ALT + equal", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), { description = "Shrink window left" })
 
--- from: hl.bind("SUPER + code:11", hl.dsp.focus({ workspace = 2 }), { description = "Switch to workspace 2" })
-hl.bind("CTRL + ALT + code:11", hl.dsp.focus({ workspace = 2 }), { description = "Switch to workspace 2" })
-
--- from: hl.bind("SUPER + code:12", hl.dsp.focus({ workspace = 3 }), { description = "Switch to workspace 3" })
-hl.bind("CTRL + ALT + code:12", hl.dsp.focus({ workspace = 3 }), { description = "Switch to workspace 3" })
-
--- from: hl.bind("SUPER + code:13", hl.dsp.focus({ workspace = 4 }), { description = "Switch to workspace 4" })
-hl.bind("CTRL + ALT + code:13", hl.dsp.focus({ workspace = 4 }), { description = "Switch to workspace 4" })
-
--- from: hl.bind("SUPER + code:14", hl.dsp.focus({ workspace = 5 }), { description = "Switch to workspace 5" })
-hl.bind("CTRL + ALT + code:14", hl.dsp.focus({ workspace = 5 }), { description = "Switch to workspace 5" })
-
--- from: hl.bind("SUPER + code:15", hl.dsp.focus({ workspace = 6 }), { description = "Switch to workspace 6" })
-hl.bind("CTRL + ALT + code:15", hl.dsp.focus({ workspace = 6 }), { description = "Switch to workspace 6" })
-
--- from: hl.bind("SUPER + code:16", hl.dsp.focus({ workspace = 7 }), { description = "Switch to workspace 7" })
-hl.bind("CTRL + ALT + code:16", hl.dsp.focus({ workspace = 7 }), { description = "Switch to workspace 7" })
-
--- from: hl.bind("SUPER + code:17", hl.dsp.focus({ workspace = 8 }), { description = "Switch to workspace 8" })
-hl.bind("CTRL + ALT + code:17", hl.dsp.focus({ workspace = 8 }), { description = "Switch to workspace 8" })
-
--- from: hl.bind("SUPER + code:18", hl.dsp.focus({ workspace = 9 }), { description = "Switch to workspace 9" })
-hl.bind("CTRL + ALT + code:18", hl.dsp.focus({ workspace = 9 }), { description = "Switch to workspace 9" })
-
--- from: hl.bind("SUPER + code:19", hl.dsp.focus({ workspace = 10 }), { description = "Switch to workspace 10" })
-hl.bind("CTRL + ALT + code:19", hl.dsp.focus({ workspace = 10 }), { description = "Switch to workspace 10" })
-
--- from: hl.bind("SUPER + code:20", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), { description = "Expand window left" })
-hl.bind("CTRL + ALT + code:20", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), { description = "Expand window left" })
-
--- from: hl.bind("SUPER + code:21", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), { description = "Shrink window left" })
-hl.bind("CTRL + ALT + code:21", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), { description = "Shrink window left" })
+-- from: hl.bind("SUPER + minus", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), { description = "Expand window left" })
+hl.bind("CTRL + ALT + minus", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), { description = "Expand window left" })
 
 -- from: hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { description = "Move window", mouse = true })
 hl.bind("CTRL + ALT + mouse:272", hl.dsp.window.drag(), { description = "Move window", mouse = true })
@@ -329,9 +387,6 @@ hl.bind("CTRL + ALT + mouse_up", hl.dsp.focus({ workspace = "e-1" }), { descript
 -- from: hl.bind("SUPER + SHIFT + A", hl.dsp.exec_cmd(string.format("%s \"https://chatgpt.com\"", webapp)), { description = "ChatGPT" })
 hl.bind("CTRL + ALT + SHIFT + A", hl.dsp.exec_cmd(string.format("%s \"https://chatgpt.com\"", webapp)), { description = "ChatGPT" })
 
--- from: hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd(string.format("%s/.config/hypr/scripts/cava-launcher toggle", home)), { description = "Cava visualizer" })
-hl.bind("CTRL + ALT + SHIFT + C", hl.dsp.exec_cmd(string.format("%s/.config/hypr/scripts/cava-launcher toggle", home)), { description = "Cava visualizer" })
-
 -- from: hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd(string.format("%s -e lazydocker", terminal)), { description = "Docker" })
 -- VNC: SUPER SHIFT + D → CTRL ALT SHIFT + Q
 hl.bind("CTRL + ALT + SHIFT + Q", hl.dsp.exec_cmd(string.format("%s -e lazydocker", terminal)), { description = "Docker" })
@@ -347,62 +402,9 @@ hl.bind("CTRL + ALT + SHIFT + X", hl.dsp.exec_cmd("hyprctl kill"), { description
 -- from: hl.bind("SUPER + SHIFT + M", hl.dsp.exec_cmd(string.format("%s/rofibeats", rofiDir)), { description = "rofibeats" })
 hl.bind("CTRL + ALT + SHIFT + M", hl.dsp.exec_cmd(string.format("%s/rofibeats", rofiDir)), { description = "rofibeats" })
 
--- from: hl.bind("SUPER + SHIFT + N", hl.dsp.exec_cmd(string.format("%s/wifi", rofiDir)), { description = "Wifi Menu" })
-hl.bind("CTRL + ALT + SHIFT + N", hl.dsp.exec_cmd(string.format("%s/wifi", rofiDir)), { description = "Wifi Menu" })
+-- from: hl.bind("SUPER + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { description = "Shrink window up" })
+hl.bind("CTRL + ALT + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { description = "Shrink window up" })
 
--- from: hl.bind("SUPER + SHIFT + O", hl.dsp.exec_cmd(string.format("%s/pop-window", scrDir)), { description = "Pop window out (float & pin)" })
--- VNC: SUPER SHIFT + O → CTRL ALT SHIFT + P
-hl.bind("CTRL + ALT + SHIFT + P", hl.dsp.exec_cmd(string.format("%s/pop-window", scrDir)), { description = "Pop window out (float & pin)" })
-
--- from: hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"), { description = "Color picker" })
--- VNC: SUPER SHIFT + P → CTRL ALT SHIFT + 1
-hl.bind("CTRL + ALT + SHIFT + 1", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"), { description = "Color picker" })
-
--- from: hl.bind("SUPER + SHIFT + V", hl.dsp.window.float(), { description = "Toggle floating" })
--- VNC: SUPER SHIFT + V → CTRL ALT SHIFT + 2
-hl.bind("CTRL + ALT + SHIFT + 2", hl.dsp.window.float(), { description = "Toggle floating" })
-
--- from: hl.bind("SUPER + SHIFT + code:10", hl.dsp.window.move({ workspace = 1 }), { description = "Move window to workspace 1" })
-hl.bind("CTRL + ALT + SHIFT + code:10", hl.dsp.window.move({ workspace = 1 }), { description = "Move window to workspace 1" })
-
--- from: hl.bind("SUPER + SHIFT + code:11", hl.dsp.window.move({ workspace = 2 }), { description = "Move window to workspace 2" })
-hl.bind("CTRL + ALT + SHIFT + code:11", hl.dsp.window.move({ workspace = 2 }), { description = "Move window to workspace 2" })
-
--- from: hl.bind("SUPER + SHIFT + code:12", hl.dsp.window.move({ workspace = 3 }), { description = "Move window to workspace 3" })
-hl.bind("CTRL + ALT + SHIFT + code:12", hl.dsp.window.move({ workspace = 3 }), { description = "Move window to workspace 3" })
-
--- from: hl.bind("SUPER + SHIFT + code:13", hl.dsp.window.move({ workspace = 4 }), { description = "Move window to workspace 4" })
-hl.bind("CTRL + ALT + SHIFT + code:13", hl.dsp.window.move({ workspace = 4 }), { description = "Move window to workspace 4" })
-
--- from: hl.bind("SUPER + SHIFT + code:14", hl.dsp.window.move({ workspace = 5 }), { description = "Move window to workspace 5" })
-hl.bind("CTRL + ALT + SHIFT + code:14", hl.dsp.window.move({ workspace = 5 }), { description = "Move window to workspace 5" })
-
--- from: hl.bind("SUPER + SHIFT + code:15", hl.dsp.window.move({ workspace = 6 }), { description = "Move window to workspace 6" })
-hl.bind("CTRL + ALT + SHIFT + code:15", hl.dsp.window.move({ workspace = 6 }), { description = "Move window to workspace 6" })
-
--- from: hl.bind("SUPER + SHIFT + code:16", hl.dsp.window.move({ workspace = 7 }), { description = "Move window to workspace 7" })
-hl.bind("CTRL + ALT + SHIFT + code:16", hl.dsp.window.move({ workspace = 7 }), { description = "Move window to workspace 7" })
-
--- from: hl.bind("SUPER + SHIFT + code:17", hl.dsp.window.move({ workspace = 8 }), { description = "Move window to workspace 8" })
-hl.bind("CTRL + ALT + SHIFT + code:17", hl.dsp.window.move({ workspace = 8 }), { description = "Move window to workspace 8" })
-
--- from: hl.bind("SUPER + SHIFT + code:18", hl.dsp.window.move({ workspace = 9 }), { description = "Move window to workspace 9" })
-hl.bind("CTRL + ALT + SHIFT + code:18", hl.dsp.window.move({ workspace = 9 }), { description = "Move window to workspace 9" })
-
--- from: hl.bind("SUPER + SHIFT + code:19", hl.dsp.window.move({ workspace = 10 }), { description = "Move window to workspace 10" })
-hl.bind("CTRL + ALT + SHIFT + code:19", hl.dsp.window.move({ workspace = 10 }), { description = "Move window to workspace 10" })
-
--- from: hl.bind("SUPER + SHIFT + code:20", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), { description = "Expand window up" })
-hl.bind("CTRL + ALT + SHIFT + code:20", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), { description = "Expand window up" })
-
--- from: hl.bind("SUPER + SHIFT + code:21", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { description = "Shrink window up" })
-hl.bind("CTRL + ALT + SHIFT + code:21", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { description = "Shrink window up" })
-
--- from: hl.bind("SUPER + ALT + C", hl.dsp.exec_cmd("kitty --title hyprluggage-calc -e hyprmath"), { description = "Calculator" })
--- VNC: SUPER ALT + C → CTRL ALT SHIFT + 3
-hl.bind("CTRL + ALT + SHIFT + 3", hl.dsp.exec_cmd("kitty --title hyprluggage-calc -e hyprmath"), { description = "Calculator" })
-
--- from: hl.bind("SUPER + ALT + N", hl.dsp.exec_cmd(string.format("%s/toggle-dnd", scrDir)), { description = "Do Not Disturb" })
--- VNC: SUPER ALT + N → CTRL ALT SHIFT + 4
-hl.bind("CTRL + ALT + SHIFT + 4", hl.dsp.exec_cmd(string.format("%s/toggle-dnd", scrDir)), { description = "Do Not Disturb" })
+-- from: hl.bind("SUPER + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), { description = "Expand window up" })
+hl.bind("CTRL + ALT + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), { description = "Expand window up" })
 
