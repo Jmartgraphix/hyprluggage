@@ -1,4 +1,4 @@
--- Converted from bindings.conf (keep .conf as revert backup)
+-- Keybindings
 -- terminal is kitty for system TUIs; Super+Return / tmux use launch-terminal.
 local home = os.getenv("HOME")
 local terminal = "kitty"

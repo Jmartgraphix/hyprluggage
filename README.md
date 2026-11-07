@@ -248,7 +248,7 @@ The installer will:
 | Desktop | hypridle killed on login | not started | no change | rules only (left inactive) | performance |
 | Laptop | hypridle started | battery-notify | suspend or clamshell | UFW enabled | balanced on battery |
 
-NVIDIA vs AMD/Intel is **independent** of desktop/laptop. On bare metal, an NVIDIA display GPU sources `~/.config/hypr/profiles/nvidia.conf`; AMD/Intel get an empty GPU stub. **Virtual machines** still use Desktop or Laptop — there is no separate VM profile — but NVIDIA is not auto-applied under a hypervisor (passthrough cards often break Hyprland/wayvnc). Opt in with `hyprluggage-hw-ensure set desktop nvidia`. wayvnc also skips `--gpu` when virt is detected. See [VNC.md](.config/hypr/VNC.md).
+NVIDIA vs AMD/Intel is **independent** of desktop/laptop. On bare metal, an NVIDIA display GPU loads `~/.config/hypr/profiles/nvidia.lua`; AMD/Intel get an empty GPU stub. **Virtual machines** still use Desktop or Laptop — there is no separate VM profile — but NVIDIA is not auto-applied under a hypervisor (passthrough cards often break Hyprland/wayvnc). Opt in with `hyprluggage-hw-ensure set desktop nvidia`. wayvnc also skips `--gpu` when virt is detected. See [VNC.md](.config/hypr/VNC.md).
 
 Re-check or recreate stubs anytime:
 
@@ -442,7 +442,7 @@ Some Space-family theme chords are remapped under Ctrl+Alt — see [`.config/hyp
 
 </details>
 
-See [.config/hypr/bindings.conf](.config/hypr/bindings.conf), [tiling.conf](.config/hypr/tiling.conf), and [media.conf](.config/hypr/media.conf) for the full list.
+See [.config/hypr/bindings.lua](.config/hypr/bindings.lua), [tiling.lua](.config/hypr/tiling.lua), and [media.lua](.config/hypr/media.lua) for the full list.
 
 ---
 
@@ -474,8 +474,8 @@ See [.config/hypr/bindings.conf](.config/hypr/bindings.conf), [tiling.conf](.con
 All configuration files are located in `~/.config/`. You can edit them directly—they won't be overwritten by theme switches.
 
 **Key customization locations:**
-- **Keybindings:** `~/.config/hypr/bindings.conf` - Modify or add shortcuts
-- **Hyprland settings:** `~/.config/hypr/` - Window rules, animations, monitors
+- **Keybindings:** `~/.config/hypr/bindings.lua` - Modify or add shortcuts
+- **Hyprland settings:** `~/.config/hypr/` - Window rules, animations, monitors (Lua; `hyprland.lua` is the entry)
 - **Waybar:** `~/.config/waybar/` - Status bar modules and styling
 - **Rofi:** `~/.config/rofi/` - Launcher appearance and scripts. Favorites, aliases (`ff firefox.desktop`), and hidden apps are one per line in `~/.config/rofi/launcher/`.
 - **Terminal:** `~/.config/kitty/`, `~/.config/ghostty/`, or `~/.config/alacritty/` - Terminal settings
@@ -515,7 +515,7 @@ All configuration files are located in `~/.config/`. You can edit them directly�
 ├── .local/bin/         # Helper scripts (VNC, clipboard bridge, etc.)
 ├── themes/             # Theme configs (colors, wallpapers)
 ├── .config/hypr/
-│   ├── profiles/       # desktop.conf, laptop.conf, nvidia.conf
+│   ├── profiles/       # desktop.lua, laptop.lua, nvidia.lua
 │   └── ...
 ├── .local/bin/         # hyprluggage-hw-ensure, hypr-vnc-mod, sunshine-mod-bridge, ...
 ├── scripts/            # Utility scripts
@@ -527,7 +527,7 @@ All configuration files are located in `~/.config/`. You can edit them directly�
     └── themes/         # Hyprluggage theme system
 ```
 
-Runtime stubs (outside the git tree): `~/.local/state/hyprluggage/profile.conf` and `gpu.conf`.
+Runtime stubs (outside the git tree): `~/.local/state/hyprluggage/profile.lua` and `gpu.lua`.
 
 ---
 
@@ -590,13 +590,13 @@ If it still loops, check:
 - `journalctl -u greetd -b --no-pager | tail -50`
 
 **Keybindings not working?**
-- Check `~/.config/hypr/bindings.conf` (and `tiling.conf` / `media.conf`) for conflicts
+- Check `~/.config/hypr/bindings.lua` (and `tiling.lua` / `media.lua`) for conflicts
 - Reload Hyprland config: `hyprctl reload`
 - Verify the keybinding syntax is correct
 - Over VNC or Sunshine, use Ctrl+Alt instead of Super — see [VNC.md](.config/hypr/VNC.md)
 
 **Need more help?**
-- Check the [full keybindings list](.config/hypr/bindings.conf)
+- Check the [full keybindings list](.config/hypr/bindings.lua)
 - Run `hyprluggage help` for command reference
 - [Report a bug](https://github.com/Jmartgraphix/hyprluggage/issues/new?template=bug_report.yml)
 

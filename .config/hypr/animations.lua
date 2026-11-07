@@ -1,4 +1,4 @@
--- Animations (from animations.conf)
+-- Animations
 
 hl.config({
 	animations = {

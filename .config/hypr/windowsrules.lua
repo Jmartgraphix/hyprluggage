@@ -1,4 +1,4 @@
--- Converted from windowsrules.conf
+-- Window rules
 
 hl.window_rule({ match = { class = "^$", title = "^$", xwayland = true, float = false, fullscreen = false, pin = false }, no_focus = true })
 hl.window_rule({ match = { class = ".*" }, suppress_event = "maximize" })

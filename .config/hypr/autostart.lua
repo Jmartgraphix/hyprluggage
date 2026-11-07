@@ -1,4 +1,4 @@
--- Autostart (from autostart.conf)
+-- Autostart
 -- exec-once → hyprland.start; bare exec → top-level (every reload)
 
 hl.on("hyprland.start", function()

@@ -1,4 +1,4 @@
--- Converted from media.conf (keep .conf as revert backup)
+-- Media keys and volume/brightness
 local home = os.getenv("HOME")
 local terminal = "kitty"
 local browser = home .. "/.config/hypr/scripts/launch-browser"

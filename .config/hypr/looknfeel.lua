@@ -1,4 +1,4 @@
--- Look and feel + layer blur (from looknfeel.conf)
+-- Look and feel + layer blur
 -- Theme palette comes from ~/.config/hyprluggage/current/.../colors.lua
 
 local home = os.getenv("HOME")

@@ -1,4 +1,4 @@
--- Environment + xwayland (from envs.conf)
+-- Environment + xwayland
 -- hl.env only applies at compositor launch, not on reload.
 
 local uid = "1000"

@@ -6,8 +6,6 @@ set -euo pipefail
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
 PROFILE_FILE="$STATE_DIR/profile"
 GPU_FILE="$STATE_DIR/gpu"
-PROFILE_CONF="$STATE_DIR/profile.conf"
-GPU_CONF="$STATE_DIR/gpu.conf"
 PROFILE_LUA="$STATE_DIR/profile.lua"
 GPU_LUA="$STATE_DIR/gpu.lua"
 HYPR_PROFILES="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/profiles"
@@ -44,10 +42,6 @@ write_profile_stub() {
 	local profile="$1"
 	mkdir -p "$STATE_DIR"
 	printf '%s\n' "$profile" >"$PROFILE_FILE"
-	cat >"$PROFILE_CONF" <<EOF
-# Managed by hyprluggage-hw-ensure — form factor: $profile
-source = $HYPR_PROFILES/${profile}.conf
-EOF
 	cat >"$PROFILE_LUA" <<EOF
 -- Managed by hyprluggage-hw-ensure — form factor: $profile
 dofile("$HYPR_PROFILES/${profile}.lua")
@@ -59,18 +53,11 @@ write_gpu_stub() {
 	mkdir -p "$STATE_DIR"
 	printf '%s\n' "$gpu" >"$GPU_FILE"
 	if [[ "$gpu" == "nvidia" ]]; then
-		cat >"$GPU_CONF" <<EOF
-# Managed by hyprluggage-hw-ensure — GPU: nvidia
-source = $HYPR_PROFILES/nvidia.conf
-EOF
 		cat >"$GPU_LUA" <<EOF
 -- Managed by hyprluggage-hw-ensure — GPU: nvidia
 dofile("$HYPR_PROFILES/nvidia.lua")
 EOF
 	else
-		cat >"$GPU_CONF" <<'EOF'
-# Managed by hyprluggage-hw-ensure — no NVIDIA GPU overlay
-EOF
 		cat >"$GPU_LUA" <<'EOF'
 -- Managed by hyprluggage-hw-ensure — no NVIDIA GPU overlay
 EOF

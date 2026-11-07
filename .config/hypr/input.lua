@@ -1,4 +1,4 @@
--- Input / cursor / gestures (from input.conf)
+-- Input / cursor / gestures
 
 hl.config({
 	cursor = {

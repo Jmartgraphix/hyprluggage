@@ -1,4 +1,4 @@
--- Converted from monitors.conf
+-- Monitors
 local home = os.getenv("HOME")
 local terminal = "kitty"
 local browser = home .. "/.config/hypr/scripts/launch-browser"

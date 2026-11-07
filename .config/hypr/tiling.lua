@@ -1,4 +1,4 @@
--- Converted from tiling.conf (keep .conf as revert backup)
+-- Tiling / workspaces / window moves
 local home = os.getenv("HOME")
 local terminal = "kitty"
 local browser = home .. "/.config/hypr/scripts/launch-browser"

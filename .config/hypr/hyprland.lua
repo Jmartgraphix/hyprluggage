@@ -1,8 +1,7 @@
 -- Hyprluggage Hyprland config (Lua)
 -- https://wiki.hypr.land/Configuring/Start/
 --
--- If this file exists at compositor start, hyprland.conf is ignored.
--- To revert: rename/remove this file and restart Hyprland (logout).
+-- Hyprland entry (Lua-only). Rollback to a tagged release if you need an older tree.
 
 hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 24")
 

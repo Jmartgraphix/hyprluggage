@@ -72,7 +72,7 @@ abbr -a rip "yt-dlp -x --audio-format=\"mp3\""
 abbr -a mp 'makepkg -si'
 abbr -a chx 'chmod +x'
 abbr -a tmuxk 'tmux kill-session'
-abbr -a nb 'nvim ~/.config/hypr/bindings.conf'
+abbr -a nb 'nvim ~/.config/hypr/bindings.lua'
 
 # bigger font in tty and regular font in tty
 abbr -a bigfont "setfont ter-132b"
