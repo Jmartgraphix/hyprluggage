@@ -95,9 +95,9 @@
   },
   "custom/theme": {
     "format": "󰏘",
-    "tooltip-format": "Themes. Right-click picks a wallpaper.",
-    "on-click": "~/.config/hypr/scripts/hyprluggage-cmd switch",
-    "on-click-right": "~/.config/waybar/scripts/wall-picker",
+    "tooltip-format": "Left: themes · Right: wallpapers · Middle: random",
+    "on-click": "~/.config/rofi/scripts/themePicker",
+    "on-click-right": "~/.config/rofi/scripts/wallPicker",
     "on-click-middle": "~/.config/waybar/scripts/random-wall"
   },
   "custom/brightness": {

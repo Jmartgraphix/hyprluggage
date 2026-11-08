@@ -1,7 +1,7 @@
 -- Theme colors for Hyprland Lua (nordic)
 -- Returned table is consumed by looknfeel.lua
 return {
-  secondary = "$activeBorderColor",
+  secondary = "rgba(8fbcbbaa)",
   outline_variant = "rgba(4c566aff)",
   active_border = "rgba(8fbcbbaa)",
   group_border_active = "rgba(8fbcbbaa)",

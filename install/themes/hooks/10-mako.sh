@@ -3,13 +3,14 @@
 
 command -v makoctl &>/dev/null || exit 0
 
-# For static themes: symlink theme-specific mako config
-# For dynamic theme: matugen generates config directly to ~/.config/mako/config
+# Static themes: symlink theme config.
+# Dynamic: matugen writes themes/dynamic/.../mako/config (and may also
+# have written a plain file under ~/.config/mako/config historically).
 src="$CURRENT_LINK/.config/mako/config"
 if [[ -f "$src" ]]; then
-    ln -sf "$src" "$HOME/.config/mako/config"
+	src="$(readlink -f "$src")"
+	ln -sfn "$src" "$HOME/.config/mako/config"
 fi
 
-# Reload mako to pick up new config
-pgrep -x mako &>/dev/null && makoctl reload 2>/dev/null || exit 0
+pgrep -x mako &>/dev/null && makoctl reload 2>/dev/null || true
 exit 0

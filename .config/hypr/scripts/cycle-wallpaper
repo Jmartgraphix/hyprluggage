@@ -9,7 +9,8 @@ source "$HOME/.config/hypr/scripts/wallpaper-lib.sh"
 source "$HOME/.config/rofi/scripts/thumbcache"
 
 THEME=$(cat "$HOME/.config/hyprluggage/.current-theme" 2>/dev/null || echo "dynamic")
-WALLDIR="$HOME/hyprluggage/themes/$THEME/backgrounds"
+repo_dir="$("$HOME/.config/hypr/scripts/hyprluggage-dir")"
+WALLDIR="$repo_dir/themes/$THEME/backgrounds"
 AWWW_PARAMS="--transition-fps 120 --transition-duration 1 --transition-bezier 0.25,0.1,0.25,1.0"
 
 if [[ "$THEME" == "dynamic" || ! -d "$WALLDIR" ]]; then
@@ -38,7 +39,7 @@ apply_wallpaper() {
   local wall="${WALLS[$idx]}"
   ensure_awww_daemon
   awww img "$wall" --transition-type "$trans" --transition-pos "$pos" $AWWW_PARAMS
-  ln -sf "$wall" "$HOME/hyprluggage/themes/$THEME/wallpaper"
+  ln -sfn "backgrounds/$(basename "$wall")" "$repo_dir/themes/$THEME/wallpaper"
   sync_hyprlock_wallpaper "$wall"
   notify-send -i "$wall" "Wallpaper" "$((idx + 1))/$TOTAL"
 }

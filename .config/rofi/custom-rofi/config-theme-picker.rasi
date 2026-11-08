@@ -1,4 +1,4 @@
-/* Theme Picker - Responsive for all displays */
+/* Theme Picker — single horizontal bar (original layout) */
 @import "~/.config/rofi/config.rasi"
 
 configuration {
@@ -22,24 +22,7 @@ mainbox {
     padding: 1em 1.5em;
     spacing: 1em;
     background-color: transparent;
-    children: [ /* "inputbar", */ "listview" ];
-}
-
-inputbar {
-    padding: 0.6em 1em;
-    margin: 0 30%;
-    border: 0;
-    border-radius: 0.6em;
-    background-color: #ffffff10;
-    children: [ "entry" ];
-}
-
-entry {
-    placeholder: "Search themes...";
-    placeholder-color: #ffffff50;
-    text-color: #ffffffdd;
-    horizontal-align: 0.5;
-    cursor: text;
+    children: [ "listview" ];
 }
 
 listview {

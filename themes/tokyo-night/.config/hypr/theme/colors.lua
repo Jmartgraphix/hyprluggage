@@ -1,7 +1,7 @@
 -- Theme colors for Hyprland Lua (tokyo-night)
 -- Returned table is consumed by looknfeel.lua
 return {
-  secondary = "$activeBorderColor",
+  secondary = "rgba(7aa2f7aa)",
   outline_variant = "rgba(414868ff)",
   active_border = "rgba(7aa2f7aa)",
   group_border_active = "rgba(7aa2f7aa)",

@@ -1,7 +1,7 @@
 -- Theme colors for Hyprland Lua (kanagawa)
 -- Returned table is consumed by looknfeel.lua
 return {
-  secondary = "$activeBorderColor",
+  secondary = "rgba(7e9cd8aa)",
   outline_variant = "rgba(54546Dff)",
   active_border = "rgba(7e9cd8aa)",
   group_border_active = "rgba(7e9cd8aa)",

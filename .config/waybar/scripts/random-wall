@@ -1,38 +1,29 @@
 #!/bin/bash
+# Waybar middle-click on the theme icon → random wallpaper
 
 source "$HOME/.config/hypr/scripts/wallpaper-lib.sh"
 
-# Random wallpaper selector with smooth animations
-WALLPAPER_DIR="$HOME/Wallpapers/"
+wallpaper_dir="$HOME/Wallpapers"
 
-# Get wallpaper files
 mapfile -t wallpapers < <(
-  find "$WALLPAPER_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | sort
+	find "$wallpaper_dir" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | sort
 )
 
-# Validate wallpapers exist
 if [[ ${#wallpapers[@]} -eq 0 ]]; then
-  (action=$(notify-send -A "open=Get Wallpapers" --wait "No Wallpapers Found" "Add images to ~/Wallpapers to use dynamic theming") && [[ "$action" == "open" ]] && xdg-open "https://github.com/Jmartgraphix/Wallpapers") &
-  exit 1
+	(
+		action=$(notify-send -A "open=Get Wallpapers" --wait "No Wallpapers Found" "Add images to ~/Wallpapers to use dynamic theming")
+		[[ "$action" == "open" ]] && xdg-open "https://github.com/Jmartgraphix/Wallpapers"
+	) &
+	exit 1
 fi
 
-ensure_awww_daemon
+selected="${wallpapers[$((RANDOM % ${#wallpapers[@]}))]}"
 
-# Select random wallpaper
-random_index=$((RANDOM % ${#wallpapers[@]}))
-selected_wallpaper="${wallpapers[$random_index]}"
+apply_wallpaper "$selected" \
+	--transition-type grow \
+	--transition-pos top-right \
+	--transition-fps 120 \
+	--transition-duration 1 \
+	--transition-bezier 0.25,0.1,0.25,1.0
 
-# Apply wallpaper with top-right corner grow animation
-awww img "$selected_wallpaper" \
-  --transition-type grow \
-  --transition-pos top-right \
-  --transition-fps 120 \
-  --transition-duration 1 \
-  --transition-bezier 0.25,0.1,0.25,1.0
-
-sync_hyprlock_wallpaper "$selected_wallpaper"
-
-# Send notification with wallpaper preview
-notify-send -i "$selected_wallpaper" "Random Wallpaper" "$(basename "$selected_wallpaper")"
-
-killall -SIGUSR1 kitty
+notify-send -i "$selected" "Random Wallpaper" "${selected#"$wallpaper_dir"/}"

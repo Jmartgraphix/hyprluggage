@@ -25,7 +25,7 @@ HYPRLUGGAGE_DIR="$HOME/.config/hyprluggage"
 CURRENT_LINK="$HYPRLUGGAGE_DIR/current"
 THEME_FILE="$HYPRLUGGAGE_DIR/.current-theme"
 
-VERSION="3.2.2"
+VERSION="3.2.3"
 
 # colors
 RED='\033[0;31m'
@@ -41,11 +41,27 @@ err() { echo -e "${RED}[ERROR]${RESET} $1" >&2; }
 info() { echo -e "${BLUE}[INFO]${RESET} $1"; }
 
 notify() {
-	command -v notify-send &>/dev/null && notify-send "$1" "$2" ${3:+-i "$3"}
+	# Never trip set -e: notify-send can fail if the daemon is briefly down.
+	# Args: summary, [body], [icon]
+	command -v notify-send &>/dev/null || return 0
+	local summary="$1" body="${2:-}" icon="${3:-}"
+	# Mako often skips or collapses alerts with an empty body.
+	[[ -n "$body" ]] || body=" "
+	if [[ -n "$icon" && -e "$icon" ]]; then
+		notify-send -a Hyprluggage -i "$icon" "$summary" "$body" >/dev/null 2>&1 || true
+	else
+		notify-send -a Hyprluggage "$summary" "$body" >/dev/null 2>&1 || true
+	fi
 }
 
 current_theme() {
-	cat "$THEME_FILE" 2>/dev/null || echo "dynamic"
+	# Trim ends only — names like "elden-ring (aether)" keep internal spaces.
+	local t
+	t=$(cat "$THEME_FILE" 2>/dev/null || true)
+	t="${t//$'\r'/}"
+	t="${t#"${t%%[![:space:]]*}"}"
+	t="${t%"${t##*[![:space:]]}"}"
+	[[ -n "$t" ]] && printf '%s\n' "$t" || echo "dynamic"
 }
 
 theme_exists() {
@@ -115,16 +131,34 @@ set_wallpaper() {
 		return
 	fi
 
-	local wall
-	wall=$(find "$THEMES_DIR/$theme/backgrounds" -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) 2>/dev/null | sort -V | head -1)
-	[[ -z "$wall" ]] && return
+	local wall="" bgdir="$THEMES_DIR/$theme/backgrounds"
+	# Prefer the theme's chosen wallpaper symlink when it still points into backgrounds/.
+	if [[ -L "$THEMES_DIR/$theme/wallpaper" || -f "$THEMES_DIR/$theme/wallpaper" ]]; then
+		wall=$(readlink -f "$THEMES_DIR/$theme/wallpaper" 2>/dev/null || true)
+		case "$wall" in
+		"$bgdir"/*) ;;
+		*) wall="" ;;
+		esac
+	fi
+	if [[ -z "$wall" || ! -f "$wall" ]]; then
+		wall=$(find "$bgdir" -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) 2>/dev/null | sort -V | head -1)
+	fi
+	[[ -n "$wall" && -f "$wall" ]] || return 0
 
 	# shellcheck source=/dev/null
 	source "$HOME/.config/hypr/scripts/wallpaper-lib.sh"
 	ensure_awww_daemon
-	awww img "$wall" --transition-type center --transition-fps 120 --transition-duration 0.8
+
+	# Apply to every output. Retry once — picker→switch can race the compositor.
+	if ! awww img "$wall" --transition-type fade --transition-fps 60 --transition-duration 0.4; then
+		sleep 0.2
+		ensure_awww_daemon
+		awww img "$wall" --transition-type none || warn "awww failed to set wallpaper"
+	fi
+
+	# Keep a relative theme-local link for tracking; hyprlock uses a separate path.
 	ln -sfn "backgrounds/$(basename "$wall")" "$THEMES_DIR/$theme/wallpaper"
-	sync_hyprlock_wallpaper "$wall"
+	sync_hyprlock_wallpaper "$wall" || true
 }
 
 # ╭───────────────────────────────────────────────────────────────────────╮
@@ -133,6 +167,7 @@ set_wallpaper() {
 
 cmd_switch() {
 	local theme="$1"
+	local new_theme wall_icon
 
 	if [[ -z "$theme" ]]; then
 		command -v rofi &>/dev/null || {
@@ -147,6 +182,11 @@ cmd_switch() {
 		fi
 	fi
 
+	# Trim CR/whitespace — rofi / theme files can sneak a trailing newline back in.
+	theme="${theme//$'\r'/}"
+	theme="${theme#"${theme%%[![:space:]]*}"}"
+	theme="${theme%"${theme##*[![:space:]]}"}"
+
 	[[ -z "$theme" ]] && exit 0
 	[[ "$theme" == "$(current_theme)" ]] && {
 		notify "Already using $theme"
@@ -158,26 +198,40 @@ cmd_switch() {
 	}
 	require_theme_format "$theme" || exit 1
 
-	info "Switching to $theme..."
+	# Freeze the destination name — hooks/sourced libs must not change what we announce.
+	new_theme="$theme"
+
+	info "Switching to $new_theme..."
 	hyprctl keyword misc:disable_autoreload 1 &>/dev/null || true
 
 	mkdir -p "$HYPRLUGGAGE_DIR"
-	echo "$theme" >"$THEME_FILE"
-	ln -sfn "$THEMES_DIR/$theme" "$CURRENT_LINK"
+	printf '%s\n' "$new_theme" >"$THEME_FILE"
+	ln -sfn "$THEMES_DIR/$new_theme" "$CURRENT_LINK"
 
-	# Dynamic theme runs hooks via change-theme -> hyprluggage reload
-	if [[ "$theme" != "dynamic" ]]; then
+	# Wallpaper first (before waybar/hypr reload), so a slow/failing hook
+	# cannot leave new colors on the previous background.
+	if [[ "$new_theme" != "dynamic" ]]; then
+		set_wallpaper "$new_theme"
 		run_hooks
+		# Re-assert wallpaper after hyprctl reload / session churn.
+		set_wallpaper "$new_theme"
+	else
+		set_wallpaper "$new_theme"
 	fi
 
 	hyprctl keyword misc:disable_autoreload 0 &>/dev/null || true
-	set_wallpaper "$theme"
 
-	# Dynamic theme handles its own notification via change-theme script
-	if [[ "$theme" != "dynamic" ]]; then
-		notify "$theme" "" "$(readlink -f "$THEMES_DIR/$theme/wallpaper" 2>/dev/null)"
+	# Dynamic theme handles its own notification via change-theme script.
+	# Mako reload (hooks) + group-by=app-name can resurface a stale
+	# "Already using …" / previous switch alert — dismiss, then announce
+	# the theme we just wrote (name in the summary, where mako shows it).
+	if [[ "$new_theme" != "dynamic" ]]; then
+		sleep 0.2
+		command -v makoctl &>/dev/null && makoctl dismiss --all --no-history >/dev/null 2>&1 || true
+		wall_icon=$(readlink -f "$THEMES_DIR/$new_theme/wallpaper" 2>/dev/null || true)
+		notify "Switched to $new_theme" "Theme applied" "$wall_icon"
 	fi
-	ok "Switched to $theme"
+	ok "Switched to $new_theme"
 }
 
 cmd_reload() {
@@ -201,10 +255,12 @@ cmd_reload() {
 }
 
 cmd_list() {
-	local current
+	local current theme
+	local -a themes=()
 	current=$(current_theme)
+	mapfile -t themes < <(list_themes)
 	echo ""
-	for theme in $(list_themes); do
+	for theme in "${themes[@]}"; do
 		if [[ "$theme" == "$current" ]]; then
 			echo -e "  ${GREEN}●${RESET} $theme (current)"
 		else

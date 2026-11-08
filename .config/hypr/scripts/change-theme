@@ -1,69 +1,41 @@
 #!/bin/bash
+# Random dynamic wallpaper + matugen. Locked out on static themes.
 
 source "$HOME/.config/hypr/scripts/wallpaper-lib.sh"
 
-# Check if custom theme is active
-CURRENT_THEME=$(cat ~/.config/hyprluggage/.current-theme 2>/dev/null || echo "dynamic")
+CURRENT_THEME=$(current_hyprluggage_theme)
 if [[ "$CURRENT_THEME" != "dynamic" ]]; then
 	notify-send "Theme Locked" "Switch to Dynamic first"
 	exit 0
 fi
 
-# Directory containing wallpapers
 WALLPAPER_DIR="$HOME/Wallpapers/"
 STATE_FILE="$HOME/.current_wallpaper_index"
 
 mapfile -t WALLPAPERS < <(find "$WALLPAPER_DIR" -type f \( -iname '*.jpg' -o -iname '*.png' \) | sort)
 
-# Get number of wallpapers
 NUM_WALLPAPERS=${#WALLPAPERS[@]}
-if [ "$NUM_WALLPAPERS" -eq 0 ]; then
-	(action=$(notify-send -A "open=Get Wallpapers" --wait "No Wallpapers Found" "Add images to ~/Wallpapers to use dynamic theming") && [[ "$action" == "open" ]] && xdg-open "https://github.com/Jmartgraphix/Wallpapers") &
+if [[ "$NUM_WALLPAPERS" -eq 0 ]]; then
+	(
+		action=$(notify-send -A "open=Get Wallpapers" --wait "No Wallpapers Found" "Add images to ~/Wallpapers to use dynamic theming")
+		[[ "$action" == "open" ]] && xdg-open "https://github.com/Jmartgraphix/Wallpapers"
+	) &
 	exit 1
 fi
 
-if [ -f "$STATE_FILE" ]; then
-	INDEX=$(<"$STATE_FILE")
-	INDEX=$((RANDOM % NUM_WALLPAPERS))
-	# INDEX=$(((INDEX + 1) % NUM_WALLPAPERS)) #cycles through wallpapers in sequence
-else
-	INDEX=0
-fi
-
+INDEX=$((RANDOM % NUM_WALLPAPERS))
 echo "$INDEX" >"$STATE_FILE"
-
 CURRENT_WALLPAPER="${WALLPAPERS[$INDEX]}"
 
-ensure_awww_daemon
-
-awww img "$CURRENT_WALLPAPER" \
+apply_wallpaper "$CURRENT_WALLPAPER" \
 	--transition-type center \
 	--transition-pos top-right \
 	--transition-fps 120 \
 	--transition-duration 1 \
 	--transition-bezier 0.25,0.1,0.25,1.0
 
-# Update wallpaper symlinks to track current wallpaper
-DISPLAYED_WALLPAPER=$(awww_current_image)
-if [[ -z "$DISPLAYED_WALLPAPER" ]]; then
-	DISPLAYED_WALLPAPER="$CURRENT_WALLPAPER"
-fi
-if [[ -n "$DISPLAYED_WALLPAPER" ]]; then
-	ln -sf "$DISPLAYED_WALLPAPER" "$HOME/hyprluggage/themes/dynamic/wallpaper"
-	sync_hyprlock_wallpaper "$DISPLAYED_WALLPAPER"
-fi
-
-matugen image "$CURRENT_WALLPAPER" -m dark
-
-# Reload mako after matugen generates colors
-pgrep -x mako &>/dev/null && makoctl reload 2>/dev/null
-
-# Update Hyprluggage apps that need special handling
-"$HOME/hyprluggage/install/themes/hyprluggage" reload
-
-# Reload apps not handled by hyprluggage
-restart-app swayosd-server
-
+# Extra session refresh for dynamic (apply_wallpaper already reloads hyprluggage).
+command -v restart-app &>/dev/null && restart-app swayosd-server || true
 pgrep -x nautilus >/dev/null && (
 	pkill -x nautilus
 	nautilus &>/dev/null &
