@@ -82,21 +82,47 @@ read_kitty_colors() {
          }' "$1"
 }
 
+# Omarchy/Aether colors.toml: prefer explicit color0-15, else map semantic names.
 read_colors_toml() {
     awk '
-        /^[[:space:]]*background[[:space:]]*=/ { bg=$3 }
-        /^[[:space:]]*foreground[[:space:]]*=/ { fg=$3 }
-        /^[[:space:]]*color[0-9]+[[:space:]]*=/ { c[$1]=$3 }
+        /^[[:space:]]*[a-zA-Z0-9_]+[[:space:]]*=/ {
+            key = $1
+            rest = $0
+            sub(/^[[:space:]]*[a-zA-Z0-9_]+[[:space:]]*=[[:space:]]*/, "", rest)
+            gsub(/"/, "", rest)
+            # Only strip " # comment" — hex values are #rrggbb.
+            sub(/[[:space:]]+#.*$/, "", rest)
+            gsub(/[[:space:]]/, "", rest)
+            kv[key] = rest
+        }
         END {
-            gsub(/"/, "", bg)
-            gsub(/"/, "", fg)
+            bg = kv["background"]
+            fg = kv["foreground"]
             if (bg == "" || fg == "") exit 1
+
+            # ANSI slots when present (Aether writes both).
+            for (i = 0; i < 16; i++) c[i] = kv["color" i]
+
+            # Modern Omarchy themes only ship semantic names.
+            if (c[0] == "") c[0] = bg
+            if (c[1] == "") c[1] = kv["red"]
+            if (c[2] == "") c[2] = kv["green"]
+            if (c[3] == "") c[3] = kv["yellow"]
+            if (c[4] == "") c[4] = (kv["blue"] != "" ? kv["blue"] : kv["accent"])
+            if (c[5] == "") c[5] = kv["magenta"]
+            if (c[6] == "") c[6] = kv["cyan"]
+            if (c[7] == "") c[7] = fg
+            if (c[8] == "") c[8] = (kv["muted"] != "" ? kv["muted"] : kv["dark_foreground"])
+            if (c[9] == "") c[9] = (kv["bright_red"] != "" ? kv["bright_red"] : c[1])
+            if (c[10] == "") c[10] = (kv["bright_green"] != "" ? kv["bright_green"] : c[2])
+            if (c[11] == "") c[11] = (kv["bright_yellow"] != "" ? kv["bright_yellow"] : c[3])
+            if (c[12] == "") c[12] = (kv["bright_blue"] != "" ? kv["bright_blue"] : c[4])
+            if (c[13] == "") c[13] = (kv["bright_magenta"] != "" ? kv["bright_magenta"] : c[5])
+            if (c[14] == "") c[14] = (kv["bright_cyan"] != "" ? kv["bright_cyan"] : c[6])
+            if (c[15] == "") c[15] = (kv["bright_foreground"] != "" ? kv["bright_foreground"] : fg)
+
             printf "%s %s ", bg, fg
-            for (i = 0; i < 16; i++) {
-                v = c["color" i]
-                gsub(/"/, "", v)
-                printf "%s ", v
-            }
+            for (i = 0; i < 16; i++) printf "%s ", c[i]
         }
     ' "$1"
 }
@@ -143,3 +169,25 @@ get_colors() {
     [[ -f "$file" ]] && read_colors_toml "$file" && return
     return 1
 }
+
+# Semantic accent from colors.toml (Omarchy / Aether). Empty when absent.
+read_toml_accent() {
+    local file="$1/colors.toml" v
+    [[ -f "$file" ]] || return 1
+    v=$(awk '
+        /^[[:space:]]*accent[[:space:]]*=/ {
+            rest = $0
+            sub(/^[[:space:]]*accent[[:space:]]*=[[:space:]]*/, "", rest)
+            gsub(/"/, "", rest)
+            sub(/[[:space:]]+#.*$/, "", rest)
+            gsub(/[[:space:]]/, "", rest)
+            print rest
+            exit
+        }
+    ' "$file")
+    [[ -n "$v" ]] || return 1
+    printf '%s\n' "$v"
+}
+
+# Back-compat name used by aether apply.
+read_aether_accent() { read_toml_accent "$@"; }

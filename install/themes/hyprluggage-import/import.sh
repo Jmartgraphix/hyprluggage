@@ -48,6 +48,8 @@ write_configs() {
     bblue=${c[12]:-$blue} bmagenta=${c[13]:-$magenta} bcyan=${c[14]:-$cyan}
     bwhite=${c[15]:-#ffffff}
     accent=$blue
+    # Omarchy/Aether colors.toml may publish a semantic accent ≠ ANSI color4.
+    [[ -n "${THEME_ACCENT:-}" ]] && accent="$THEME_ACCENT"
     # Hyprluggage's bar, GTK theme, and shadows are dark. A light Aether
     # palette would paint dark text on the dark bar and white shadows.
     if (( $(luminance "$bg") > $(luminance "$fg") )); then
@@ -127,7 +129,7 @@ build_theme() {
     local colors bg fg
     local palette
 
-    colors=$(get_colors "$src") || { err "no kitty.conf or alacritty.toml found"; exit 1; }
+    colors=$(get_colors "$src") || { err "no colors found (need colors.toml, kitty.conf, or alacritty.toml)"; exit 1; }
     read -ra C <<< "$colors"
     bg="${C[0]}"
     fg="${C[1]}"
@@ -138,11 +140,14 @@ build_theme() {
     rm -rf "$dest"
     prepare_theme_dirs "$dest"
     copy_wallpapers "$src" "$dest"
+    THEME_ACCENT=$(read_toml_accent "$src" || true)
     write_configs "$name" "$dest" "$bg" "$fg" "${palette[@]}"
     if [[ "$kind" == "aether" ]]; then
         gen_nvim
     else
         copy_overrides "$src" "$dest"
+        # Omarchy repos rarely ship neovim.lua; still generate aether.nvim palette.
+        [[ -f "$dest/.config/nvim/theme.lua" ]] || gen_nvim
     fi
     write_theme_format "$dest"
 }
