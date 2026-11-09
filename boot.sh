@@ -42,7 +42,10 @@ echo
 if [[ -d "$DEST/.git" ]]; then
     echo -e "${DIM}  Updating hyprluggage...${RESET}"
     git -C "$DEST" fetch origin --tags
-    git -C "$DEST" pull --ff-only || true
+    # Keep going on diverge/local commits, but don't pretend the update worked.
+    if ! git -C "$DEST" pull --ff-only; then
+        echo -e "${MAGENTA}  !${RESET} git pull failed — installing from current local tree (may be stale)"
+    fi
 else
     echo -e "${DIM}  Cloning from github.com/${REPO}...${RESET}"
     rm -rf "$DEST"
