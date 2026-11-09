@@ -1,0 +1,31 @@
+# Aether-style colors.toml: semantic names plus explicit ANSI slots.
+# color1 differs from red so smoke can assert ANSI wins.
+mode = "dark"
+
+accent = "#b2bbce"
+background = "#020306"
+foreground = "#e6e0ce"
+
+red = "#9d7465"
+green = "#746748"
+yellow = "#9d9371"
+blue = "#b2bbce"
+magenta = "#917789"
+cyan = "#a0acc0"
+
+color0 = "#020306"
+color1 = "#111111"
+color2 = "#746748"
+color3 = "#9d9371"
+color4 = "#b2bbce"
+color5 = "#917789"
+color6 = "#a0acc0"
+color7 = "#e6e0ce"
+color8 = "#4a4d52"
+color9 = "#d5b3a5"
+color10 = "#b3a679"
+color11 = "#d2caa8"
+color12 = "#e3e7f5"
+color13 = "#ccb4c7"
+color14 = "#d4ddee"
+color15 = "#f6e9be"

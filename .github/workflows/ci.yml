@@ -66,3 +66,11 @@ jobs:
           CI_HOME="${RUNNER_TEMP}/hyprluggage-home"
           mkdir -p "$CI_HOME/.config" "$CI_HOME/.local/bin" "$CI_HOME/.local/share"
           stow -n -v -t "$CI_HOME" -d "$GITHUB_WORKSPACE" .
+
+  themes:
+    name: theme smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check theme layout and colors.toml parsing
+        run: bash install/themes/smoke-themes.sh

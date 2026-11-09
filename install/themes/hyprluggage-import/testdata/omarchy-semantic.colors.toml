@@ -1,0 +1,23 @@
+# Minimal Omarchy-style colors.toml (semantic names only, no color0-15).
+mode = "dark"
+
+accent = "#d9a56c"
+muted = "#7a5c66"
+
+background = "#0d0509"
+foreground = "#f0eaed"
+
+red = "#e85f6f"
+yellow = "#d4a882"
+green = "#f29b9a"
+cyan = "#e8c099"
+blue = "#d9a56c"
+magenta = "#d1b399"
+
+bright_red = "#ff7a8a"
+bright_yellow = "#e6ba94"
+bright_green = "#ffb5b4"
+bright_cyan = "#fbd2ab"
+bright_blue = "#ebb97e"
+bright_magenta = "#e3c5ab"
+bright_foreground = "#ffffff"
