@@ -21,7 +21,16 @@ fi
 STATE_DIR="${XDG_STATE_HOME}/hyprluggage"
 LOG="$STATE_DIR/session.log"
 TMPLOG="/tmp/hyprluggage-session-$(id -u).log"
+# Cap growth across years of logins; keep the newest ~512 KiB.
+LOG_MAX_BYTES=$((512 * 1024))
 mkdir -p "$STATE_DIR" 2>/dev/null || true
+
+if [[ -f "$LOG" ]]; then
+	log_size=$(wc -c <"$LOG" 2>/dev/null || echo 0)
+	if [[ "${log_size:-0}" -gt $LOG_MAX_BYTES ]]; then
+		tail -c "$LOG_MAX_BYTES" "$LOG" >"$LOG.tmp" 2>/dev/null && mv -f "$LOG.tmp" "$LOG"
+	fi
+fi
 
 log() { echo "$*" | tee -a "$TMPLOG" >>"$LOG" 2>/dev/null; }
 
