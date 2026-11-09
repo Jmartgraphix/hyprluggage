@@ -47,9 +47,12 @@ check_theme() {
 		fail "$name: theme.toml format='$got' (want $THEME_FORMAT)"
 	fi
 
-	# Presence only — dynamic may point at ~/Wallpapers which CI lacks.
-	if [[ ! -L "$dest/wallpaper" && ! -f "$dest/wallpaper" ]]; then
-		fail "$name: missing wallpaper link/file"
+	# themes/*/wallpaper is gitignored (user preference). Static themes must
+	# ship at least one image under backgrounds/; dynamic uses ~/Wallpapers.
+	if [[ "$name" != "dynamic" ]]; then
+		if ! find "$dest/backgrounds" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | grep -q .; then
+			fail "$name: no images in backgrounds/"
+		fi
 	fi
 
 	for req in \
