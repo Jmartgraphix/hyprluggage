@@ -27,11 +27,11 @@ fi
 # Fetch weather from wttr.in
 if [ -z "$LOCATION" ]; then
     # Auto-detect location or use IP-based location
-    weather_data=$(curl -s "wttr.in/?format=j1" 2>/dev/null)
+    weather_data=$(curl -s "https://wttr.in/?format=j1" 2>/dev/null)
 else
     # URL encode the location (replace spaces with +, keep commas and other chars)
     encoded_location=$(echo "$LOCATION" | sed 's/ /+/g')
-    weather_data=$(curl -s "wttr.in/${encoded_location}?format=j1" 2>/dev/null)
+    weather_data=$(curl -s "https://wttr.in/${encoded_location}?format=j1" 2>/dev/null)
 fi
 
 # Check if we got valid JSON with weather data
