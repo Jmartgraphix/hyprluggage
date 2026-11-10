@@ -25,7 +25,7 @@ HYPRLUGGAGE_DIR="$HOME/.config/hyprluggage"
 CURRENT_LINK="$HYPRLUGGAGE_DIR/current"
 THEME_FILE="$HYPRLUGGAGE_DIR/.current-theme"
 
-VERSION="3.2.7"
+VERSION="3.2.8"
 
 # colors
 RED='\033[0;31m'
@@ -399,6 +399,14 @@ cmd_doctor() {
 		doctor_ok "monitors-local.lua (host layout)"
 	else
 		doctor_ok "monitors-local.lua absent (shared catch-all / auto layout)"
+	fi
+	if [[ -f "$state_dir/envs-local.lua" ]]; then
+		doctor_ok "envs-local.lua (host env / HiDPI)"
+	else
+		doctor_ok "envs-local.lua absent (shared env defaults)"
+	fi
+	if [[ ! -f "$state_dir/monitors-local.lua" || ! -f "$state_dir/envs-local.lua" ]]; then
+		info "for HiDPI Qt, custom layout, or audio priority: hyprluggage host"
 	fi
 
 	# ── Theme ────────────────────────────────────────────────────────────
@@ -823,6 +831,103 @@ EOF
 	esac
 }
 
+cmd_host() {
+	local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
+	local envs_path="$state_dir/envs-local.lua"
+	local monitors_path="$state_dir/monitors-local.lua"
+	local weather_path="$state_dir/weather-location"
+	local wp_example="$DOTFILES/examples/wireplumber/51-audio-priority.conf"
+	local wp_dest="$HOME/.config/wireplumber/wireplumber.conf.d/51-audio-priority.conf"
+	local sub="${1:-}"
+
+	case "$sub" in
+	"" | help | -h | --help)
+		cat <<EOF
+Host overlays (opt-in; never required for a fresh install)
+
+  New machines are usable with shared defaults. Create overlays only when
+  something looks wrong (layout, HiDPI Qt, audio priority, weather).
+
+Paths under $state_dir:
+  monitors-local.lua   Per-output layout (scale, position, mirror, disable)
+  envs-local.lua       QT scale / xwayland HiDPI (needs logout/login)
+  weather-location     Waybar weather city (set via Waybar click)
+
+Other host files (outside stow):
+  ~/.config/sunshine/sunshine.conf     Moonlight capture output_name
+  ~/.config/wireplumber/...            Audio device priority (see below)
+
+Commands:
+  hyprluggage host              This map
+  hyprluggage host envs         Print envs-local example + path
+  hyprluggage host envs --init  Create envs-local.lua if missing (QT 1.5 sample)
+  hyprluggage host monitors     Same as: hyprluggage monitors help
+  hyprluggage monitors save     Write monitors-local.lua from hyprctl
+  hyprluggage monitors path     Print monitors-local.lua path
+
+WirePlumber (optional):
+  mkdir -p ~/.config/wireplumber/wireplumber.conf.d
+  cp $wp_example \\
+     $wp_dest
+  # then edit node.name matches for your DAC / built-in audio
+
+Weather: click the Waybar weather module, or:
+  echo 'City, ST' > $weather_path
+EOF
+		;;
+	envs)
+		shift || true
+		if [[ "${1:-}" == "--init" ]]; then
+			if [[ -f "$envs_path" ]]; then
+				warn "already exists: $envs_path"
+				echo "$envs_path"
+				exit 0
+			fi
+			mkdir -p "$state_dir"
+			cat >"$envs_path" <<'EOF'
+-- Host-local env / HiDPI (not managed by stow / hyprluggage update).
+-- hl.env only applies at compositor launch — logout/login after edits.
+-- See: hyprluggage host envs
+hl.env("QT_SCALE_FACTOR", "1.5")
+hl.config({
+	xwayland = {
+		force_zero_scaling = true,
+	},
+})
+EOF
+			ok "wrote $envs_path"
+			info "logout/login for hl.env to apply"
+			echo "$envs_path"
+			exit 0
+		fi
+		cat <<EOF
+Path: $envs_path
+$( [[ -f "$envs_path" ]] && echo "Status: present" || echo "Status: absent (shared defaults)" )
+
+Example (paste into that file, then logout/login):
+
+-- Host-local env / HiDPI (not managed by stow / hyprluggage update).
+hl.env("QT_SCALE_FACTOR", "1.5")
+hl.config({
+	xwayland = {
+		force_zero_scaling = true,
+	},
+})
+
+Create with: hyprluggage host envs --init
+EOF
+		;;
+	monitors)
+		cmd_monitors help
+		;;
+	*)
+		err "Unknown host subcommand: $sub"
+		echo "Try: hyprluggage host"
+		exit 1
+		;;
+	esac
+}
+
 cmd_help() {
 	cat <<'EOF'
                                                                     
@@ -850,6 +955,8 @@ Commands:
   fix                Fix broken symlinks
   doctor             Health report (read-only)
   monitors save|path Save or show host-local monitor layout
+  host [envs|monitors]
+                     Host overlays map (scale, layout, audio)
   update [tag]       Update to latest (or given) v* release tag
   rollback           Restore the previous ref from the last update
   remove <theme>     Delete a theme
@@ -934,6 +1041,10 @@ doctor) cmd_doctor ;;
 monitors)
 	shift
 	cmd_monitors "$@"
+	;;
+host)
+	shift
+	cmd_host "$@"
 	;;
 update)
 	shift

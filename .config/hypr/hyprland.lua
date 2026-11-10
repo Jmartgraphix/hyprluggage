@@ -20,6 +20,8 @@ require("media")
 local state = (os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")) .. "/hyprluggage"
 -- Per-machine monitor layout (after shared catch-all in monitors.lua)
 pcall(dofile, state .. "/monitors-local.lua")
+-- Per-machine env/HiDPI (after shared envs.lua); see: hyprluggage host envs
+pcall(dofile, state .. "/envs-local.lua")
 pcall(dofile, state .. "/profile.lua")
 pcall(dofile, state .. "/gpu.lua")
 

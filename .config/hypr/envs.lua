@@ -1,10 +1,11 @@
 -- Environment + xwayland
 -- hl.env only applies at compositor launch, not on reload.
+-- Per-machine QT/HiDPI overrides: ~/.local/state/hyprluggage/envs-local.lua
+-- (see: hyprluggage host envs)
 
-local xrd = os.getenv("XDG_RUNTIME_DIR") or ""
-local uid = xrd:match("/run/user/(%d+)") or os.getenv("UID") or "1000"
+local home = os.getenv("HOME") or ""
 
-hl.env("MPD_HOST", "/run/user/" .. uid .. "/mpd/socket")
+hl.env("MPD_HOST", home .. "/.config/mpd/socket")
 hl.env("EDITOR", "nvim")
 hl.env("GTK_THEME", "adw-gtk3-dark")
 hl.env("XCURSOR_SIZE", "24")
@@ -21,11 +22,3 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
-
-hl.env("QT_SCALE_FACTOR", "1.5")
-
-hl.config({
-	xwayland = {
-		force_zero_scaling = true,
-	},
-})

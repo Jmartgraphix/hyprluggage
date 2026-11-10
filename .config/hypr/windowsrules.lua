@@ -127,7 +127,6 @@ hl.window_rule({ match = { tag = "pip" }, keep_aspect_ratio = true })
 hl.window_rule({ match = { tag = "pip" }, border_size = 0 })
 hl.window_rule({ match = { tag = "pip" }, opacity = "1 1" })
 hl.window_rule({ match = { tag = "pip" }, move = "100%-w-40 4%" })
-hl.window_rule({ match = { class = "^steam$ # use - hyprctl monitors - in terminal for list of monitors" }, monitor = "DP-1" })
 hl.window_rule({ match = { class = "^steam_app_.*$" }, fullscreen = true })
 -- Chat clients request activation on new messages. Ignore that request so they
 -- stay in the background, but leave the windows focusable. no_focus makes
@@ -145,10 +144,6 @@ for _, class in ipairs(chat_apps) do
     hl.window_rule({ match = { class = class }, suppress_event = "activatefocus" })
 end
 hl.window_rule({ match = { class = "^(FreeCAD|freecad)$" }, no_initial_focus = true })
-hl.window_rule({ match = { class = "^(steam_app_109600)$" }, fullscreen = true })
-hl.window_rule({ match = { class = "^(steam_app_109600)$" }, float = true })
-hl.window_rule({ match = { class = "^(steam_app_109600)$" }, size = { 3840, 2160 } })
-hl.window_rule({ match = { class = "^(steam_app_109600)$" }, center = true })
 hl.window_rule({ match = { title = "^(Cryptic.*)$" }, float = true })
 
 -- Webapp / chat workspace defaults (shared; not display config)

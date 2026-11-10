@@ -4,10 +4,7 @@
   "position": "top",
   "spacing": 0,
   "height": 28,
-  "output": [
-    "!HDMI-A-2",
-    "*"
-  ],
+  "output": ["*"],
   "modules-left": [
     "custom/logo",
     "mpris"

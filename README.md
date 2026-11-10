@@ -294,6 +294,7 @@ hyprluggage fix             # fix broken symlinks
 hyprluggage doctor          # health report (read-only)
 hyprluggage monitors save   # save host monitor layout to state
 hyprluggage monitors path   # print host monitors-local.lua path
+hyprluggage host            # host overlays map (scale, layout, audio)
 hyprluggage update          # move to the latest v* release tag
 hyprluggage update v3.0.0   # move to an explicit tag
 hyprluggage rollback        # undo the last update (one step)
@@ -533,15 +534,26 @@ All configuration files are located in `~/.config/`. You can edit them directly�
     └── themes/         # Hyprluggage theme system
 ```
 
-Runtime stubs (outside the git tree): `~/.local/state/hyprluggage/profile.lua`, `gpu.lua`, and optional `monitors-local.lua`.
+Runtime stubs (outside the git tree): `~/.local/state/hyprluggage/profile.lua`, `gpu.lua`, and optional `monitors-local.lua` / `envs-local.lua` / `weather-location`.
 
-### Monitors (host-local layout)
+### Host overlays
 
-Shared [`.config/hypr/monitors.lua`](.config/hypr/monitors.lua) only ships a catch-all `preferred`/`auto` rule plus laptop eDP binds. Per-machine layout lives in `~/.local/state/hyprluggage/monitors-local.lua` so `hyprluggage update` / stow never overwrite your desk or a friend’s.
+A fresh install is usable with **no** host files. Overlays are opt-in when something looks wrong (layout, HiDPI Qt, audio priority, weather). Discover them with:
 
-- Fresh install: no local file is seeded; auto layout is enough for first boot.
-- After arranging displays (hyprctl / temporary keywords): `hyprluggage monitors save`
-- Hand-edit remains supported for mirrors or disabled outputs save cannot express perfectly: `hyprluggage monitors path`
+```bash
+hyprluggage host            # paths + recipes
+hyprluggage host envs       # QT / HiDPI snippet
+hyprluggage monitors save   # write monitors-local.lua from hyprctl
+```
+
+| Overlay | Path | When |
+|---|---|---|
+| Monitors | `~/.local/state/hyprluggage/monitors-local.lua` | Custom scale/position/mirror |
+| Env / HiDPI | `~/.local/state/hyprluggage/envs-local.lua` | Qt apps look wrong (needs logout/login) |
+| Weather | `~/.local/state/hyprluggage/weather-location` | Waybar weather city (picker or edit) |
+| Audio priority | `~/.config/wireplumber/...` (not stowed) | Prefer a USB DAC — copy from [`examples/wireplumber/`](examples/wireplumber/) |
+
+Shared [`.config/hypr/monitors.lua`](.config/hypr/monitors.lua) only ships a catch-all `preferred`/`auto` rule plus laptop eDP binds. `hyprluggage update` / stow never overwrite state overlays.
 
 ---
 
