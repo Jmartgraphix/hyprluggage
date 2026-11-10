@@ -25,7 +25,7 @@ HYPRLUGGAGE_DIR="$HOME/.config/hyprluggage"
 CURRENT_LINK="$HYPRLUGGAGE_DIR/current"
 THEME_FILE="$HYPRLUGGAGE_DIR/.current-theme"
 
-VERSION="3.2.9"
+VERSION="3.2.10"
 
 # colors
 RED='\033[0;31m'
@@ -852,6 +852,7 @@ Paths under $state_dir:
   monitors-local.lua   Per-output layout (scale, position, mirror, disable)
   envs-local.lua       QT scale / xwayland HiDPI (needs logout/login)
   weather-location     Waybar weather city (set via Waybar click)
+  session-dirs         Extra roots for tmux sessionX (one path per line)
 
 Other host files (outside stow):
   ~/.config/sunshine/sunshine.conf     Moonlight capture output_name
@@ -874,6 +875,9 @@ WirePlumber (optional):
 
 Weather: click the Waybar weather module, or:
   echo 'City, ST' > $weather_path
+
+Tmux session picker extras (optional):
+  printf '%s\\n' '~/Projects/work' '~/src/course' > $state_dir/session-dirs
 EOF
 		;;
 	envs)
