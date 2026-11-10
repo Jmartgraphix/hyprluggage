@@ -10,13 +10,15 @@ fi
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 VNC_STATE="${XDG_RUNTIME_DIR}/wayvnc-vncmod/active"
 
+# Ctrl+Alt Super twins stay loaded all session for Gatwy/Moonlight. Keyhints
+# must not dump both lists locally — that buries SUPER binds under ~100 twins.
 if [[ -f "$VNC_STATE" ]]; then
   PROMPT="Remote keybinds (Ctrl+Alt)"
   # Only remote Ctrl+Alt twins — not Super+Ctrl+Alt (or other Super chords)
   filter_list() { grep -E '^CTRL ALT( SHIFT)? \+'; }
 else
   PROMPT=""
-  filter_list() { cat; }
+  filter_list() { grep -Ev '^CTRL ALT( SHIFT)? \+'; }
 fi
 
 # Hyprland 0.56 broke `hyprctl binds -j`; parse the stable text output instead.
