@@ -52,6 +52,7 @@ systemctl --user enable --now sunshine-mod-bridge   # if Sunshine/Moonlight is i
 After changing Super binds:
 ```bash
 hypr-vnc-mod generate   # refresh vnc-mod-generated.lua from bindings/tiling/media/monitors.lua
+# eDP Super+Alt laptop binds stay in shared monitors.lua (host layout is monitors-local.lua)
 # next VNC or Sunshine apply will also regenerate
 ```
 

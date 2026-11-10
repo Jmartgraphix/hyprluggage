@@ -156,4 +156,5 @@ echo
 ok "Installation complete"
 info "Log out and back in for changes to take effect"
 info "Run 'hyprluggage help' to get started"
+info "Arrange displays if needed, then: hyprluggage monitors save"
 echo

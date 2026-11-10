@@ -16,8 +16,10 @@ require("windowsrules")
 require("tiling")
 require("media")
 
--- Form factor + GPU overlays (stubs under ~/.local/state/hyprluggage/)
+-- Host overlays under ~/.local/state/hyprluggage/ (never written by update/stow)
 local state = (os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")) .. "/hyprluggage"
+-- Per-machine monitor layout (after shared catch-all in monitors.lua)
+pcall(dofile, state .. "/monitors-local.lua")
 pcall(dofile, state .. "/profile.lua")
 pcall(dofile, state .. "/gpu.lua")
 
