@@ -8,7 +8,7 @@ hl.config({
 		kb_options = "compose:ralt",
 		follow_mouse = 1,
 		numlock_by_default = true,
-		sensitivity = 0.40,
+		sensitivity = 0.0,
 		touchpad = {
 			natural_scroll = false,
 			scroll_factor = 0.4,

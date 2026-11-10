@@ -181,13 +181,13 @@ hl.bind("CTRL + ALT + SHIFT + comma", hl.dsp.focus({ workspace = "e-1" }), { des
 -- VNC: SUPER CTRL + RIGHT → CTRL ALT SHIFT + period
 hl.bind("CTRL + ALT + SHIFT + period", hl.dsp.focus({ workspace = "e+1" }), { description = "Next workspace (VNC)" })
 
--- from: hl.bind("SUPER + ALT + H", hl.dsp.exec_cmd("hyprctl keyword monitor \"eDP-1,disable\""), { description = "Laptop screen off" })
+-- from: hl.bind("SUPER + ALT + H", hl.dsp.exec_cmd(home .. "/.config/hypr/scripts/laptop-panel off"), { description = "Laptop screen off" })
 -- VNC: SUPER ALT + H → CTRL ALT SHIFT + F1
-hl.bind("CTRL + ALT + SHIFT + F1", hl.dsp.exec_cmd("hyprctl keyword monitor \"eDP-1,disable\""), { description = "Laptop screen off (VNC)" })
+hl.bind("CTRL + ALT + SHIFT + F1", hl.dsp.exec_cmd(home .. "/.config/hypr/scripts/laptop-panel off"), { description = "Laptop screen off (VNC)" })
 
--- from: hl.bind("SUPER + ALT + l", hl.dsp.exec_cmd("hyprctl keyword monitor \"eDP-1,preferred,0x0,1\""), { description = "Laptop screen on" })
--- VNC: SUPER ALT + l → CTRL ALT SHIFT + F2
-hl.bind("CTRL + ALT + SHIFT + F2", hl.dsp.exec_cmd("hyprctl keyword monitor \"eDP-1,preferred,0x0,1\""), { description = "Laptop screen on (VNC)" })
+-- from: hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd(home .. "/.config/hypr/scripts/laptop-panel on"), { description = "Laptop screen on" })
+-- VNC: SUPER ALT + L → CTRL ALT SHIFT + F2
+hl.bind("CTRL + ALT + SHIFT + F2", hl.dsp.exec_cmd(home .. "/.config/hypr/scripts/laptop-panel on"), { description = "Laptop screen on (VNC)" })
 
 -- from: hl.bind("SUPER + 0", hl.dsp.focus({ workspace = 10 }), { description = "Switch to workspace 10" })
 hl.bind("CTRL + ALT + 0", hl.dsp.focus({ workspace = 10 }), { description = "Switch to workspace 10" })
@@ -276,8 +276,8 @@ hl.bind("CTRL + ALT + ESCAPE", hl.dsp.exec_cmd(string.format("%s/powermenu", rof
 -- from: hl.bind("SUPER + F1", hl.dsp.exec_cmd(string.format("%s/toggle-monitor", scrDir)), { description = "Toggle Monitor Power" })
 hl.bind("CTRL + ALT + F1", hl.dsp.exec_cmd(string.format("%s/toggle-monitor", scrDir)), { description = "Toggle Monitor Power" })
 
--- from: hl.bind("SUPER + G", hl.dsp.exec_cmd(string.format("%s \"https://github.com/Jmartgraphix\"", webapp)), { description = "Github" })
-hl.bind("CTRL + ALT + G", hl.dsp.exec_cmd(string.format("%s \"https://github.com/Jmartgraphix\"", webapp)), { description = "Github" })
+-- from: hl.bind("SUPER + G", hl.dsp.exec_cmd(string.format("%s \"https://github.com\"", webapp)), { description = "Github" })
+hl.bind("CTRL + ALT + G", hl.dsp.exec_cmd(string.format("%s \"https://github.com\"", webapp)), { description = "Github" })
 
 -- from: hl.bind("SUPER + K", hl.dsp.exec_cmd(string.format("%s/keyhints", rofiDir)), { description = "Show all keybindings" })
 hl.bind("CTRL + ALT + K", hl.dsp.exec_cmd(string.format("%s/keyhints", rofiDir)), { description = "Show all keybindings" })
@@ -391,9 +391,9 @@ hl.bind("CTRL + ALT + SHIFT + A", hl.dsp.exec_cmd(string.format("%s \"https://ch
 -- VNC: SUPER SHIFT + D → CTRL ALT SHIFT + Q
 hl.bind("CTRL + ALT + SHIFT + Q", hl.dsp.exec_cmd(string.format("%s -e lazydocker", terminal)), { description = "Docker" })
 
--- from: hl.bind("SUPER + SHIFT + G", hl.dsp.exec_cmd(string.format("%s \"https://mail.google.com/mail/u/1/\"", webapp)), { description = "Gmail" })
+-- from: hl.bind("SUPER + SHIFT + G", hl.dsp.exec_cmd(string.format("%s \"https://mail.google.com/\"", webapp)), { description = "Gmail" })
 -- VNC: SUPER SHIFT + G → CTRL ALT SHIFT + Z
-hl.bind("CTRL + ALT + SHIFT + Z", hl.dsp.exec_cmd(string.format("%s \"https://mail.google.com/mail/u/1/\"", webapp)), { description = "Gmail" })
+hl.bind("CTRL + ALT + SHIFT + Z", hl.dsp.exec_cmd(string.format("%s \"https://mail.google.com/\"", webapp)), { description = "Gmail" })
 
 -- from: hl.bind("SUPER + SHIFT + K", hl.dsp.exec_cmd("hyprctl kill"), { description = "kill application" })
 -- VNC: SUPER SHIFT + K → CTRL ALT SHIFT + X

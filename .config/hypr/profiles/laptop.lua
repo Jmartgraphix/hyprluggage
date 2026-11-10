@@ -26,3 +26,7 @@ hl.config({
 -- Hybrid lid: suspend if no external monitor; clamshell if docked
 hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd(home .. "/.config/hypr/scripts/lid-close"), { locked = true })
 hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd(home .. "/.config/hypr/scripts/lid-open"), { locked = true })
+
+-- Built-in panel toggle (discovers eDP|LVDS|DSI; no-op if absent)
+hl.bind("SUPER + ALT + H", hl.dsp.exec_cmd(home .. "/.config/hypr/scripts/laptop-panel off"), { description = "Laptop screen off" })
+hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd(home .. "/.config/hypr/scripts/laptop-panel on"), { description = "Laptop screen on" })

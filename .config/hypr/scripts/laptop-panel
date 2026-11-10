@@ -1,0 +1,22 @@
+#!/bin/bash
+# Enable/disable the internal laptop panel (eDP|LVDS|DSI).
+# Usage: laptop-panel on|off|enable|disable
+set -euo pipefail
+
+action="${1:-}"
+monitors_json="$(hyprctl monitors all -j 2>/dev/null || hyprctl monitors -j 2>/dev/null || echo '[]')"
+internal="$(echo "$monitors_json" | jq -r '.[] | select(.name | test("^(eDP|LVDS|DSI)"; "i")) | .name' 2>/dev/null | head -1)"
+internal="${internal:-eDP-1}"
+
+case "$action" in
+on | enable | preferred)
+	hyprctl keyword monitor "${internal},preferred,auto,1"
+	;;
+off | disable)
+	hyprctl keyword monitor "${internal},disable"
+	;;
+*)
+	echo "usage: laptop-panel on|off" >&2
+	exit 2
+	;;
+esac

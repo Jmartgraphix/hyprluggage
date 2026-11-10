@@ -89,6 +89,11 @@ else
     elif [[ -x "$DOTFILES/.local/bin/hypr-vnc-mod" ]]; then
         "$DOTFILES/.local/bin/hypr-vnc-mod" ensure &>/dev/null || true
     fi
+    # Hyprlock logo (hyprlock.conf cannot call hyprluggage-dir)
+    mkdir -p "$HOME/.config/hyprluggage"
+    if [[ -f "$DOTFILES/assets/luggage_open.png" ]]; then
+        ln -sfn "$DOTFILES/assets/luggage_open.png" "$HOME/.config/hyprluggage/luggage_open.png"
+    fi
 fi
 
 # Show backup location if backups were created

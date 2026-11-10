@@ -8,6 +8,8 @@ SOURCES=(
   "$HOME/.config/hypr/tiling.lua"
   "$HOME/.config/hypr/media.lua"
   "$HOME/.config/hypr/monitors.lua"
+  # Profile overlays (e.g. laptop panel Super+Alt+H/L)
+  "$HOME/.config/hypr/profiles/laptop.lua"
 )
 python3 - "$OUT" "${SOURCES[@]}" << 'PY'
 import re, sys

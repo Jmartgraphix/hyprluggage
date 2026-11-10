@@ -103,8 +103,8 @@
     "interval": "once",
     "signal": 10,
     "on-click-right": "~/.config/hypr/scripts/nightlight",
-    "on-scroll-up": "~/.config/hypr/scripts/ddc-brightness +",
-    "on-scroll-down": "~/.config/hypr/scripts/ddc-brightness -"
+    "on-scroll-up": "~/.config/hypr/scripts/brightness +",
+    "on-scroll-down": "~/.config/hypr/scripts/brightness -"
   },
   "disk": {
     "interval": 30,
@@ -128,7 +128,7 @@
     "tooltip": false
   },
   "network": {
-    "interface": "wlan*",
+    "interface": "wlan*|en*|eth*|wwan*",
     "format-icons": [
       "󰤯",
       "󰤟",

@@ -2,83 +2,83 @@
 
 [templates.hyprland]
 input_path = '~/.config/matugen/templates/hyprland-colors.lua'
-output_path = '~/hyprluggage/themes/dynamic/.config/hypr/theme/colors.lua'
+output_path = 'themes/dynamic/.config/hypr/theme/colors.lua'
 
 [templates.kitty]
 input_path = '~/.config/matugen/templates/kitty-colors.conf'
-output_path = '~/hyprluggage/themes/dynamic/.config/kitty/colors.conf'
+output_path = 'themes/dynamic/.config/kitty/colors.conf'
 
 [templates.btop]
 input_path = '~/.config/matugen/templates/btop.theme'
-output_path = '~/hyprluggage/themes/dynamic/.config/btop/themes/current.theme'
+output_path = 'themes/dynamic/.config/btop/themes/current.theme'
 
 [templates.yazi]
 input_path = '~/.config/matugen/templates/yazi-theme.toml'
-output_path = '~/hyprluggage/themes/dynamic/.config/yazi/theme.toml'
+output_path = 'themes/dynamic/.config/yazi/theme.toml'
 
 [templates.cava]
 input_path = '~/.config/matugen/templates/cava-colors.ini'
-output_path = '~/hyprluggage/themes/dynamic/.config/cava/config'
+output_path = 'themes/dynamic/.config/cava/config'
 
 [templates.fuzzel]
 input_path = '~/.config/matugen/templates/fuzzel_theme.ini'
-output_path = '~/hyprluggage/themes/dynamic/.config/fuzzel/fuzzel_theme.ini'
+output_path = 'themes/dynamic/.config/fuzzel/fuzzel_theme.ini'
 
 [templates.ghostty]
 input_path = '~/.config/matugen/templates/ghostty'
-output_path = '~/hyprluggage/themes/dynamic/.config/ghostty/theme'
+output_path = 'themes/dynamic/.config/ghostty/theme'
 
 [templates.waybar]
 input_path = '~/.config/matugen/templates/colors.css'
-output_path = '~/hyprluggage/themes/dynamic/.config/waybar/colors.css'
+output_path = 'themes/dynamic/.config/waybar/colors.css'
 
 [templates.starship]
 input_path = '~/.config/matugen/templates/starship-colors.toml'
-output_path = '~/hyprluggage/themes/dynamic/.config/starship.toml'
+output_path = 'themes/dynamic/.config/starship.toml'
 
 [templates.rofi]
 input_path = '~/.config/matugen/templates/rofi-colors.rasi'
-output_path = '~/hyprluggage/themes/dynamic/.config/rofi/colors.rasi'
+output_path = 'themes/dynamic/.config/rofi/colors.rasi'
 
 [templates.gtk3]
 input_path = '~/.config/matugen/templates/gtk-colors.css'
-output_path = '~/hyprluggage/themes/dynamic/.config/gtk-3.0/colors.css'
+output_path = 'themes/dynamic/.config/gtk-3.0/colors.css'
 
 [templates.alacritty]
 input_path = '~/.config/matugen/templates/alacritty-colors.toml'
-output_path = '~/hyprluggage/themes/dynamic/.config/alacritty/colors.toml'
+output_path = 'themes/dynamic/.config/alacritty/colors.toml'
 
 [templates.gtk4]
 input_path = '~/.config/matugen/templates/gtk-colors.css'
-output_path = '~/hyprluggage/themes/dynamic/.config/gtk-4.0/colors.css'
+output_path = 'themes/dynamic/.config/gtk-4.0/colors.css'
 
 [templates.rmpc]
 input_path = '~/.config/matugen/templates/rmpc-theme.ron'
-output_path = '~/hyprluggage/themes/dynamic/.config/rmpc/themes/current.ron'
+output_path = 'themes/dynamic/.config/rmpc/themes/current.ron'
 
 [templates.pywalfox-json]
 input_path = '~/.config/matugen/templates/pywalfox-colors.json'
-output_path = '~/hyprluggage/themes/dynamic/.cache/wal/colors.json'
+output_path = 'themes/dynamic/.cache/wal/colors.json'
 
 [templates.pywalfox-colors]
 input_path = '~/.config/matugen/templates/pywalfox-colors'
-output_path = '~/hyprluggage/themes/dynamic/.cache/wal/colors'
+output_path = 'themes/dynamic/.cache/wal/colors'
 
 [templates.vesktop]
 input_path = '~/.config/matugen/templates/midnight-color.css'
-output_path = '~/hyprluggage/themes/dynamic/.config/vesktop/themes/hyprluggage-discord.css'
+output_path = 'themes/dynamic/.config/vesktop/themes/hyprluggage-discord.css'
 
 [templates.obsidian]
 input_path = '~/.config/matugen/templates/obsidian-theme.css'
-output_path = '~/hyprluggage/themes/dynamic/.config/obsidian/theme.css'
+output_path = 'themes/dynamic/.config/obsidian/theme.css'
 
 [templates.spicetify]
 input_path = '~/.config/matugen/templates/spicetify-colors.ini'
-output_path = '~/hyprluggage/themes/dynamic/.config/spicetify/Themes/hyprluggage/color.ini'
+output_path = 'themes/dynamic/.config/spicetify/Themes/hyprluggage/color.ini'
 
 [templates.mako]
 input_path = '~/.config/matugen/templates/mako'
-output_path = '~/hyprluggage/themes/dynamic/.config/mako/config'
+output_path = 'themes/dynamic/.config/mako/config'
 
 
 

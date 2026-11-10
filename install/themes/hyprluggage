@@ -25,7 +25,7 @@ HYPRLUGGAGE_DIR="$HOME/.config/hyprluggage"
 CURRENT_LINK="$HYPRLUGGAGE_DIR/current"
 THEME_FILE="$HYPRLUGGAGE_DIR/.current-theme"
 
-VERSION="3.2.8"
+VERSION="3.2.9"
 
 # colors
 RED='\033[0;31m'
@@ -860,7 +860,8 @@ Other host files (outside stow):
 Commands:
   hyprluggage host              This map
   hyprluggage host envs         Print envs-local example + path
-  hyprluggage host envs --init  Create envs-local.lua if missing (QT 1.5 sample)
+  hyprluggage host envs --init --hidpi
+                                Create envs-local.lua with QT 1.5 (desk HiDPI)
   hyprluggage host monitors     Same as: hyprluggage monitors help
   hyprluggage monitors save     Write monitors-local.lua from hyprctl
   hyprluggage monitors path     Print monitors-local.lua path
@@ -878,6 +879,13 @@ EOF
 	envs)
 		shift || true
 		if [[ "${1:-}" == "--init" ]]; then
+			shift || true
+			if [[ "${1:-}" != "--hidpi" ]]; then
+				err "refusing bare --init (would ship desk HiDPI to laptops)"
+				info "for HiDPI desks: hyprluggage host envs --init --hidpi"
+				info "or paste a custom snippet from: hyprluggage host envs"
+				exit 1
+			fi
 			if [[ -f "$envs_path" ]]; then
 				warn "already exists: $envs_path"
 				echo "$envs_path"
@@ -904,7 +912,7 @@ EOF
 Path: $envs_path
 $( [[ -f "$envs_path" ]] && echo "Status: present" || echo "Status: absent (shared defaults)" )
 
-Example (paste into that file, then logout/login):
+Example for HiDPI desks (paste into that file, then logout/login):
 
 -- Host-local env / HiDPI (not managed by stow / hyprluggage update).
 hl.env("QT_SCALE_FACTOR", "1.5")
@@ -914,7 +922,8 @@ hl.config({
 	},
 })
 
-Create with: hyprluggage host envs --init
+Create with: hyprluggage host envs --init --hidpi
+(Laptops usually leave envs-local absent.)
 EOF
 		;;
 	monitors)

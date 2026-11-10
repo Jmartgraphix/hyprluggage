@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MARKER="$HOME/.local/state/hyprluggage/first-run-done"
+MARKER="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage/first-run-done"
 [[ -f "$MARKER" ]] && exit 0
 
 # Wait for Hyprland to initialize
@@ -10,19 +10,27 @@ sleep 2
 mkdir -p "$HOME/.config/autostart"
 printf '[Desktop Entry]\nHidden=true\n' >"$HOME/.config/autostart/cachyos-hello.desktop"
 
-# Apply default theme
-~/hyprluggage/install/themes/hyprluggage switch octarine
+repo="$("$HOME/.config/hypr/scripts/hyprluggage-dir")"
+cli="$repo/install/themes/hyprluggage"
+if [[ ! -x "$cli" ]]; then
+	notify-send -u critical "Hyprluggage" "first-run: theme CLI not found at $cli"
+	exit 1
+fi
 
-# Welcome notifications
+# Apply default theme — only mark done if switch succeeds so a failed
+# first boot can retry next login.
+if ! "$cli" switch octarine; then
+	notify-send -u critical "Hyprluggage" "first-run: theme switch failed; will retry next login"
+	exit 1
+fi
+
 notify-send -u critical "App Launcher" "Press Super + Space to launch apps"
 notify-send -u critical "Keybindings" "Press Super + K to view all keybindings"
 notify-send -u normal "Remote (VNC)" "Over browser VNC use Ctrl+Alt instead of Super (Ctrl+Alt+K for keybinds)"
 notify-send -u critical "Welcome to Hyprluggage" "Run 'hyprluggage help' for available commands."
 
-# Weather location setup (optional)
 sleep 1
 notify-send -u normal "Weather Module" "Click the weather icon in waybar to set your location (or use auto-detect)"
 
-# Mark as done (prevents re-running on future boots)
 mkdir -p "$(dirname "$MARKER")"
 touch "$MARKER"

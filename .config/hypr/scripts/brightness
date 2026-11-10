@@ -1,0 +1,72 @@
+#!/bin/bash
+# Profile-aware brightness for the focused (or named) Hyprland output.
+# Laptop + internal panel → backlight (brightnessctl / swayosd).
+# Desktop or external → DDC (ddc-brightness).
+# Usage: brightness +|- [Monitor]
+set -euo pipefail
+
+dir="${1:-}"
+monitor="${2:-}"
+
+case "$dir" in
++ | raise | up) sign="+" ;;
+- | lower | down) sign="-" ;;
+*)
+	echo "usage: brightness +|- [Monitor]" >&2
+	exit 2
+	;;
+esac
+
+if [[ -z "$monitor" ]]; then
+	monitor="$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused == true).name // empty')"
+fi
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
+profile="desktop"
+if [[ -f "$state_dir/profile" ]]; then
+	profile="$(tr -d '[:space:]' <"$state_dir/profile")"
+fi
+
+is_internal=0
+if [[ "$monitor" =~ ^(eDP|LVDS|DSI) ]]; then
+	is_internal=1
+fi
+
+has_backlight=0
+if command -v brightnessctl >/dev/null 2>&1 && brightnessctl -c backlight info &>/dev/null; then
+	has_backlight=1
+fi
+
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/hyprluggage"
+mkdir -p "$cache_dir"
+
+use_backlight=0
+if [[ "$is_internal" -eq 1 && "$has_backlight" -eq 1 ]]; then
+	if [[ "$profile" == "laptop" ]]; then
+		use_backlight=1
+	elif [[ "$profile" != "desktop" ]]; then
+		# Unknown profile: prefer backlight when the panel is internal.
+		use_backlight=1
+	fi
+fi
+
+if [[ "$use_backlight" -eq 1 ]]; then
+	if [[ "$sign" == "+" ]]; then
+		brightnessctl -c backlight set 10%+ >/dev/null
+		swayosd-client --monitor "$monitor" --brightness raise 2>/dev/null || true
+	else
+		brightnessctl -c backlight set 10%- >/dev/null
+		swayosd-client --monitor "$monitor" --brightness lower 2>/dev/null || true
+	fi
+	# brightnessctl get / max for waybar cache
+	cur="$(brightnessctl -c backlight get 2>/dev/null || echo 0)"
+	max="$(brightnessctl -c backlight max 2>/dev/null || echo 1)"
+	if [[ "$cur" =~ ^[0-9]+$ && "$max" =~ ^[0-9]+$ && "$max" -gt 0 ]]; then
+		pct=$((cur * 100 / max))
+		printf '%s\n' "$pct" >"$cache_dir/brightness-$monitor"
+		pkill -RTMIN+10 waybar >/dev/null 2>&1 || true
+	fi
+	exit 0
+fi
+
+exec "$(dirname "$0")/ddc-brightness" "$sign" "$monitor"

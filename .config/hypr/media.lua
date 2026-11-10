@@ -27,20 +27,21 @@ local function osd(args)
 	hl.dispatch(hl.dsp.exec_cmd(cmd))
 end
 
-local function ddc(dir)
+local function brightness(dir)
 	local mon = hl.get_active_monitor()
 	local name = (mon and mon.name) or ""
 	local sign = dir > 0 and "+" or "-"
-	hl.dispatch(hl.dsp.exec_cmd(string.format("%s/ddc-brightness %s %s", scrDir, sign, name)))
+	-- Profile-aware: laptop internal panel → backlight; else DDC.
+	hl.dispatch(hl.dsp.exec_cmd(string.format("%s/brightness %s %s", scrDir, sign, name)))
 end
 
 local function knob(dir)
 	local super = super_down()
 	local alt = alt_down()
-	-- Super or Super+Alt: DDC on the focused monitor (no laptop backlight here).
+	-- Super or Super+Alt: brightness on the focused monitor.
 	-- Alt alone stays precise volume.
 	if super then
-		ddc(dir)
+		brightness(dir)
 	elseif alt then
 		osd(dir > 0 and "--output-volume +1" or "--output-volume -1")
 	else
