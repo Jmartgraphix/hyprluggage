@@ -27,7 +27,7 @@ packages=(
 	eza bat fd ripgrep fzf zoxide jq
 
 	# Files
-	yazi thunar tumbler thunar-volman thunar-archive-plugin
+	yazi thunar tumbler ffmpegthumbnailer thunar-volman thunar-archive-plugin file-roller catfish
 
 	# Editor
 	neovim lazygit
