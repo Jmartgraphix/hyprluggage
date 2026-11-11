@@ -7,9 +7,9 @@ pgrep -x kitty &>/dev/null || exit 0
 while read -r pid; do
 	[[ -r "/proc/$pid/cmdline" ]] || continue
 	cmdline=$(tr '\0' ' ' <"/proc/$pid/cmdline")
-	# Match `kitty … -e cmd` / `kitty -e cmd` one-shot windows
+	# Match one-shot `kitty … -e cmd` windows (also covers `kitty --hold -e …`)
 	case " $cmdline " in
-	*" -e "* | *" --hold -e "* ) continue ;;
+	*" -e "* ) continue ;;
 	esac
 	kill -USR1 "$pid" 2>/dev/null || true
 done < <(pgrep -x kitty)

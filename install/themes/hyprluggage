@@ -834,7 +834,6 @@ EOF
 cmd_host() {
 	local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
 	local envs_path="$state_dir/envs-local.lua"
-	local monitors_path="$state_dir/monitors-local.lua"
 	local weather_path="$state_dir/weather-location"
 	local wp_example="$DOTFILES/examples/wireplumber/51-audio-priority.conf"
 	local wp_dest="$HOME/.config/wireplumber/wireplumber.conf.d/51-audio-priority.conf"
