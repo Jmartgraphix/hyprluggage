@@ -5,6 +5,7 @@ PartOf=graphical-session.target
 After=graphical-session.target
 # Distro units (waybar/mako/cliphist) + hyprluggage-shipped units below.
 Wants=waybar.service
+Wants=waybar-monitor-resync.service
 Wants=mako.service
 Wants=cliphist.service
 Wants=wl-clip-persist.service

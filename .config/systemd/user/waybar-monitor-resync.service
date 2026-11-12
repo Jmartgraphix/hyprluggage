@@ -1,0 +1,15 @@
+[Unit]
+Description=Restart Waybar after monitor hotplug (workspaces IPC recovery)
+Documentation=file:%h/hyprluggage/README.md
+After=graphical-session.target waybar.service
+PartOf=graphical-session.target
+Wants=waybar.service
+
+[Service]
+Type=simple
+ExecStart=%h/.config/hypr/scripts/waybar-monitor-resync
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=hyprluggage-session.target

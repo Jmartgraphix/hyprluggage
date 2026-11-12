@@ -389,7 +389,8 @@ if [[ -z "${DOTFILES:-}" ]]; then
 fi
 if [[ -d "$SESSION_UNIT_SRC" ]]; then
     mkdir -p "$SESSION_UNIT_DIR"
-    for f in hyprluggage-session.target waybar.service mako.service cliphist.service \
+    for f in hyprluggage-session.target waybar.service waybar-monitor-resync.service \
+        mako.service cliphist.service \
         wl-clip-persist.service awww.service swayosd.service polkit-gnome-agent.service \
         kdeconnectd.service kdeconnect-indicator.service; do
         if [[ -f "$SESSION_UNIT_SRC/$f" ]]; then
@@ -401,6 +402,7 @@ if systemctl --user daemon-reload &>/dev/null; then
     session_units=(
         hyprluggage-session.target
         waybar.service
+        waybar-monitor-resync.service
         mako.service
         cliphist.service
         wl-clip-persist.service

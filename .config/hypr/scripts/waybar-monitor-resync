@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# Restart waybar after monitor hotplug so hyprland/workspaces recovers when
+# Waybar permanently disables the module after a bad Hyprland IPC JSON read.
+# Uses try-restart: intentional toggle-waybar stop is left alone.
+set -euo pipefail
+
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export PATH="$HOME/.local/bin:/usr/bin:/bin:$PATH"
+
+DEBOUNCE_SEC="${WAYBAR_RESYNC_DEBOUNCE:-1}"
+pending_pid=""
+
+cancel_pending() {
+	if [[ -n "${pending_pid}" ]] && kill -0 "$pending_pid" 2>/dev/null; then
+		kill "$pending_pid" 2>/dev/null || true
+		wait "$pending_pid" 2>/dev/null || true
+	fi
+	pending_pid=""
+}
+
+schedule_resync() {
+	cancel_pending
+	(
+		sleep "$DEBOUNCE_SEC"
+		# Only if the unit is (or should be) running — never revive a manual stop.
+		if systemctl --user try-restart waybar.service &>/dev/null; then
+			logger -t waybar-monitor-resync "try-restarted waybar after monitor event"
+		fi
+	) &
+	pending_pid=$!
+}
+
+# Prefer HYPRLAND_INSTANCE_SIGNATURE; else a live instance (lock PID alive + socket2).
+resolve_his() {
+	if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+		local sock="${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket2.sock"
+		if [[ -S "$sock" ]]; then
+			printf '%s\n' "$HYPRLAND_INSTANCE_SIGNATURE"
+			return 0
+		fi
+	fi
+	local dir his lock pid
+	# Newest live lock wins (avoids stale leftover sockets under $XDG_RUNTIME_DIR/hypr).
+	while IFS= read -r dir; do
+		his="$(basename "$dir")"
+		lock="${dir}/hyprland.lock"
+		[[ -S "${dir}/.socket2.sock" ]] || continue
+		[[ -f "$lock" ]] || continue
+		pid="$(tr -d '[:space:]' <"$lock" | head -1)"
+		[[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null || continue
+		printf '%s\n' "$his"
+		return 0
+	done < <(find "${XDG_RUNTIME_DIR}/hypr" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' 2>/dev/null | sort -nr | awk '{print $2}')
+	return 1
+}
+
+socket_path() {
+	local his
+	his="$(resolve_his)" || return 1
+	printf '%s\n' "${XDG_RUNTIME_DIR}/hypr/${his}/.socket2.sock"
+}
+wait_for_socket() {
+	local sock=""
+	local _n
+	for _n in $(seq 1 60); do
+		if sock="$(socket_path 2>/dev/null)" && [[ -S "$sock" ]]; then
+			printf '%s\n' "$sock"
+			return 0
+		fi
+		sleep 0.5
+	done
+	return 1
+}
+
+listen_once() {
+	local sock="$1"
+	python3 -u - "$sock" <<'PY'
+import socket
+import sys
+
+path = sys.argv[1]
+sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+sock.connect(path)
+buf = b""
+try:
+	while True:
+		chunk = sock.recv(4096)
+		if not chunk:
+			break
+		buf += chunk
+		while b"\n" in buf:
+			line, buf = buf.split(b"\n", 1)
+			sys.stdout.write(line.decode("utf-8", "replace") + "\n")
+			sys.stdout.flush()
+finally:
+	sock.close()
+PY
+}
+
+trap 'cancel_pending; exit 0' INT TERM
+
+# Reconnect loop: Hyprland reload / brief socket blips must not exit the unit.
+while true; do
+	sock="$(wait_for_socket)" || {
+		logger -t waybar-monitor-resync "no Hyprland socket2; retrying"
+		sleep 2
+		continue
+	}
+	his="$(basename "$(dirname "$sock")")"
+	export HYPRLAND_INSTANCE_SIGNATURE="$his"
+	logger -t waybar-monitor-resync "listening on $sock"
+
+	while IFS= read -r line; do
+		case "$line" in
+		monitoradded\>\>* | monitorremoved\>\>*)
+			schedule_resync
+			;;
+		esac
+	done < <(listen_once "$sock" || true)
+
+	logger -t waybar-monitor-resync "socket closed; reconnecting"
+	sleep 0.5
+done

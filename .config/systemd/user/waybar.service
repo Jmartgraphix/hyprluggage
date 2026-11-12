@@ -8,7 +8,8 @@ PartOf=graphical-session.target
 Type=simple
 # No ExecStartPre sleep — that made Super+Shift+Space feel laggy.
 # After=graphical-session.target is enough for login ordering.
-ExecStart=/usr/bin/waybar
+# Wrapper applies optional host waybar-outputs (mirror excludes); else plain waybar.
+ExecStart=%h/.config/hypr/scripts/waybar-launch
 ExecReload=/bin/kill -SIGUSR2 $MAINPID
 Restart=always
 RestartSec=2

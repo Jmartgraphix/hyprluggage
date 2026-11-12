@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Launch Waybar. If ~/.local/state/hyprluggage/waybar-outputs exists, rewrite only
+# the top-level "output" array into a runtime config (host mirror excludes, etc.).
+# No host file → plain waybar (shared suitcase defaults).
+set -euo pipefail
+
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+cfg="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/config.jsonc"
+style="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style.css"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/hyprluggage"
+outputs_file="$state_dir/waybar-outputs"
+runtime_dir="${XDG_RUNTIME_DIR}/hyprluggage"
+runtime_cfg="$runtime_dir/waybar.jsonc"
+
+if [[ ! -f "$outputs_file" ]]; then
+	exec /usr/bin/waybar
+fi
+
+# Collect non-empty, non-comment lines
+mapfile -t lines < <(grep -vE '^[[:space:]]*(#|$)' "$outputs_file" 2>/dev/null || true)
+if ((${#lines[@]} == 0)); then
+	exec /usr/bin/waybar
+fi
+
+if [[ ! -f "$cfg" ]]; then
+	exec /usr/bin/waybar
+fi
+
+mkdir -p "$runtime_dir"
+
+# JSONC may contain comments; strip // and /* */ before jq.
+python3 - "$cfg" "$runtime_cfg" "${lines[@]}" <<'PY'
+import json, re, sys
+
+src, dst, *outputs = sys.argv[1:]
+text = open(src, encoding="utf-8").read()
+# Strip // line comments and /* block comments */ (not inside strings — good enough for our config)
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"//.*?$", "", text, flags=re.M)
+data = json.loads(text)
+data["output"] = outputs
+with open(dst, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2)
+    f.write("\n")
+PY
+
+exec /usr/bin/waybar -c "$runtime_cfg" -s "$style"
