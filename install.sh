@@ -135,6 +135,10 @@ source "$DOTFILES/install/stow.sh"
 source "$DOTFILES/install/hyprmath.sh"
 install_hyprmath
 
+# Network panel (separate repo, pinned tag)
+source "$DOTFILES/install/nmwire.sh"
+install_nmwire || warn "nmwire install failed; rerun: bash install/nmwire.sh"
+
 # Setup desktop entries
 source "$DOTFILES/install/desktop-entries.sh"
 
