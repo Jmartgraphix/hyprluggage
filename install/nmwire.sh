@@ -6,7 +6,7 @@
 
 # Pin: bump this tag after releasing a new nmwire version.
 NMWIRE_REPO="${NMWIRE_REPO:-https://github.com/Jmartgraphix/nmwire.git}"
-NMWIRE_REF="${NMWIRE_REF:-v0.1.0}"
+NMWIRE_REF="${NMWIRE_REF:-v0.1.1}"
 NMWIRE_SHARE="${XDG_DATA_HOME:-$HOME/.local/share}/hyprluggage/nmwire"
 NMWIRE_BIN="${XDG_BIN_HOME:-$HOME/.local/bin}/nmwire"
 NMWIRE_DESKTOP="${XDG_DATA_HOME:-$HOME/.local/share}/applications/nmwire.desktop"
