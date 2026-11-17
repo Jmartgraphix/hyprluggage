@@ -394,11 +394,26 @@ cmd_doctor() {
 				if [[ -n "$user_env" ]] && grep -Eq '^(WAYLAND_DISPLAY|HYPRLAND_INSTANCE_SIGNATURE)=' <<<"$user_env"; then
 					path_line=$(grep '^PATH=' <<<"$user_env" || true)
 					if [[ "$path_line" != *"$HOME/.local/bin"* ]]; then
-						doctor_warn "systemd user PATH lacks ~/.local/bin; Waybar and the launcher cannot find nmwire or hyprmath"
+						doctor_warn "systemd user PATH lacks ~/.local/bin. This login: systemctl --user set-environment PATH=\"\$(systemctl --user show-environment | sed -n 's/^PATH=//p'):\$HOME/.local/bin\" && systemctl --user restart waybar. Log in again for a lasting fix."
 					fi
 				fi
 			fi
 		fi
+	fi
+	if command -v greetd &>/dev/null && [[ -r /etc/greetd/config.toml ]]; then
+		if grep -q 'hyprluggage-session' /etc/greetd/config.toml; then
+			doctor_ok "greetd uses hyprluggage-session"
+		else
+			doctor_warn "greetd starts Hyprland without hyprluggage-session (old install). PATH is covered by ~/.config/uwsm/env; to migrate greetd, see README (at the machine only, then reboot)"
+		fi
+	fi
+	local uwsm_env="${XDG_CONFIG_HOME:-$HOME/.config}/uwsm/env"
+	if [[ -f "$uwsm_env" ]] && grep -q '.local/bin' "$uwsm_env"; then
+		doctor_ok "uwsm env adds ~/.local/bin"
+	else
+		# The tilde is part of the message, not a path this script expands.
+		# shellcheck disable=SC2088
+		doctor_warn "~/.config/uwsm/env missing (run: hyprluggage update or stow)"
 	fi
 
 	# ── State stubs ──────────────────────────────────────────────────────
