@@ -310,7 +310,7 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 
 ### Updating Hyprluggage
 
-Releases are git tags (`vMAJOR.MINOR.PATCH`), matching the CLI `VERSION`. `hyprluggage update` fetches tags, checks out the latest (or an explicit tag), records the previous commit for one-step undo, then refreshes core packages and stow — no interactive installer prompts.
+Releases are git tags (`vMAJOR.MINOR.PATCH`), matching the CLI `VERSION`. `hyprluggage update` fetches tags, checks out the latest (or an explicit tag), records the previous commit for one-step undo, then refreshes core packages and stow — no interactive installer prompts. If `~/.config/uwsm` is already a real folder, that refresh moves it to `~/dotfiles-backup*/.config/uwsm` before linking the shared `~/.config/uwsm/env`.
 
 ```bash
 hyprluggage update          # latest v* tag
@@ -594,6 +594,18 @@ hyprluggage fix
 - Check you have sudo/root access
 - Verify you're on Arch Linux or CachyOS
 - See [install/themes/README.md](install/themes/README.md) for theme-specific issues
+
+**Migrating an old greetd config**
+
+Do this only while sitting at the machine, then reboot. Do not restart greetd over VNC or SSH. `~/.config/uwsm/env` already puts `~/.local/bin` on PATH, so Waybar can find nmwire and hyprmath without this. Keep `[initial_session]` if it is already there, and do not add it if it is absent.
+
+```bash
+sudo cp /etc/greetd/config.toml /etc/greetd/config.toml.bak
+sudo install -Dm755 ~/hyprluggage/.local/bin/hyprluggage-session /etc/greetd/hyprluggage-session
+sudo install -Dm755 ~/hyprluggage/.local/bin/hyprluggage-session /usr/local/bin/hyprluggage-session
+```
+
+Point `[default_session]` at `tuigreet --asterisks --cmd /etc/greetd/hyprluggage-session`. If `[initial_session]` exists, set its command to `/etc/greetd/hyprluggage-session` and leave its user line alone. Install `install/tuigreet-config.toml` to `/etc/tuigreet/config.toml` when that file is missing. Reboot, then run `hyprluggage doctor`.
 
 **Hyprland not starting / greetd login loops back to tuigreet?**
 - Check: `journalctl -u greetd -b` and `~/.local/state/hyprluggage/session.log`
