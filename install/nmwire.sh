@@ -26,6 +26,35 @@ _nmwire_pacman_owned() {
 	pacman -Qq nmwire &>/dev/null || pacman -Qq nmwire-git &>/dev/null
 }
 
+# Stow links the whole nmgui folder. Ignored bytecode keeps that link alive after
+# the tracked files are gone, so remove the link and the leftover folder here.
+_nmwire_retire_nmgui() {
+	local config_link resolved dest_dir dest_css tracked
+	[[ -n "${DOTFILES:-}" ]] || return 0
+	config_link="${XDG_CONFIG_HOME:-$HOME/.config}/nmgui"
+	[[ -L "$config_link" ]] || return 0
+
+	if [[ -e "$config_link" ]]; then
+		resolved=$(readlink -f "$config_link" 2>/dev/null || true)
+		[[ "$resolved" == "$DOTFILES/.config/nmgui" ]] || return 0
+	fi
+
+	dest_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nmwire"
+	dest_css="$dest_dir/style.css"
+	if [[ -f "$DOTFILES/.config/nmgui/style.css" && ! -f "$dest_css" ]]; then
+		mkdir -p "$dest_dir"
+		mv "$DOTFILES/.config/nmgui/style.css" "$dest_css"
+	fi
+
+	rm -f "$config_link"
+
+	if [[ -d "$DOTFILES/.git" ]] && tracked=$(git -C "$DOTFILES" ls-files -- .config/nmgui); then
+		if [[ -z "$tracked" ]]; then
+			rm -rf "$DOTFILES/.config/nmgui"
+		fi
+	fi
+}
+
 # Drop only the copies this installer created. A package file with a different Exec= stays.
 _nmwire_drop_managed_copy() {
 	local target=""
@@ -47,6 +76,7 @@ install_nmwire() {
 	step "Installing nmwire ($NMWIRE_REF)"
 
 	if _nmwire_pacman_owned; then
+		_nmwire_retire_nmgui
 		_nmwire_drop_managed_copy
 		ok "nmwire from pacman"
 		return 0
@@ -99,6 +129,7 @@ install_nmwire() {
 	update-desktop-database "$(dirname "$NMWIRE_DESKTOP")" 2>/dev/null || true
 	rm -f "$HOME/.cache/rofi"* 2>/dev/null || true
 
+	_nmwire_retire_nmgui
 	ok "nmwire → $NMWIRE_BIN"
 }
 

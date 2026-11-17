@@ -31,9 +31,8 @@ hl.layer_rule({ match = { namespace = "selection" }, no_anim = true })
 hl.window_rule({ match = { tag = "floating-window" }, float = true })
 hl.window_rule({ match = { tag = "floating-window" }, center = true })
 hl.window_rule({ match = { tag = "floating-window" }, size = { 610, 500 } })
-hl.window_rule({ match = { class = "(blueman-manager|org\\.blueman\\.Manager|bluetooth-window|localsend|Wiremix|nmgui)" }, tag = "+floating-window" })
+hl.window_rule({ match = { class = "(blueman-manager|org\\.blueman\\.Manager|bluetooth-window|localsend|Wiremix)" }, tag = "+floating-window" })
 hl.window_rule({ match = { title = "^Bluetooth Devices$" }, tag = "+floating-window" })
-hl.window_rule({ match = { title = "^(.*Network Manager.*)$" }, tag = "+floating-window" })
 -- nmwire floats on its own. The shared floating-window size is 610×500,
 -- which clips this panel, and that tag size wins over a later size rule.
 hl.window_rule({ match = { class = "com\\.jmartgraphix\\.nmwire" }, float = true })
