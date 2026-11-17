@@ -133,7 +133,7 @@ source "$DOTFILES/install/stow.sh"
 
 # Terminal calculator (separate repo, pinned tag)
 source "$DOTFILES/install/hyprmath.sh"
-install_hyprmath
+install_hyprmath || warn "hyprmath install failed; rerun: bash install/hyprmath.sh"
 
 # Network panel (separate repo, pinned tag)
 source "$DOTFILES/install/nmwire.sh"
