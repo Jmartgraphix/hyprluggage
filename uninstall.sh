@@ -13,7 +13,7 @@ source "$DOTFILES/install/utils.sh"
 skip=(
     base-devel git stow fish tmux neovim thunar
     pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber
-    networkmanager bluez bluez-utils polkit-gnome power-profiles-daemon
+    networkmanager gtk4 python-gobject bluez bluez-utils polkit-gnome power-profiles-daemon
     xdg-utils xdg-user-dirs libnotify wl-clipboard ffmpeg jq wget curl unzip
     qt5-wayland qt6-wayland xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
     qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects

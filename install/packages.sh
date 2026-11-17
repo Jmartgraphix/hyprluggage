@@ -47,7 +47,7 @@ packages=(
 	spotify-launcher spicetify-cli
 
 	# Network & Bluetooth
-	networkmanager nmgui-bin kdeconnect
+	networkmanager gtk4 python-gobject kdeconnect
 	bluez bluez-utils blueman
 	openssh ufw
 
