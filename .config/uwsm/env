@@ -1,0 +1,6 @@
+# hyprluggage: pinned apps (nmwire, hyprmath) are linked into ~/.local/bin.
+# Appended after /usr/bin so a future AUR package in /usr/bin wins. Safe to source twice.
+case ":$PATH:" in
+*":$HOME/.local/bin:"*) ;;
+*) export PATH="$PATH:$HOME/.local/bin" ;;
+esac

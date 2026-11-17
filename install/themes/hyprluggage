@@ -25,7 +25,7 @@ HYPRLUGGAGE_DIR="$HOME/.config/hyprluggage"
 CURRENT_LINK="$HYPRLUGGAGE_DIR/current"
 THEME_FILE="$HYPRLUGGAGE_DIR/.current-theme"
 
-VERSION="3.2.12"
+VERSION="3.3.1"
 
 # colors
 RED='\033[0;31m'
@@ -371,6 +371,49 @@ cmd_doctor() {
 		doctor_ok "optional Cursor ($cursor_desktop)"
 	else
 		doctor_warn "optional Cursor desktop file missing"
+	fi
+
+	# ── nmwire ───────────────────────────────────────────────────────────
+	# Waybar's network click and the launcher both use the bare name.
+	local nmwire_link nmwire_path user_env path_line
+	nmwire_link="${XDG_BIN_HOME:-$HOME/.local/bin}/nmwire"
+	if command -v nmwire &>/dev/null; then
+		nmwire_path=$(command -v nmwire)
+		doctor_ok "nmwire $nmwire_path"
+	elif [[ -L "$nmwire_link" && ! -e "$nmwire_link" ]]; then
+		doctor_warn "nmwire link is broken (run: bash install/nmwire.sh)"
+	else
+		doctor_err "nmwire missing (Waybar network click)"
+	fi
+	# PATH only matters while the pinned link is what provides nmwire.
+	# Outside a graphical session the user manager has not imported it yet.
+	if [[ -e "$nmwire_link" ]]; then
+		if ! command -v pacman &>/dev/null || ! { pacman -Qq nmwire &>/dev/null || pacman -Qq nmwire-git &>/dev/null; }; then
+			if command -v systemctl &>/dev/null; then
+				user_env=$(systemctl --user show-environment 2>/dev/null || true)
+				if [[ -n "$user_env" ]] && grep -Eq '^(WAYLAND_DISPLAY|HYPRLAND_INSTANCE_SIGNATURE)=' <<<"$user_env"; then
+					path_line=$(grep '^PATH=' <<<"$user_env" || true)
+					if [[ "$path_line" != *"$HOME/.local/bin"* ]]; then
+						doctor_warn "systemd user PATH lacks ~/.local/bin. This login: systemctl --user set-environment PATH=\"\$(systemctl --user show-environment | sed -n 's/^PATH=//p'):\$HOME/.local/bin\" && systemctl --user restart waybar. Log in again for a lasting fix."
+					fi
+				fi
+			fi
+		fi
+	fi
+	if command -v greetd &>/dev/null && [[ -r /etc/greetd/config.toml ]]; then
+		if grep -q 'hyprluggage-session' /etc/greetd/config.toml; then
+			doctor_ok "greetd uses hyprluggage-session"
+		else
+			doctor_warn "greetd starts Hyprland without hyprluggage-session (old install). PATH is covered by ~/.config/uwsm/env; to migrate greetd, see README (at the machine only, then reboot)"
+		fi
+	fi
+	local uwsm_env="${XDG_CONFIG_HOME:-$HOME/.config}/uwsm/env"
+	if [[ -f "$uwsm_env" ]] && grep -q '.local/bin' "$uwsm_env"; then
+		doctor_ok "uwsm env adds ~/.local/bin"
+	else
+		# The tilde is part of the message, not a path this script expands.
+		# shellcheck disable=SC2088
+		doctor_warn "~/.config/uwsm/env missing (run: hyprluggage update or stow)"
 	fi
 
 	# ── State stubs ──────────────────────────────────────────────────────
