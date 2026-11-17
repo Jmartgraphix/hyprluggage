@@ -43,6 +43,37 @@ do_unstow() {
     stow -D . 2>/dev/null && ok "Removed" || warn "Some failed"
 }
 
+# Pinned checkouts are not stow links, so uninstall has to remove them itself.
+clean_pinned_apps() {
+    step "Removing pinned apps"
+    local app share bin target desktop
+    for app in hyprmath nmwire; do
+        share="${XDG_DATA_HOME:-$HOME/.local/share}/hyprluggage/$app"
+        bin="${XDG_BIN_HOME:-$HOME/.local/bin}/$app"
+        if [[ -L "$bin" ]]; then
+            target=$(readlink -f "$bin" 2>/dev/null || true)
+            if [[ -z "$target" ]]; then
+                target=$(readlink "$bin" 2>/dev/null || true)
+            fi
+            if [[ "$target" == "$share" || "$target" == "$share"/* ]]; then
+                rm -f "$bin"
+                ok "Removed $bin"
+            fi
+        fi
+        if [[ -d "$share" ]]; then
+            rm -rf "$share"
+            ok "Removed $share"
+        fi
+    done
+
+    desktop="${XDG_DATA_HOME:-$HOME/.local/share}/applications/nmwire.desktop"
+    if [[ -f "$desktop" ]] && grep -qx 'Exec=nmwire' "$desktop"; then
+        rm -f "$desktop"
+        ok "Removed nmwire.desktop"
+    fi
+    return 0
+}
+
 restore_backups() {
     step "Restoring backups"
 
@@ -189,6 +220,7 @@ echo "  - Remove symlinks"
 echo "  - Restore backed up configs"  
 echo "  - Optionally remove packages"
 echo "  - Clean shell PATH"
+echo "  - Remove pinned apps (hyprmath, nmwire)"
 echo
 
 if command -v gum &>/dev/null; then
@@ -199,6 +231,7 @@ fi
 
 echo
 do_unstow
+clean_pinned_apps
 restore_backups
 clean_desktop_entries
 ask_packages
