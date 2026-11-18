@@ -3,14 +3,20 @@
 
 source "$HOME/.config/hypr/scripts/wallpaper-lib.sh"
 
-current_theme=$(cat ~/.config/hyprluggage/.current-theme 2>/dev/null || echo "dynamic")
+current_theme=$(current_hyprluggage_theme)
 if [[ "$current_theme" != "dynamic" ]]; then
 	notify-send "Theme Locked" "Switch to Dynamic first"
 	exit 0
 fi
 
 wallpaper_dir="$HOME/Wallpapers"
-awww_params="--transition-fps 120 --transition-type grow --transition-duration 1 --transition-bezier 0.25,0.1,0.25,1.0 --transition-pos top-right"
+awww_params=(
+	--transition-fps 120
+	--transition-type grow
+	--transition-duration 1
+	--transition-bezier "0.25,0.1,0.25,1.0"
+	--transition-pos top-right
+)
 
 mapfile -d '' wallpapers < <(find "$wallpaper_dir" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) -print0)
 
@@ -35,13 +41,13 @@ choice=$(menu | rofi -i -dmenu -p "" -config ~/.config/rofi/custom-rofi/config-w
 # find and apply selected wallpaper
 for wp in "${wallpapers[@]}"; do
 	if [[ "$(basename "$wp")" == "$choice" ]]; then
-		awww img "$wp" $awww_params
-		matugen image "$wp" -m dark
-
-		sync_hyprlock_wallpaper "$wp"
-
-		"$HOME/hyprluggage/install/themes/hyprluggage" reload
-		restart-app swayosd-server
+		# Sets the wallpaper and hyprlock link, runs matugen with -p <repo>,
+		# reloads mako and hyprluggage. Matugen must never run without -p.
+		if ! apply_wallpaper "$wp" "${awww_params[@]}"; then
+			notify-send "Wallpaper failed" "$choice"
+			exit 1
+		fi
+		command -v restart-app &>/dev/null && restart-app swayosd-server || true
 
 		# nautilus needs full restart to pick up new gtk theme
 		pgrep -x nautilus >/dev/null && (

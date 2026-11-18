@@ -121,18 +121,12 @@ else
     if [[ -f "$DOTFILES/assets/luggage_open.png" ]]; then
         ln -sfn "$DOTFILES/assets/luggage_open.png" "$HOME/.config/hyprluggage/luggage_open.png"
     fi
-    # Matugen rewrites themes/dynamic/.config and .cache. Those paths are
-    # gitignored. Copy any missing file from the shipped baseline once.
-    dynamic_base="$DOTFILES/themes/dynamic/baseline"
-    dynamic_live="$DOTFILES/themes/dynamic"
-    if [[ -d "$dynamic_base" ]]; then
-        while IFS= read -r -d '' src; do
-            rel="${src#"$dynamic_base"/}"
-            dest="$dynamic_live/$rel"
-            [[ -e "$dest" ]] && continue
-            mkdir -p "$(dirname "$dest")"
-            cp -a "$src" "$dest"
-        done < <(find "$dynamic_base" -type f -print0)
+    # Matugen rewrites themes/dynamic/.config and .cache (gitignored).
+    # Copy any missing file from themes/dynamic/baseline.
+    if [[ -f "$DOTFILES/install/themes/dynamic-seed.sh" ]]; then
+        # shellcheck disable=SC1091
+        source "$DOTFILES/install/themes/dynamic-seed.sh"
+        ensure_dynamic_seed "$DOTFILES"
     fi
     # mako/config is untracked; the theme hook (hooks/10-mako.sh) owns it.
     # Seed it from the current theme, or dynamic, if it is missing.

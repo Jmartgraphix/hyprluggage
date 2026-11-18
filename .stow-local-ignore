@@ -23,6 +23,9 @@ _darcs
 ^/COPYING
 
 ^zsh$
+
+# Leftover matugen output from before v3.3.5 (repo/home/...); never link ~/home
+^/home$
 scripts
 images
 assets
