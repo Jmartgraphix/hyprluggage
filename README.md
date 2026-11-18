@@ -310,7 +310,7 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 
 ### Updating Hyprluggage
 
-Releases are git tags (`vMAJOR.MINOR.PATCH`), matching the CLI `VERSION`. `hyprluggage update` fetches tags, checks out the latest (or an explicit tag), records the previous commit for one-step undo, then refreshes core packages and stow — no interactive installer prompts. If `~/.config/uwsm` is already a real folder, that refresh moves it to `~/dotfiles-backup*/.config/uwsm` before linking the shared `~/.config/uwsm/env`. `~/.config/mako/config` is created by the theme hook, and `systemctl --user enable` links under `.config/systemd/user/*.wants/` are ignored.
+Releases are git tags (`vMAJOR.MINOR.PATCH`), matching the CLI `VERSION`. `hyprluggage update` fetches tags, checks out the latest (or an explicit tag), records the previous commit for one-step undo, then refreshes core packages and stow — no interactive installer prompts. If `~/.config/uwsm` is already a real folder, that refresh moves it to `~/dotfiles-backup*/.config/uwsm` before linking the shared `~/.config/uwsm/env`. `~/.config/mako/config` is created by the theme hook, and `systemctl --user enable` links under `.config/systemd/user/*.wants/` are ignored. Matugen writes the dynamic theme colors under `themes/dynamic/`; those files are not tracked. Install and update copy any missing one from `themes/dynamic/baseline`.
 
 ```bash
 hyprluggage update          # latest v* tag
@@ -331,6 +331,8 @@ hyprluggage reload
 ```
 
 Do not delete any `*.wants` folders. They keep your services enabled.
+
+If `git status` lists `themes/dynamic/` files, those are Matugen colors from a wallpaper. Restore that directory once with `git checkout -- themes/dynamic`, then update. The next wallpaper writes them again, and from this release on they stay out of git.
 
 Rolling back to v3.3.1 or older removes the mpd drop-in (`RuntimeDirectory=mpd`). Rerun the installer, or recreate it:
 

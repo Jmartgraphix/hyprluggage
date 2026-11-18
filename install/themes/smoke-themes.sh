@@ -55,11 +55,15 @@ check_theme() {
 		fi
 	fi
 
+	# Dynamic colors are generated into themes/dynamic and gitignored.
+	# The shipped copies live under baseline/ so a fresh clone can seed them.
+	local root="$dest"
+	[[ "$name" == "dynamic" ]] && root="$dest/baseline"
 	for req in \
 		.config/hypr/theme/colors.lua \
 		.config/waybar/colors.css \
 		.config/mako/config; do
-		if [[ ! -f "$dest/$req" ]]; then
+		if [[ ! -f "$root/$req" ]]; then
 			fail "$name: missing $req"
 		fi
 	done
