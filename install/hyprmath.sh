@@ -4,31 +4,48 @@
 #|-/ /--| hyprmath installer  |-/ /--|#
 #|/ /---+---------------------+/ /---|#
 
-# Pin: bump this tag after releasing a new hyprmath version.
+# Newest v* tag unless HYPRMATH_REF is set (tag, branch, or commit).
 HYPRMATH_REPO="${HYPRMATH_REPO:-https://github.com/Jmartgraphix/hyprmath.git}"
-HYPRMATH_REF="${HYPRMATH_REF:-v0.1.0}"
+HYPRMATH_REF="${HYPRMATH_REF:-}"
 HYPRMATH_SHARE="${XDG_DATA_HOME:-$HOME/.local/share}/hyprluggage/hyprmath"
 HYPRMATH_BIN="${XDG_BIN_HOME:-$HOME/.local/bin}/hyprmath"
 
+_hyprmath_resolve_ref() {
+	if [[ -n "$HYPRMATH_REF" ]]; then
+		printf '%s\n' "$HYPRMATH_REF"
+		return 0
+	fi
+	local tag
+	tag=$(git ls-remote --tags --refs "$HYPRMATH_REPO" 'v*' | awk -F/ '{print $NF}' | sort -V | tail -1)
+	if [[ -z "$tag" ]]; then
+		err "no hyprmath v* tags at $HYPRMATH_REPO"
+		return 1
+	fi
+	printf '%s\n' "$tag"
+}
+
 _hyprmath_checkout_pin() {
 	local dir="$1"
-	git -C "$dir" fetch --tags --force --depth 1 origin "refs/tags/${HYPRMATH_REF}:refs/tags/${HYPRMATH_REF}" 2>/dev/null \
-		|| git -C "$dir" fetch --tags --force origin "refs/tags/${HYPRMATH_REF}:refs/tags/${HYPRMATH_REF}" \
-		|| git -C "$dir" fetch --tags --force origin "$HYPRMATH_REF"
+	local ref="$2"
+	git -C "$dir" fetch --tags --force --depth 1 origin "refs/tags/${ref}:refs/tags/${ref}" 2>/dev/null \
+		|| git -C "$dir" fetch --tags --force origin "refs/tags/${ref}:refs/tags/${ref}" \
+		|| git -C "$dir" fetch --tags --force origin "$ref"
 	# Annotated tags peel to the commit; plain checkout of the tag name works once fetched.
-	git -C "$dir" checkout -q --detach "$HYPRMATH_REF"
+	git -C "$dir" checkout -q --detach "$ref"
 }
 
 install_hyprmath() {
-	step "Installing hyprmath ($HYPRMATH_REF)"
+	local ref
+	ref=$(_hyprmath_resolve_ref) || return 1
+	step "Installing hyprmath ($ref)"
 
 	mkdir -p "$(dirname "$HYPRMATH_SHARE")"
 	mkdir -p "$(dirname "$HYPRMATH_BIN")"
 
 	if [[ -d "$HYPRMATH_SHARE/.git" ]]; then
 		info "Updating existing checkout"
-		_hyprmath_checkout_pin "$HYPRMATH_SHARE" || {
-			err "Failed to update hyprmath to $HYPRMATH_REF"
+		_hyprmath_checkout_pin "$HYPRMATH_SHARE" "$ref" || {
+			err "Failed to update hyprmath to $ref"
 			return 1
 		}
 	else
@@ -36,8 +53,8 @@ install_hyprmath() {
 		mkdir -p "$HYPRMATH_SHARE"
 		git -C "$HYPRMATH_SHARE" init -q
 		git -C "$HYPRMATH_SHARE" remote add origin "$HYPRMATH_REPO"
-		if ! _hyprmath_checkout_pin "$HYPRMATH_SHARE"; then
-			err "Failed to clone hyprmath $HYPRMATH_REF"
+		if ! _hyprmath_checkout_pin "$HYPRMATH_SHARE" "$ref"; then
+			err "Failed to clone hyprmath $ref"
 			rm -rf "$HYPRMATH_SHARE"
 			return 1
 		fi
