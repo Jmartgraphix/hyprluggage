@@ -25,7 +25,7 @@ HYPRLUGGAGE_DIR="$HOME/.config/hyprluggage"
 CURRENT_LINK="$HYPRLUGGAGE_DIR/current"
 THEME_FILE="$HYPRLUGGAGE_DIR/.current-theme"
 
-VERSION="3.3.1"
+VERSION="3.3.2"
 
 # colors
 RED='\033[0;31m'
@@ -571,6 +571,13 @@ cmd_doctor() {
 	if [[ -n "$repo" && -d "$repo/.git" ]]; then
 		describe=$(git -C "$repo" describe --tags --always 2>/dev/null || echo "unknown")
 		doctor_ok "git $describe"
+		if git -C "$repo" diff-index --quiet HEAD -- 2>/dev/null; then
+			doctor_ok "worktree clean (hyprluggage update can run)"
+		else
+			doctor_warn "worktree has tracked changes; hyprluggage update will refuse:"
+			git -C "$repo" status --short --untracked-files=no | sed 's/^/      /'
+			info "    restore only those files: git -C $repo checkout -- <file> (then hyprluggage reload)"
+		fi
 		if [[ -f "$state_dir/current-ref" ]]; then
 			doctor_ok "current-ref $(tr -d '[:space:]' <"$state_dir/current-ref")"
 		fi

@@ -233,13 +233,17 @@ page_one() {
     # PATH setup
     heading "Mapping the Paths"
     
-    local rc="" shell_name=""
+    local rc="" shell_name="" repo_root
+    repo_root="$(cd "$SCRIPT_DIR/../.." && pwd)"
     [[ -f "$HOME/.config/fish/config.fish" ]] && rc="$HOME/.config/fish/config.fish" && shell_name="fish"
     [[ -z "$rc" && -f "$HOME/.zshrc" ]] && rc="$HOME/.zshrc" && shell_name="zsh"
     [[ -z "$rc" && -f "$HOME/.bashrc" ]] && rc="$HOME/.bashrc" && shell_name="bash"
 
     spin "Checking shell config" 0.35
-    if [[ -n "$rc" ]] && ! grep -q "hyprluggage" "$rc" 2>/dev/null; then
+    if [[ -n "$rc" && "$(readlink -f "$rc")" == "$repo_root"/* ]]; then
+        # fish: .config/fish/env.fish already adds install/themes to PATH
+        check_mark "PATH set by hyprluggage ($shell_name)"
+    elif [[ -n "$rc" ]] && ! grep -q "hyprluggage" "$rc" 2>/dev/null; then
         echo -e "\n# Hyprluggage" >> "$rc"
         [[ "$shell_name" == "fish" ]] && echo "set -gx PATH $SCRIPT_DIR \$PATH" >> "$rc" ||
             echo "export PATH=\"$SCRIPT_DIR:\$PATH\"" >> "$rc"
