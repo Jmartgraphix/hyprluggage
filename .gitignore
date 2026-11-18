@@ -11,6 +11,9 @@
 # systemctl --user enable writes these into the stowed folder
 .config/systemd/user/*.wants/
 
+# uwsm select saves this into the stowed ~/.config/uwsm folder
+.config/uwsm/default-id
+
 # Launcher favorites, aliases, and hidden apps (created on first run)
 .config/rofi/launcher/
 
