@@ -64,6 +64,7 @@ apply_wallpaper() {
 		ln -sfn "$wp" "$repo/themes/dynamic/wallpaper"
 		# config.toml paths are repo-relative; --prefix points at the clone
 		# (state/dir), so a non-~/hyprluggage install still works.
+		# The outputs under themes/dynamic are gitignored. baseline/ is the seed.
 		matugen image "$wp" -m dark -p "$repo"
 		pgrep -x mako &>/dev/null && makoctl reload 2>/dev/null || true
 		"$repo/install/themes/hyprluggage" reload || true
