@@ -36,6 +36,22 @@ ARGV_JSON="$REAL_HOME/.cursor/argv.json"
 USER_APPS="$REAL_HOME/.local/share/applications"
 MIMEAPPS="$REAL_HOME/.config/mimeapps.list"
 
+# This script is root. Plain mkdir leaves root:root directories in the
+# user's home, and install.sh then dies while linking:
+#   mv: cannot move ~/.local/share/applications ... Permission denied
+claim_user_dir() {
+    local dir="$1"
+    local current
+    mkdir -p "$dir"
+    current="$dir"
+    while [[ "$current" == "$REAL_HOME/"* ]]; do
+        if [[ ! -L "$current" && "$(stat -c '%u' "$current")" -eq 0 ]]; then
+            chown "$REAL_USER:$REAL_GROUP" -- "$current"
+        fi
+        current=$(dirname "$current")
+    done
+}
+
 mkdir -p "$APP_DIR"
 
 if [[ "$CLEANUP_ONLY" -eq 0 ]]; then
@@ -139,7 +155,7 @@ StartupNotify=true
 MimeType=x-scheme-handler/cursor;x-scheme-handler/vscode;
 EOF
 
-mkdir -p "$USER_APPS"
+claim_user_dir "$USER_APPS"
 install_desktop "$USER_APPS/cursor.desktop" << EOF
 [Desktop Entry]
 Name=Cursor
@@ -163,6 +179,7 @@ StartupNotify=true
 MimeType=x-scheme-handler/cursor;x-scheme-handler/vscode;
 EOF
 chown "$REAL_USER:$REAL_GROUP" "$USER_APPS/cursor.desktop" "$USER_APPS/cursor-url-handler.desktop"
+claim_user_dir "$(dirname "$ARGV_JSON")"
 
 python3 - "$ARGV_JSON" "$REAL_USER" "$REAL_GROUP" << 'PY'
 import grp
@@ -213,6 +230,7 @@ ensure_mime_default() {
 ensure_mime_default "$MIMEAPPS" "x-scheme-handler/cursor" "cursor-url-handler.desktop"
 ensure_mime_default "$MIMEAPPS" "x-scheme-handler/vscode" "cursor-url-handler.desktop"
 chown "$REAL_USER:$REAL_GROUP" "$MIMEAPPS"
+claim_user_dir "$(dirname "$MIMEAPPS")"
 
 sudo -u "$REAL_USER" env HOME="$REAL_HOME" XDG_DATA_HOME="$REAL_HOME/.local/share" \
     xdg-mime default cursor-url-handler.desktop x-scheme-handler/cursor

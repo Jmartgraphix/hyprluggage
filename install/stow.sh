@@ -21,6 +21,29 @@ for f in "$HOME"/*; do
     [[ "$target" == hyprluggage/install/* || "$target" == hyprluggage/*.md || "$target" == hyprluggage/*.sh ]] && rm "$f"
 done
 
+# update-cursor runs as root. On a new account, mkdir leaves
+# ~/.local/share/applications owned by root. Renaming that directory needs
+# write permission on it, so the backup mv below used to abort the install
+# with "Permission denied". Hand those directories back to the desktop user.
+reclaim_root_owned() {
+    local dir="$1"
+    local recursive="${2:-}"
+    [[ -d "$dir" && ! -L "$dir" ]] || return 0
+    [[ "$(stat -c '%u' "$dir")" -eq 0 ]] || return 0
+    info "Reclaiming root-owned directory: $dir"
+    if [[ "$recursive" == "-R" ]]; then
+        sudo chown -R "$(id -un):$(id -gn)" -- "$dir"
+    else
+        sudo chown "$(id -un):$(id -gn)" -- "$dir"
+    fi
+}
+
+reclaim_root_owned "$HOME/.local"
+reclaim_root_owned "$HOME/.local/share"
+reclaim_root_owned "$HOME/.local/share/applications" -R
+reclaim_root_owned "$HOME/.cursor" -R
+reclaim_root_owned "$HOME/.config"
+
 # Prevent stow from symlinking ~/.config itself
 mkdir -p "$HOME/.config" "$HOME/.local/share" "$HOME/.local/bin"
 
@@ -42,6 +65,10 @@ backup_if_exists() {
         [[ -e "$item" ]] || continue
         local name
         name=$(basename "$item")
+        # Not stowed (.stow-local-ignore). desktop-entries.sh copies files
+        # into the live directory. Moving it throws away launchers and is
+        # what aborted a new VM install when the directory was root-owned.
+        [[ "$1/$name" == ".local/share/applications" ]] && continue
         local target="$target_dir/$name"
         [[ -e "$target" && ! -L "$target" ]] || continue
         mkdir -p "$BACKUP_DIR/$1"
