@@ -21,6 +21,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(dirname "$(dirname "$SCRIPT_DIR")")"
 THEMES_DIR="$DOTFILES/themes"
 HOOKS_DIR="$SCRIPT_DIR/hooks"
+if [[ -f "$SCRIPT_DIR/dynamic-seed.sh" ]]; then
+	# shellcheck disable=SC1091
+	source "$SCRIPT_DIR/dynamic-seed.sh"
+fi
 HYPRLUGGAGE_DIR="$HOME/.config/hyprluggage"
 CURRENT_LINK="$HYPRLUGGAGE_DIR/current"
 THEME_FILE="$HYPRLUGGAGE_DIR/.current-theme"
@@ -109,6 +113,10 @@ list_themes() {
 }
 
 run_hooks() {
+	# Fill in any missing dynamic theme file before hooks link them.
+	if declare -F ensure_dynamic_seed >/dev/null; then
+		ensure_dynamic_seed "$DOTFILES"
+	fi
 	echo "Running hooks..."
 	for hook in "$HOOKS_DIR"/*.sh; do
 		[[ -x "$hook" ]] || chmod +x "$hook"
@@ -466,6 +474,23 @@ cmd_doctor() {
 		fi
 	else
 		doctor_err "theme \"$theme\" not found under $THEMES_DIR"
+	fi
+
+	# ── Dynamic theme seed ───────────────────────────────────────────────
+	if declare -F dynamic_seed_missing >/dev/null; then
+		local seed_missing
+		seed_missing=$(dynamic_seed_missing "$DOTFILES")
+		if [[ -z "$seed_missing" ]]; then
+			doctor_ok "dynamic theme files present"
+		else
+			if [[ "$theme" == "dynamic" ]]; then
+				doctor_err "dynamic theme files missing (active theme):"
+			else
+				doctor_warn "dynamic theme files missing:"
+			fi
+			printf '%s\n' "$seed_missing" | sed 's/^/      /'
+			info "    fix: hyprluggage reload (re-seeds from themes/dynamic/baseline); remove a broken link first"
+		fi
 	fi
 
 	# ── User units ───────────────────────────────────────────────────────
