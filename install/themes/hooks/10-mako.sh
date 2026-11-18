@@ -9,6 +9,7 @@ command -v makoctl &>/dev/null || exit 0
 src="$CURRENT_LINK/.config/mako/config"
 if [[ -f "$src" ]]; then
 	src="$(readlink -f "$src")"
+	mkdir -p "$HOME/.config/mako"
 	ln -sfn "$src" "$HOME/.config/mako/config"
 fi
 

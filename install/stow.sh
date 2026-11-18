@@ -121,6 +121,17 @@ else
     if [[ -f "$DOTFILES/assets/luggage_open.png" ]]; then
         ln -sfn "$DOTFILES/assets/luggage_open.png" "$HOME/.config/hyprluggage/luggage_open.png"
     fi
+    # mako/config is untracked; the theme hook (hooks/10-mako.sh) owns it.
+    # Seed it from the current theme, or dynamic, if it is missing.
+    if [[ ! -e "$HOME/.config/mako/config" ]]; then
+        mako_src="$HOME/.config/hyprluggage/current/.config/mako/config"
+        [[ -f "$mako_src" ]] || mako_src="$DOTFILES/themes/dynamic/.config/mako/config"
+        if [[ -f "$mako_src" ]]; then
+            mkdir -p "$HOME/.config/mako"
+            ln -sfn "$(readlink -f "$mako_src")" "$HOME/.config/mako/config"
+            pgrep -x mako &>/dev/null && makoctl reload 2>/dev/null || true
+        fi
+    fi
 fi
 
 # Show backup location if backups were created
