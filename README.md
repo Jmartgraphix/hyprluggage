@@ -310,7 +310,7 @@ Or press `Super + Ctrl + Shift + Space` for the theme picker.
 
 ### Updating Hyprluggage
 
-Releases are git tags (`vMAJOR.MINOR.PATCH`), matching the CLI `VERSION`. `hyprluggage update` fetches tags, checks out the latest (or an explicit tag), records the previous commit for one-step undo, then refreshes core packages and stow — no interactive installer prompts. If `~/.config/uwsm` is already a real folder, that refresh moves it to `~/dotfiles-backup*/.config/uwsm` before linking the shared `~/.config/uwsm/env`.
+Releases are git tags (`vMAJOR.MINOR.PATCH`), matching the CLI `VERSION`. `hyprluggage update` fetches tags, checks out the latest (or an explicit tag), records the previous commit for one-step undo, then refreshes core packages and stow — no interactive installer prompts. If `~/.config/uwsm` is already a real folder, that refresh moves it to `~/dotfiles-backup*/.config/uwsm` before linking the shared `~/.config/uwsm/env`. `~/.config/mako/config` is created by the theme hook, and `systemctl --user enable` links under `.config/systemd/user/*.wants/` are ignored.
 
 ```bash
 hyprluggage update          # latest v* tag
