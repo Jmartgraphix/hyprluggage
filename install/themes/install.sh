@@ -234,7 +234,7 @@ page_one() {
     heading "Mapping the Paths"
     
     local rc="" shell_name="" repo_root
-    repo_root="$(cd "$SCRIPT_DIR/../.." && pwd)"
+    repo_root="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
     [[ -f "$HOME/.config/fish/config.fish" ]] && rc="$HOME/.config/fish/config.fish" && shell_name="fish"
     [[ -z "$rc" && -f "$HOME/.zshrc" ]] && rc="$HOME/.zshrc" && shell_name="zsh"
     [[ -z "$rc" && -f "$HOME/.bashrc" ]] && rc="$HOME/.bashrc" && shell_name="bash"
