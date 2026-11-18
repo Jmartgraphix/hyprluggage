@@ -387,15 +387,25 @@ SESSION_UNIT_SRC="${DOTFILES:-}/.config/systemd/user"
 if [[ -z "${DOTFILES:-}" ]]; then
     SESSION_UNIT_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.config/systemd/user"
 fi
+
+# Stow folds a new ~/.config/systemd into one symlink, so these paths are the
+# same file. ln then exits "are the same file" and aborts the install.
+link_session_unit() {
+    local name="$1"
+    local src="$SESSION_UNIT_SRC/$name"
+    local dest="$SESSION_UNIT_DIR/$name"
+    [[ -f "$src" ]] || return 0
+    [[ "$src" -ef "$dest" ]] && return 0
+    ln -sfn "$src" "$dest"
+}
+
 if [[ -d "$SESSION_UNIT_SRC" ]]; then
     mkdir -p "$SESSION_UNIT_DIR"
     for f in hyprluggage-session.target waybar.service waybar-monitor-resync.service \
         mako.service cliphist.service \
         wl-clip-persist.service awww.service swayosd.service polkit-gnome-agent.service \
         kdeconnectd.service kdeconnect-indicator.service; do
-        if [[ -f "$SESSION_UNIT_SRC/$f" ]]; then
-            ln -sfn "$SESSION_UNIT_SRC/$f" "$SESSION_UNIT_DIR/$f"
-        fi
+        link_session_unit "$f"
     done
 fi
 if systemctl --user daemon-reload &>/dev/null; then
@@ -416,7 +426,7 @@ if systemctl --user daemon-reload &>/dev/null; then
     # symlinks — restore them before enable).
     systemctl --user disable waybar.service mako.service cliphist.service &>/dev/null || true
     for f in waybar.service mako.service cliphist.service; do
-        [[ -f "$SESSION_UNIT_SRC/$f" ]] && ln -sfn "$SESSION_UNIT_SRC/$f" "$SESSION_UNIT_DIR/$f"
+        link_session_unit "$f"
     done
     systemctl --user daemon-reload &>/dev/null || true
     systemctl --user enable "${session_units[@]}" &>/dev/null \
