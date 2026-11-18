@@ -332,8 +332,6 @@ hyprluggage reload
 
 Do not delete any `*.wants` folders. They keep your services enabled.
 
-If `git status` lists `themes/dynamic/` files, those are Matugen colors from a wallpaper. Restore that directory once with `git checkout -- themes/dynamic`, then update. The next wallpaper writes them again, and from this release on they stay out of git.
-
 Rolling back to v3.3.1 or older removes the mpd drop-in (`RuntimeDirectory=mpd`). Rerun the installer, or recreate it:
 
 ```bash
@@ -341,6 +339,21 @@ mkdir -p ~/.config/systemd/user/mpd.service.d
 printf '[Service]\nRuntimeDirectory=mpd\n' > ~/.config/systemd/user/mpd.service.d/override.conf
 systemctl --user daemon-reload && systemctl --user restart mpd
 ```
+
+**Upgrading from v3.3.4 or older (dynamic theme)**
+
+From v3.3.5 the dynamic theme's Matugen colors are no longer tracked. On an older install, `git status --short` may list files under `themes/dynamic/`, and `hyprluggage update` refuses. Restore them once, then update:
+
+```bash
+git -C ~/hyprluggage checkout -- themes/dynamic
+hyprluggage update
+```
+
+This resets the dynamic colors to the shipped baseline. Re-apply your wallpaper to regenerate them: `Super + Ctrl + Space` (pick a wallpaper) or `Super + Ctrl + Alt + Space` (random). New colors stay out of git from now on.
+
+An untracked `home/` folder in the repo (`?? home/` in `git status`) is Matugen output left by those older versions. Check that it holds only `themes/dynamic` files (`find ~/hyprluggage/home -type f | grep -v /themes/dynamic/` prints nothing), then delete `~/hyprluggage/home`, and `~/home` if it is a symlink into it.
+
+`hyprluggage doctor` reports any missing dynamic theme file; `hyprluggage reload` copies it back from `themes/dynamic/baseline`.
 
 To cut a release: bump `VERSION` in `install/themes/hyprluggage`, commit, then `git tag -a vX.Y.Z -m "…" && git push origin vX.Y.Z`. Tag before risky tree changes so rollback has a safe landing.
 
