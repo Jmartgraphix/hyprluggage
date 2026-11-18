@@ -571,6 +571,7 @@ cmd_doctor() {
 	if [[ -n "$repo" && -d "$repo/.git" ]]; then
 		describe=$(git -C "$repo" describe --tags --always 2>/dev/null || echo "unknown")
 		doctor_ok "git $describe"
+		git -C "$repo" update-index -q --refresh >/dev/null 2>&1 || true
 		if git -C "$repo" diff-index --quiet HEAD -- 2>/dev/null; then
 			doctor_ok "worktree clean (hyprluggage update can run)"
 		else
@@ -637,6 +638,8 @@ repo_state_dir() {
 
 require_clean_worktree() {
 	local repo="$1"
+	# diff-index trusts stat data; a touched-but-unchanged file looks modified.
+	git -C "$repo" update-index -q --refresh >/dev/null 2>&1 || true
 	if ! git -C "$repo" diff-index --quiet HEAD -- 2>/dev/null; then
 		err "worktree has tracked changes; commit or stash before update/rollback"
 		return 1

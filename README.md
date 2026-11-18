@@ -317,6 +317,29 @@ hyprluggage update          # latest v* tag
 hyprluggage rollback        # back to the previous ref
 ```
 
+**Upgrading from v3.3.1 or older**
+
+v3.3.2 stopped writing into tracked files. An install made before it has local changes that block `hyprluggage update`. Run this once:
+
+```bash
+cd ~/hyprluggage
+git status --short
+git checkout -- .config/fish/config.fish .config/mako/config   # only the ones listed as M or T
+rm -f .config/systemd/user/mpd.service.d/override.conf        # untracked; v3.3.2+ ships the same file
+hyprluggage update
+hyprluggage reload
+```
+
+Do not delete any `*.wants` folders. They keep your services enabled.
+
+Rolling back to v3.3.1 or older removes the mpd drop-in (`RuntimeDirectory=mpd`). Rerun the installer, or recreate it:
+
+```bash
+mkdir -p ~/.config/systemd/user/mpd.service.d
+printf '[Service]\nRuntimeDirectory=mpd\n' > ~/.config/systemd/user/mpd.service.d/override.conf
+systemctl --user daemon-reload && systemctl --user restart mpd
+```
+
 To cut a release: bump `VERSION` in `install/themes/hyprluggage`, commit, then `git tag -a vX.Y.Z -m "…" && git push origin vX.Y.Z`. Tag before risky tree changes so rollback has a safe landing.
 
 ### Updating Cursor
@@ -464,7 +487,7 @@ See [.config/hypr/bindings.lua](.config/hypr/bindings.lua), [tiling.lua](.config
 | OSD | [SwayOSD](https://github.com/ErikReider/SwayOSD) | On-screen display for volume, brightness, and caps lock |
 | Terminal | [Kitty](https://sw.kovidgoyal.net/kitty/) / [Ghostty](https://ghostty.org/) / [Alacritty](https://alacritty.org/) | All three installed; Kitty is the default Super+Return terminal and system TUI host. Pick Ghostty or Alacritty as the working terminal from the Hyprluggage TUI. Alacritty also runs the screensaver. |
 | File Manager | [Thunar](https://docs.xfce.org/xfce/thunar/start) (GUI) / [Yazi](https://github.com/sxyazi/yazi) (CLI) | Dual file managers for GUI and terminal workflows |
-| Calculator | [hyprmath](https://github.com/Jmartgraphix/hyprmath) | Terminal calculator tape (Standard + Scientific); launcher still does one-shot math |
+| Calculator | [hyprmath](https://github.com/Jmartgraphix/hyprmath) | Terminal calculator tape (Standard + Scientific); launcher still does one-shot math. `HYPRMATH_REF=v0.1.0 hyprluggage update` pins a release; otherwise the newest `vX.Y.Z` is installed. |
 | Notifications | [Mako](https://github.com/emersion/mako) | Lightweight notification daemon with theme support |
 | Lock screen | [Hyprlock](https://github.com/hyprwm/hyprlock) | Secure lock screen integrated with Hyprland |
 | Theme engine | [Matugen](https://github.com/InioX/matugen) | Material You color palette generator from wallpapers |
@@ -610,7 +633,7 @@ Point `[default_session]` at `tuigreet --asterisks --cmd /etc/greetd/hyprluggage
 **Hyprland not starting / greetd login loops back to tuigreet?**
 - Check: `journalctl -u greetd -b` and `~/.local/state/hyprluggage/session.log`
 - If you see `greeter exited without creating a session` / `start-limit-hit`, tuigreet's session command is wrong — it must use `--cmd`.
-- After pulling a greetd fix, re-apply as the install user:
+- After pulling a greetd fix, re-apply as the install user. **Do this at the machine, not over VNC or SSH:** restarting greetd ends the Hyprland session and wayvnc, so you lose a remote connection. Rebooting instead of the last line also works.
 
 ```bash
 cd ~/hyprluggage && git pull
