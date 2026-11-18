@@ -120,8 +120,6 @@ fi
 
 # ── MPD ───────────────────────────────────────────────────────────────────────
 if pkg_installed mpd; then
-    mkdir -p ~/.config/systemd/user/mpd.service.d
-    echo -e "[Service]\nRuntimeDirectory=mpd" > ~/.config/systemd/user/mpd.service.d/override.conf
     # Check if systemd --user is available before trying to use it
     if systemctl --user daemon-reload &>/dev/null; then
         systemctl --user enable --now mpd &>/dev/null && ok "mpd" || warn "mpd failed"

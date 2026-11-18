@@ -8,6 +8,9 @@
 .config/rofi/colors.rasi
 .config/mako/config
 
+# systemctl --user enable writes these into the stowed folder
+.config/systemd/user/*.wants/
+
 # Launcher favorites, aliases, and hidden apps (created on first run)
 .config/rofi/launcher/
 
