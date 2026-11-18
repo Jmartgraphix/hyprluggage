@@ -520,6 +520,13 @@ if pkg_installed openssh; then
         else
             warn "sshd: drop-in missing at $SSHD_SRC"
         fi
+        # A new VM has no host keys. sshd -t then exits "no hostkeys available"
+        # and the service is left disabled even though SSH was requested.
+        if sudo ssh-keygen -A >/dev/null; then
+            ok "sshd: host keys"
+        else
+            warn "sshd: failed to generate host keys"
+        fi
         if sudo sshd -t; then
             if sudo systemctl enable --now sshd &>/dev/null; then
                 sudo systemctl reload sshd &>/dev/null || true
