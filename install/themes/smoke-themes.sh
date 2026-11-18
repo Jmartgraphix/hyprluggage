@@ -101,6 +101,25 @@ check_colors_fixtures() {
 	rm -rf "$td"
 }
 
+check_dynamic_seed() {
+	local td missing
+	td=$(mktemp -d)
+	mkdir -p "$td/themes/dynamic/.config/kitty"
+	cp -a "$THEMES_DIR/dynamic/baseline" "$td/themes/dynamic/"
+	# A dangling link must be skipped, never written through.
+	ln -s "$td/nowhere" "$td/themes/dynamic/.config/kitty/colors.conf"
+	# shellcheck source=/dev/null
+	source "$SCRIPT_DIR/dynamic-seed.sh"
+	ensure_dynamic_seed "$td"
+	[[ -f "$td/themes/dynamic/.config/hypr/theme/colors.lua" ]] || fail "dynamic seed: colors.lua not copied"
+	[[ -f "$td/themes/dynamic/.config/mako/config" ]] || fail "dynamic seed: mako config not copied"
+	[[ ! -e "$td/nowhere" ]] || fail "dynamic seed: wrote through a dangling symlink"
+	missing=$(dynamic_seed_missing "$td")
+	[[ "$missing" == ".config/kitty/colors.conf" ]] || fail "dynamic seed: missing list was '$missing'"
+	rm -rf "$td"
+	ok "dynamic seed"
+}
+
 echo "Theme smoke under $THEMES_DIR"
 shopt -s nullglob
 for dest in "$THEMES_DIR"/*/; do
@@ -118,6 +137,8 @@ if [[ -f "$IMPORT_INIT" && -f "$FIXTURES/omarchy-semantic.colors.toml" && -f "$F
 else
 	fail "import fixtures missing under $FIXTURES"
 fi
+
+check_dynamic_seed
 
 if [[ "$errors" -gt 0 ]]; then
 	echo "Theme smoke: $errors failure(s)" >&2
