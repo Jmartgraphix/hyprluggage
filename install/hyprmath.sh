@@ -15,10 +15,16 @@ _hyprmath_resolve_ref() {
 		printf '%s\n' "$HYPRMATH_REF"
 		return 0
 	fi
-	local tag
-	tag=$(git ls-remote --tags --refs "$HYPRMATH_REPO" 'v*' | awk -F/ '{print $NF}' | sort -V | tail -1)
+	local refs tag
+	if ! refs=$(git ls-remote --tags --refs "$HYPRMATH_REPO" 'v*' 2>/dev/null); then
+		err "cannot reach $HYPRMATH_REPO (git ls-remote failed); check the network or set HYPRMATH_REF=vX.Y.Z" >&2
+		return 1
+	fi
+	# Releases only: vMAJOR.MINOR.PATCH, no -rc/-beta suffixes.
+	tag=$(printf '%s\n' "$refs" | awk -F/ '{print $NF}' \
+		| grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
 	if [[ -z "$tag" ]]; then
-		err "no hyprmath v* tags at $HYPRMATH_REPO"
+		err "no hyprmath release tags (vX.Y.Z) at $HYPRMATH_REPO" >&2
 		return 1
 	fi
 	printf '%s\n' "$tag"
