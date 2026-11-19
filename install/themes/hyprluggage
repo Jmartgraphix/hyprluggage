@@ -29,7 +29,7 @@ HYPRLUGGAGE_DIR="$HOME/.config/hyprluggage"
 CURRENT_LINK="$HYPRLUGGAGE_DIR/current"
 THEME_FILE="$HYPRLUGGAGE_DIR/.current-theme"
 
-VERSION="3.3.7"
+VERSION="3.3.8"
 
 # colors
 RED='\033[0;31m'
