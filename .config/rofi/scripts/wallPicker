@@ -10,7 +10,7 @@ awww_params=(
 	--transition-type center
 	--transition-pos bottom
 	--transition-duration 1
-	--transition-bezier 0.25,0.1,0.25,1.0
+	--transition-bezier "0.25,0.1,0.25,1.0"
 )
 
 mapfile -d '' wallpapers < <(

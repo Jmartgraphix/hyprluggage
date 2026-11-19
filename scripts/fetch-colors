@@ -15,7 +15,7 @@ show_colors() {
     echo ""
 
     # First row: ANSI colors 0-7 (dark colors)
-    for row in {1..4}; do
+    for _ in {1..4}; do
       for color in {0..7}; do
         printf "\e[38;5;${color}m\e[48;5;${color}m████████\e[0m  "
       done
@@ -24,7 +24,7 @@ show_colors() {
     echo ""
 
     # Second row: ANSI colors 8-15 (bright colors)
-    for row in {1..4}; do
+    for _ in {1..4}; do
       for color in {8..15}; do
         printf "\e[38;5;${color}m\e[48;5;${color}m████████\e[0m  "
       done

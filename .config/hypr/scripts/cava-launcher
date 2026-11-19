@@ -2,7 +2,6 @@
 # Manual cava launcher - can be used to start, stop, toggle, or monitor cava
 
 CAVA_PID_FILE="/tmp/cava.pid"
-PLAYERCTL_STATUS=""
 
 # Check if cava is already running
 is_cava_running() {

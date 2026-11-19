@@ -42,6 +42,23 @@ jobs:
           done
           echo "shellcheck ${#check[@]} files"
           shellcheck -x -s bash "${check[@]}"
+      - name: Run shellcheck (user scripts, warnings and errors)
+        run: |
+          set -euo pipefail
+          # Scripts the step above skips: whole rofi/waybar/scripts folders,
+          # and extension-less scripts elsewhere. Bash/sh by shebang only
+          # (skips the Python helpers). SC2155 and info/style are not enforced here.
+          is_bash() { head -n1 "$1" | grep -Eq '^#!(/usr/bin/env[[:space:]]+|/usr/bin/|/bin/)(bash|sh)([[:space:]]|$)'; }
+          check=()
+          while IFS= read -r -d '' f; do
+            if is_bash "$f"; then check+=("$f"); fi
+          done < <(find .config/rofi/scripts .config/waybar/scripts scripts -type f -print0 2>/dev/null)
+          while IFS= read -r -d '' f; do
+            if is_bash "$f"; then check+=("$f"); fi
+          done < <(find .config/hypr/scripts .local/bin install -type f ! -name '*.sh' -print0 2>/dev/null)
+          mapfile -t check < <(printf '%s\n' "${check[@]}" | sort -u)
+          echo "shellcheck (warning+) ${#check[@]} files"
+          shellcheck -x -s bash -S warning -e SC2155 "${check[@]}"
 
   luacheck:
     name: luacheck
