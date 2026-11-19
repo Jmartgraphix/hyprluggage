@@ -69,7 +69,9 @@ apply_wallpaper() {
 		# inside the clone. The leading slash lets --prefix land in this repo,
 		# including a clone that is not ~/hyprluggage. Those outputs are
 		# gitignored. baseline/ is the seed.
-		if ! matugen image "$wp" -m dark -p "$repo"; then
+		# A keybind has no terminal. Without --prefer, matugen asks which
+		# source color to use and exits when several are available.
+		if ! matugen image "$wp" -m dark --prefer darkness -p "$repo"; then
 			notify-send -u critical "Matugen failed" "Colors unchanged for $(basename "$wp")"
 			return 2
 		fi

@@ -1,5 +1,5 @@
 # Run matugen only through apply_wallpaper (.config/hypr/scripts/wallpaper-lib.sh)
-# or as: matugen image <wallpaper> -m dark -p "$(~/.config/hypr/scripts/hyprluggage-dir)"
+# or as: matugen image <wallpaper> -m dark --prefer darkness -p "$(~/.config/hypr/scripts/hyprluggage-dir)"
 # output_path values are absolute from / on purpose: -p puts the repo in front of
 # them. Without -p matugen tries to write to /themes/... and fails.
 # Outputs under themes/dynamic are gitignored; themes/dynamic/baseline is the seed.
