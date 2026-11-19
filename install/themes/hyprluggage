@@ -135,8 +135,15 @@ set_wallpaper() {
 
 	# Dynamic theme uses ~/Wallpapers with matugen
 	if [[ "$theme" == "dynamic" ]]; then
-		"$HOME/.config/hypr/scripts/change-theme"
-		return
+		# change-theme notifies on its own failures (matugen failed, empty
+		# ~/Wallpapers). Don't let set -e stop the switch here: the caller
+		# still resets misc:disable_autoreload. Link the last generated or
+		# seeded dynamic colors so the session matches .current-theme.
+		if ! "$HOME/.config/hypr/scripts/change-theme"; then
+			warn "dynamic colors not regenerated (see notification); using the last saved dynamic colors"
+			run_hooks
+		fi
+		return 0
 	fi
 
 	local wall="" bgdir="$THEMES_DIR/$theme/backgrounds"
