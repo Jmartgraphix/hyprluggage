@@ -59,7 +59,7 @@ apply_wallpaper() {
 
 	sync_hyprlock_wallpaper "$wp" || true
 
-	local theme repo
+	local theme repo log
 	theme=$(current_hyprluggage_theme)
 	repo=$(hyprluggage_repo_dir)
 	if [[ "$theme" == "dynamic" ]]; then
@@ -71,8 +71,15 @@ apply_wallpaper() {
 		# gitignored. baseline/ is the seed.
 		# A keybind has no terminal. Without --prefer, matugen asks which
 		# source color to use and exits when several are available.
-		if ! matugen image "$wp" -m dark --prefer darkness -p "$repo"; then
-			notify-send -u critical "Matugen failed" "Colors unchanged for $(basename "$wp")"
+		# stderr goes to a small log so a keybind failure can be read later.
+		log="${XDG_CACHE_HOME:-$HOME/.cache}/hyprluggage-matugen.log"
+		mkdir -p "$(dirname "$log")"
+		if [[ -f "$log" ]] && (($(stat -c %s "$log" 2>/dev/null || echo 0) > 262144)); then
+			: >"$log"
+		fi
+		printf '\n== %s %s\n' "$(date '+%F %T')" "$wp" >>"$log"
+		if ! matugen image "$wp" -m dark --prefer darkness -p "$repo" 2>>"$log"; then
+			notify-send -u critical "Matugen failed" "Colors unchanged for $(basename "$wp"). Details: ${log/#"$HOME"/\~}"
 			return 2
 		fi
 		ln -sfn "$wp" "$repo/themes/dynamic/wallpaper"
