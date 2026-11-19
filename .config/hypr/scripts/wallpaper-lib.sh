@@ -69,8 +69,8 @@ apply_wallpaper() {
 		# inside the clone. The leading slash lets --prefix land in this repo,
 		# including a clone that is not ~/hyprluggage. Those outputs are
 		# gitignored. baseline/ is the seed.
-		# A keybind has no terminal. Without --prefer, matugen asks which
-		# source color to use and exits when several are available.
+		# A keybind has no terminal. Without --source-color-index, matugen 4.x
+		# asks which source color to use and exits. 0 = top-ranked (3.x behavior).
 		# stderr goes to a small log so a keybind failure can be read later.
 		log="${XDG_CACHE_HOME:-$HOME/.cache}/hyprluggage-matugen.log"
 		mkdir -p "$(dirname "$log")"
@@ -78,7 +78,7 @@ apply_wallpaper() {
 			: >"$log"
 		fi
 		printf '\n== %s %s\n' "$(date '+%F %T')" "$wp" >>"$log"
-		if ! matugen image "$wp" -m dark --prefer darkness -p "$repo" 2>>"$log"; then
+		if ! matugen image "$wp" -m dark --source-color-index 0 -p "$repo" 2>>"$log"; then
 			notify-send -u critical "Matugen failed" "Colors unchanged for $(basename "$wp"). Details: ${log/#"$HOME"/\~}"
 			return 2
 		fi
