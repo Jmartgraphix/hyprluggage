@@ -48,5 +48,5 @@ if [[ ! -f "$wp" ]]; then
 	exit 1
 fi
 
-apply_wallpaper "$wp" "${awww_params[@]}"
+apply_wallpaper "$wp" "${awww_params[@]}" || exit 1   # apply_wallpaper reports matugen failures
 notify-send -i "$wp" "Wallpaper" "$choice"

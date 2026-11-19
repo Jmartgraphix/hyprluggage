@@ -43,10 +43,12 @@ for wp in "${wallpapers[@]}"; do
 	if [[ "$(basename "$wp")" == "$choice" ]]; then
 		# Sets the wallpaper and hyprlock link, runs matugen with -p <repo>,
 		# reloads mako and hyprluggage. Matugen must never run without -p.
-		if ! apply_wallpaper "$wp" "${awww_params[@]}"; then
+		rc=0
+		apply_wallpaper "$wp" "${awww_params[@]}" || rc=$?
+		if ((rc == 1)); then
 			notify-send "Wallpaper failed" "$choice"
-			exit 1
 		fi
+		((rc == 0)) || exit 1   # rc 2: apply_wallpaper already said "Matugen failed"
 		command -v restart-app &>/dev/null && restart-app swayosd-server || true
 
 		# nautilus needs full restart to pick up new gtk theme

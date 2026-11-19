@@ -32,7 +32,7 @@ apply_wallpaper "$CURRENT_WALLPAPER" \
 	--transition-pos top-right \
 	--transition-fps 120 \
 	--transition-duration 1 \
-	--transition-bezier 0.25,0.1,0.25,1.0
+	--transition-bezier 0.25,0.1,0.25,1.0 || exit 1   # apply_wallpaper reports matugen failures
 
 # Extra session refresh for dynamic (apply_wallpaper already reloads hyprluggage).
 command -v restart-app &>/dev/null && restart-app swayosd-server || true
