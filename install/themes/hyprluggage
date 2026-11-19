@@ -17,7 +17,7 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd -P)"
 DOTFILES="$(dirname "$(dirname "$SCRIPT_DIR")")"
 THEMES_DIR="$DOTFILES/themes"
 HOOKS_DIR="$SCRIPT_DIR/hooks"

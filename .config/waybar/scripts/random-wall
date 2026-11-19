@@ -24,6 +24,6 @@ apply_wallpaper "$selected" \
 	--transition-pos top-right \
 	--transition-fps 120 \
 	--transition-duration 1 \
-	--transition-bezier 0.25,0.1,0.25,1.0
+	--transition-bezier 0.25,0.1,0.25,1.0 || exit 1   # apply_wallpaper reports matugen failures
 
 notify-send -i "$selected" "Random Wallpaper" "${selected#"$wallpaper_dir"/}"

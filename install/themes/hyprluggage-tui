@@ -6,7 +6,7 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd -P)"
 DOTFILES="$(dirname "$(dirname "$SCRIPT_DIR")")"
 THEMES_DIR="$DOTFILES/themes"
 BRANDING="$DOTFILES/branding"
@@ -47,6 +47,7 @@ browse_inner() {
     
     local preview_script
     preview_script=$(mktemp)
+    # shellcheck disable=SC2064 # expand now: remove this call's temp file on return
     trap "rm -f '$preview_script'" RETURN
     
     cat > "$preview_script" <<'EOF'

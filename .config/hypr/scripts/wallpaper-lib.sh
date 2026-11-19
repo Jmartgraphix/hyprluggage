@@ -47,6 +47,8 @@ current_hyprluggage_theme() {
 }
 
 # Apply a wallpaper path. If the active theme is dynamic, also regenerate colors.
+# Returns 0 on success, 1 if the file is missing (caller reports it), 2 if
+# matugen failed (already reported here; mako and hyprluggage are not reloaded).
 apply_wallpaper() {
 	local wp="$1"
 	shift || true
@@ -61,14 +63,17 @@ apply_wallpaper() {
 	theme=$(current_hyprluggage_theme)
 	repo=$(hyprluggage_repo_dir)
 	if [[ "$theme" == "dynamic" ]]; then
-		ln -sfn "$wp" "$repo/themes/dynamic/wallpaper"
 		# Output paths in the matugen config are absolute from /. Matugen
 		# resolves a relative path against the config file first, then --prefix
 		# pastes the repo in front, which writes home/<user>/hyprluggage/...
 		# inside the clone. The leading slash lets --prefix land in this repo,
 		# including a clone that is not ~/hyprluggage. Those outputs are
 		# gitignored. baseline/ is the seed.
-		matugen image "$wp" -m dark -p "$repo"
+		if ! matugen image "$wp" -m dark -p "$repo"; then
+			notify-send -u critical "Matugen failed" "Colors unchanged for $(basename "$wp")"
+			return 2
+		fi
+		ln -sfn "$wp" "$repo/themes/dynamic/wallpaper"
 		pgrep -x mako &>/dev/null && makoctl reload 2>/dev/null || true
 		"$repo/install/themes/hyprluggage" reload || true
 	fi
